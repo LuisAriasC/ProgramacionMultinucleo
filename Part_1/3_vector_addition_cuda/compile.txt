@@ -1,0 +1,1 @@
+nvcc -o vector_add vector_add.cu -std=c++11 
