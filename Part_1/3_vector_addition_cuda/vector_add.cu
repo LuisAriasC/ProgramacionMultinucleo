@@ -43,7 +43,7 @@ int main( int argc, char* argv[] )
     SAFE_CALL(cudaEventCreate(&stop), "Error creating stop event");
 
     // Size of vectors
-    int n = 1<<20;
+    int n = 1<<21;
 
     // Host input vectors
     float *h_a;
