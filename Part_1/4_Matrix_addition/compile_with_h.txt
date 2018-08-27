@@ -1,0 +1,1 @@
+nvcc -o output input.cu -std=c++11
