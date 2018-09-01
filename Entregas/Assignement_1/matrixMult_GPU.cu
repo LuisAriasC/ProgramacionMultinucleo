@@ -99,7 +99,7 @@ int main(int argc, char **argv)
     SAFE_CALL(cudaDeviceSynchronize(), "Error executing kernel");
     auto end_cpu =  chrono::high_resolution_clock::now();
 
-    duration_ms = end_cpu - start_cpu;
+    chrono::duration<float, std::milli> duration_ms = end_cpu - start_cpu;
 
     printf("multMatrixOnGPU2d1d <<<(%d,%d), (%d,%d)>>> elapsed %f ms\n", grid.x,
            grid.y,
