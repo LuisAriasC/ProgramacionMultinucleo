@@ -2,7 +2,8 @@
 #include <iostream>
 #include <cuda_runtime.h>
 #include <cstdio>
-#include <math_functions.h>
+#include <math.h>
+#include <cuda_fp16.h>
 #include <chrono>
 
 using namespace std;
@@ -34,7 +35,7 @@ __global__ void multMatrixOnGPU2d1d(float *MatA, float *MatB, float *MatC, int n
     unsigned int idx = iy * nx + ix;
 
     unsigned int col_position = idx % nx;
-    unsigned int row_position = floor(idx / ny);
+    unsigned int row_position = h2floor ( idx / ny );
     unsigned int initial_col_mult = idx - col_position;
 
     float sum = 0.0;
