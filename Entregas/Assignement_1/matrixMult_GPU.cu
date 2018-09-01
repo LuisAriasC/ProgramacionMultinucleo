@@ -1,5 +1,4 @@
 #include "common.h"
-#include <iostream>
 #include <cuda_runtime.h>
 #include <cstdio>
 #include <chrono>
@@ -20,21 +19,28 @@ void printMatrix(float *mat, const int nx, const int ny){
 void initialData(float *ip, const int size){
     int i;
     for(i = 0; i < size; i++)
-      ip[i] = i * 2;
-      //ip[i] = (float)(rand() & 0xFF) / 10.0f;
+        ip[i] = i * 2;
+        //ip[i] = (float)(rand() & 0xFF) / 10.0f;
     return;
 }
 
-
 // grid 2D block 1D
-__global__ void sumMatrixOnGPU2d1d(float *MatA, float *MatB, float *MatC, int nx, int ny){
-  
+__global__ void multMatrixOnGPU2d1d(float *MatA, float *MatB, float *MatC, int nx, int ny) {
+
     unsigned int ix = threadIdx.x + blockIdx.x * blockDim.x;
     unsigned int iy = blockIdx.y;
     unsigned int idx = iy * nx + ix;
 
+    unsigned int col_position = idx % nx;
+    unsigned int row_position = floor(idx / ny);
+    unsigned int initial_col_mult = idx - col_position;
+
+    float sum = 0.0;
+
     if (ix < nx && iy < ny)
-        MatC[idx] = MatA[idx] + MatB[idx];
+      for (int i = 0; i < nx; i++)
+        sum = sum + MatA[initial_col_mult + i] * MatB[i * nx + row_position];
+      MatC[idx] = sum;
 }
 
 int main(int argc, char **argv)
@@ -49,30 +55,31 @@ int main(int argc, char **argv)
     SAFE_CALL(cudaSetDevice(dev), "Error setting device");
 
     // set up data size of matrix
-    int nx = 1 << 9;
-    int ny = 1 << 9;
+    int nx = 1 << 2;
+    int ny = 1 << 2;
 
     int nxy = nx * ny;
     int nBytes = nxy * sizeof(float);
     printf("Matrix size: nx %d ny %d\n", nx, ny);
 
     // malloc host memory
-    float *m_A, *m_B, *m_R;
-    m_A = (float *)malloc(nBytes);
-    m_B = (float *)malloc(nBytes);
-    m_R = (float *)malloc(nBytes);
+    float *h_A, *h_B, *gpuRef;
+    h_A = (float *)malloc(nBytes);
+    h_B = (float *)malloc(nBytes);
+    gpuRef = (float *)malloc(nBytes);
 
     // initialize data at host side
+
     initialData(h_A, nxy);
     initialData(h_B, nxy);
 
-    memset(m_R, 0, nBytes);
+    memset(gpuRef, 0, nBytes);
 
     // malloc device global memory
-    float *d_MatA, *d_MatB, *d_MatR;
+    float *d_MatA, *d_MatB, *d_MatC;
     SAFE_CALL(cudaMalloc((void **)&d_MatA, nBytes), "Error allocating d_MatA");
     SAFE_CALL(cudaMalloc((void **)&d_MatB, nBytes), "Error allocating d_MatB");
-    SAFE_CALL(cudaMalloc((void **)&d_MatR, nBytes), "Error allocating d_MatR");
+    SAFE_CALL(cudaMalloc((void **)&d_MatC, nBytes), "Error allocating d_MatC");
 
     // transfer data from host to device
     SAFE_CALL(cudaMemcpy(d_MatA, h_A, nBytes, cudaMemcpyHostToDevice), "Error copying d_MatA");
@@ -83,14 +90,17 @@ int main(int argc, char **argv)
     dim3 block(dimx, 1);
     dim3 grid((nx + block.x - 1) / block.x, ny);
 
+    printMatrix(h_A, nx, ny);
+    printMatrix(h_B, nx, ny);
+
     start_cpu =  chrono::high_resolution_clock::now();
-    sumMatrixOnGPU2d1d<<<grid, block>>>(d_MatA, d_MatB, d_MatR, nx, ny);
+    multMatrixOnGPU2d1d<<<grid, block>>>(d_MatA, d_MatB, d_MatC, nx, ny);
     SAFE_CALL(cudaDeviceSynchronize(), "Error executing kernel");
     end_cpu =  chrono::high_resolution_clock::now();
 
     duration_ms = end_cpu - start_cpu;
 
-    printf("sumMatrixOnGPU1D <<<(%d,%d), (%d,%d)>>> elapsed %f ms\n", grid.x,
+    printf("multMatrixOnGPU2d1d <<<(%d,%d), (%d,%d)>>> elapsed %f ms\n", grid.x,
            grid.y,
            block.x, block.y, duration_ms.count());
 
@@ -98,17 +108,17 @@ int main(int argc, char **argv)
     SAFE_CALL(cudaGetLastError(), "Error with last error");
 
     // copy kernel result back to host side
-    SAFE_CALL(cudaMemcpy(m_R, d_MatR, nBytes, cudaMemcpyDeviceToHost), "Error copying d_MatC");
-
+    SAFE_CALL(cudaMemcpy(gpuRef, d_MatC, nBytes, cudaMemcpyDeviceToHost), "Error copying d_MatC");
+    printMatrix(gpuRef, nx, ny);
     // free device global memory
     SAFE_CALL(cudaFree(d_MatA), "Error freeing memory");
     SAFE_CALL(cudaFree(d_MatB), "Error freeing memory");
-    SAFE_CALL(cudaFree(d_MatR), "Error freeing memory");
+    SAFE_CALL(cudaFree(d_MatC), "Error freeing memory");
 
     // free host memory
-    free(m_A);
-    free(m_B);
-    free(m_R);
+    free(h_A);
+    free(h_B);
+    free(gpuRef);
 
     // reset device
     SAFE_CALL(cudaDeviceReset(), "Error reseting");
