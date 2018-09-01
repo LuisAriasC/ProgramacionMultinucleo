@@ -2,7 +2,7 @@
 #include <iostream>
 #include <cuda_runtime.h>
 #include <cstdio>
-#include <math.h>
+#include <math_functions.h>
 #include <chrono>
 
 using namespace std;
