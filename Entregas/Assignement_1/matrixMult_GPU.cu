@@ -1,4 +1,5 @@
 #include "common.h"
+#include <iostream>
 #include <cuda_runtime.h>
 #include <cstdio>
 #include <chrono>
@@ -93,10 +94,10 @@ int main(int argc, char **argv)
     printMatrix(h_A, nx, ny);
     printMatrix(h_B, nx, ny);
 
-    start_cpu =  chrono::high_resolution_clock::now();
+    auto start_cpu =  chrono::high_resolution_clock::now();
     multMatrixOnGPU2d1d<<<grid, block>>>(d_MatA, d_MatB, d_MatC, nx, ny);
     SAFE_CALL(cudaDeviceSynchronize(), "Error executing kernel");
-    end_cpu =  chrono::high_resolution_clock::now();
+    auto end_cpu =  chrono::high_resolution_clock::now();
 
     duration_ms = end_cpu - start_cpu;
 
