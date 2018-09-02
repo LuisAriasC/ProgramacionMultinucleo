@@ -11,7 +11,7 @@
 
 #define N0  300
 #define N1  500
-#define N2  650
+#define N2  800
 
 using namespace std;
 
