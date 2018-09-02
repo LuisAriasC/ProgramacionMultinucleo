@@ -22,8 +22,8 @@ static inline void _safe_cuda_call(cudaError err, const char* msg, const char* f
 void printMatrix(float *mat, const int nx, const int ny){
   for (int iy = 0; iy < ny; iy++) {
     for (int ix = 0; ix < nx; ix++)
-      cout << mat[ix] << " ";
-    cout << endl;
+			printf("%f ", mat[ix] );
+    printf("\n");
     mat += nx;
   }
 
