@@ -33,8 +33,8 @@ void printMatrix(float *mat, const int nx, const int ny){
 void initialData(float *ip, const int size){
     int i;
     for(i = 0; i < size; i++)
-        ip[i] = i * 2;
-        //ip[i] = (float)(rand() & 0xFF) / 10.0f;
+        //ip[i] = i * 2;
+        ip[i] = (float)(rand() & 0xFF) / 10.0f;
     return;
 }
 
