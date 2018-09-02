@@ -40,7 +40,7 @@ int main(int argc, char **argv){
       printf("Matrix size: nx %d ny %d\n", nx, ny);
 
       // malloc host memory
-      float *h_A, *h_B, *gpuRef;
+      float *h_A, *h_B, *gpu_R;
       h_A = (float *)malloc(nBytes);
       h_B = (float *)malloc(nBytes);
       gpu_R = (float *)malloc(nBytes);
