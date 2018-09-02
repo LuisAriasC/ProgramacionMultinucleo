@@ -196,6 +196,13 @@ int main(int argc, char **argv)
     SAFE_CALL(cudaFree(d_MatB), "Error freeing memory");
     SAFE_CALL(cudaFree(d_MatC), "Error freeing memory");
 
+    printMatrix(h_R, nx, ny);
+    printf("\n");
+    printMatrix(omp_R, nx, ny);
+    printf("\n");
+    printMatrix(gpu_R, nx, ny);
+    printf("\n");
+
     // free host memory
     free(h_A);
     free(h_B);
