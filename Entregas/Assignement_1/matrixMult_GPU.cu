@@ -99,7 +99,7 @@ int main(int argc, char **argv)
     float avTime = 0.0;
     int iterations = 100;
 
-    for (int i = 0; i < iteration; i++) {
+    for (int i = 0; i < iterations; i++) {
       auto start_cpu =  chrono::high_resolution_clock::now();
       multMatrixOnGPU2d1d<<<grid, block>>>(d_MatA, d_MatB, d_MatC, nx, ny);
       SAFE_CALL(cudaDeviceSynchronize(), "Error executing kernel");
