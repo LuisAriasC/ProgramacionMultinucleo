@@ -61,7 +61,7 @@ __global__ void multMatrixOnGPU2d1d(float *MatA, float *MatB, float *MatC, int n
         idx = iy * nx + ix;
         unsigned int col_position = idx % nx;
         unsigned int h_A_col_init = idx - col_position;
-        printf("Index en h_R es %d con fil y col %d %d\nEn h_A comienza a multiplicar desde index %d \nEn h_B comienza a multiplicar desde index %d\n\n", idx, iy, col_position, h_A_col_init, col_position);
+        //printf("Index en h_R es %d con fil y col %d %d\nEn h_A comienza a multiplicar desde index %d \nEn h_B comienza a multiplicar desde index %d\n\n", idx, iy, col_position, h_A_col_init, col_position);
         float sum = 0.0;
         for (int i = 0; i < nx; i++)
           sum = sum + MatA[h_A_col_init + i] * MatB[i * nx + col_position];
@@ -199,10 +199,10 @@ int main(int argc, char **argv)
     checkResult(h_R, omp_R, nxy);
     // Check cpu and gpu results
     printf("Checking result between cpu and gpu\n");
-    checkResult(h_R, gpu_R, nxy);
+    checkResult(h_R, d_MatC, nxy);
     // Check omp and gpu results
     printf("Checking result between omp and gpu\n");
-    checkResult(omp_R, gpu_R, nxy);
+    checkResult(omp_R, d_MatC, nxy);
 
     // free device global memory
     SAFE_CALL(cudaFree(d_MatA), "Error freeing memory");
