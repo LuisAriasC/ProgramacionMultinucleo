@@ -12,17 +12,17 @@ void printMatrix(float *mat, const int nx, const int ny){
   return;
 }
 
-void initialData(float *ip, const int size){
+void initialData(int *ip, const int size){
     int i;
     for(i = 0; i < size; i++)
         //ip[i] = i * 2;
-        ip[i] = (float)(rand() & 0xFF) / 10.0f;
+        ip[i] = (int)(rand() % 10) + 1;
     return;
 }
 
-void checkResult(float *hostRef, float *gpuRef, const int N)
+void checkResult(int *hostRef, int *gpuRef, const int N)
 {
-    double epsilon = 1.0E-1;
+    double epsilon = 1.0E-8;
     bool match = 1;
 
     for (int i = 0; i < N; i++)

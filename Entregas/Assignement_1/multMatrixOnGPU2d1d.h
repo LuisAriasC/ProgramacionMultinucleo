@@ -1,5 +1,5 @@
 // grid 2D block 1D
-__global__ void multMatrixOnGPU2d1d(float *MatA, float *MatB, float *MatC, int nx, int ny) {
+__global__ void multMatrixOnGPU2d1d(int *MatA, int *MatB, int *MatC, int nx, int ny) {
 
     unsigned int ix = threadIdx.x + blockIdx.x * blockDim.x;
     unsigned int iy = blockIdx.y;

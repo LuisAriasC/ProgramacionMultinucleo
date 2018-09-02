@@ -1,8 +1,8 @@
-void multMatrixOMP(float *A, float *B, float *C, const int nx, const int ny){
+void multMatrixOMP(int *A, int *B, int *C, const int nx, const int ny){
 
-  float *ia = A;
-  float *ib = B;
-  float *ic = C;
+  int *ia = A;
+  int *ib = B;
+  int *ic = C;
 
   int i,j,k;
   #pragma omp parallel for private(i,j,k) shared(ia, ib, ic)

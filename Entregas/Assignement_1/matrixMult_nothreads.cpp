@@ -8,9 +8,9 @@
 #include <string.h>
 
 
-#define N0  100
-#define N1  200
-#define N2  400
+#define N0  200
+#define N1  500
+#define N2  800
 
 using namespace std;
 
@@ -33,10 +33,10 @@ int main(int argc, char **argv){
       printf("Matrix size: nx %d ny %d\n", nx, ny);
 
       // malloc host memory
-      float *m_A, *m_B, *m_R;
-      m_A = (float *)malloc(nBytes);
-      m_B = (float *)malloc(nBytes);
-      m_R = (float *)malloc(nBytes);
+      int *m_A, *m_B, *m_R;
+      m_A = (int *)malloc(nBytes);
+      m_B = (int *)malloc(nBytes);
+      m_R = (int *)malloc(nBytes);
 
       // initialize data at host side
       initialData(m_A, nxy);

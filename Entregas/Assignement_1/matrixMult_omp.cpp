@@ -1,5 +1,6 @@
 #include "custom.h"
 #include "multMatrixOMP.h"
+#include "multMatrixOnHost.h"
 #include <iostream>
 #include <cstdio>
 #include <cstdlib>
@@ -8,9 +9,9 @@
 #include <string.h>
 #include <omp.h>
 
-#define N0  1000
-#define N1  2000
-#define N2  4000
+#define N0  200
+#define N1  500
+#define N2  800
 
 using namespace std;
 
@@ -34,11 +35,11 @@ int main(int argc, char const *argv[]){
     printf("Matrix size: nx %d ny %d\n", nx, ny);
 
     // malloc host memory
-    float *m_A, *m_B, *m_R, *m_OMP;
-    m_A = (float *)malloc(nBytes);
-    m_B = (float *)malloc(nBytes);
-    m_R = (float *)malloc(nBytes);
-    m_OMP = (float *)malloc(nBytes);
+    int *m_A, *m_B, *m_R, *m_OMP;
+    m_A = (int *)malloc(nBytes);
+    m_B = (int *)malloc(nBytes);
+    m_R = (int *)malloc(nBytes);
+    m_OMP = (int *)malloc(nBytes);
 
     // initialize data at host side
     initialData(m_A, nxy);
@@ -81,7 +82,7 @@ int main(int argc, char const *argv[]){
     }
 
     avTime_omp = avTime_omp / iterations;
-    printf("Average time for %d iterations is %f ms for a multiplication in a %dx%d matrix with OpenMP \n", arSize, avTime, nx, ny );
+    printf("Average time for %d iterations is %f ms for a multiplication in a %dx%d matrix with OpenMP \n", iterations, avTime, nx, ny );
 
 
     printf("Checking result between cpu and OpenMP\n");
@@ -89,7 +90,7 @@ int main(int argc, char const *argv[]){
 
 
     printf("Average time in CPU %dx%d matrix: %f\n", nx, ny, avTime);
-    printf("Average time in OpenMO %dx%d matrix: %f\n", nx, ny, avTime_gpu);
+    printf("Average time in OpenMO %dx%d matrix: %f\n", nx, ny, avTime_omp);
     printf("Speedup: %f\n", avTime / avTime_omp);
 
     // free host memory

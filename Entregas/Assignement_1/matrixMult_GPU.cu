@@ -8,9 +8,9 @@
 //#include <cuda_fp16.h>
 #include <chrono>
 
-#define N0  1000
-#define N1  2000
-#define N2  4000
+#define N0  200
+#define N1  500
+#define N2  800
 
 using namespace std;
 
@@ -41,11 +41,11 @@ int main(int argc, char **argv){
       printf("Matrix size: nx %d ny %d\n", nx, ny);
 
       // malloc host memory
-      float *h_A, *h_B, *h_R, *gpu_R;
-      h_A = (float *)malloc(nBytes);
-      h_B = (float *)malloc(nBytes);
-      h_R = (float *)malloc(nBytes);
-      gpu_R = (float *)malloc(nBytes);
+      int *h_A, *h_B, *h_R, *gpu_R;
+      h_A = (int *)malloc(nBytes);
+      h_B = (int *)malloc(nBytes);
+      h_R = (int *)malloc(nBytes);
+      gpu_R = (int *)malloc(nBytes);
 
       // initialize data at host side
 
@@ -73,7 +73,7 @@ int main(int argc, char **argv){
 
 
       // malloc device global memory
-      float *d_MatA, *d_MatB, *d_MatC;
+      int *d_MatA, *d_MatB, *d_MatC;
       SAFE_CALL(cudaMalloc((void **)&d_MatA, nBytes), "Error allocating d_MatA");
       SAFE_CALL(cudaMalloc((void **)&d_MatB, nBytes), "Error allocating d_MatB");
       SAFE_CALL(cudaMalloc((void **)&d_MatC, nBytes), "Error allocating d_MatC");
