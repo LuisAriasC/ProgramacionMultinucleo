@@ -69,7 +69,7 @@ int main(int argc, char **argv){
       }
 
       avTime = avTime / iterations;
-      printf("Average time for %d iterations is %f ms for a multiplication in a %dx%d matrix on Host \n", arSize, avTime, nx, ny );
+      printf("Average time for %d iterations is %f ms for a multiplication in a %dx%d matrix on Host \n", iterations, avTime, nx, ny );
 
 
       // malloc device global memory
@@ -103,7 +103,7 @@ int main(int argc, char **argv){
       }
 
       avTime_gpu = avTime_gpu / iterations;
-      printf("Average time for %d multiplications in GPU with a matrix of %d x %d is %f ms\n", iterations, nx, ny, avTime_gpu);
+      printf("Average time for %d multiplications is %f ms for a multiplication in a %dx%d matrix on GPU\n", iterations, avTime_gpu, nx, ny);
       /**********************************************MULT ON GPU END*******************************************************************************/
 
       // SAFE_CALL kernel error
