@@ -1,7 +1,7 @@
 #include "common.h"
 #include "multMatrixOnHost.h"
 #include "multMatrixOMP.h"
-#include "multMatrixOnGPU2d1d"
+#include "multMatrixOnGPU2d1d.h"
 #include <iostream>
 #include <cuda_runtime.h>
 #include <cstdio>
