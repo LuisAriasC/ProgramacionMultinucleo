@@ -1,4 +1,7 @@
 #include "common.h"
+#include "multMatrixOnHost.h"
+#include "multMatrixOMP.h"
+#include "multMatrixOnGPU2d1d"
 #include <iostream>
 #include <cuda_runtime.h>
 #include <cstdio>
@@ -10,64 +13,6 @@
 #include <omp.h>
 
 using namespace std;
-
-void multMatrixOnHost(float *A, float *B, float *C, const int nx, const int ny){
-  float *ia = A;
-  float *ib = B;
-  float *ic = C;
-
-  for (int i = 0; i < ny; i++) {
-    for (int j = 0; j < nx; j++) {
-        float sum = 0.0;
-        for (int k = 0; k < ny ; k++)
-          sum = sum + ia[i * nx + k] * ib[k * nx + j];
-        ic[i * nx + j] = sum;
-    }
-  }
-
-  return;
-}
-
-
-void multMatrixOMP(float *A, float *B, float *C, const int nx, const int ny){
-  float *ia = A;
-  float *ib = B;
-  float *ic = C;
-
-  int i,j,k;
-  #pragma omp parallel for private(i,j,k) shared(ia, ib, ic)
-  for (i = 0; i < ny; i++)
-  {
-    for (j = 0; j < nx; j++)
-    {
-        float sum = 0.0;
-        for (k = 0; k < ny ; k++)
-          sum = sum + ia[i * nx + k] * ib[k * nx + j];
-        ic[i * nx + j] = sum;
-    }
-  }
-
-  return;
-}
-
-// grid 2D block 1D
-__global__ void multMatrixOnGPU2d1d(float *MatA, float *MatB, float *MatC, int nx, int ny) {
-
-    unsigned int ix = threadIdx.x + blockIdx.x * blockDim.x;
-    unsigned int iy = blockIdx.y;
-
-    unsigned int idx;
-    if (ix < nx && iy < ny){
-        idx = iy * nx + ix;
-        unsigned int col_position = idx % nx;
-        unsigned int h_A_col_init = idx - col_position;
-        //printf("Index en h_R es %d con fil y col %d %d\nEn h_A comienza a multiplicar desde index %d \nEn h_B comienza a multiplicar desde index %d\n\n", idx, iy, col_position, h_A_col_init, col_position);
-        float sum = 0.0;
-        for (int i = 0; i < nx; i++)
-          sum = sum + MatA[h_A_col_init + i] * MatB[i * nx + col_position];
-        MatC[idx] = sum;
-    }
-}
 
 int main(int argc, char **argv)
 {
