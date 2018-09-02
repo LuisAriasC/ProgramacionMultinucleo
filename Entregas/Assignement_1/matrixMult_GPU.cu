@@ -38,6 +38,8 @@ __global__ void multMatrixOnGPU2d1d(float *MatA, float *MatB, float *MatC, int n
     unsigned int row_position = (int)floorf ( (float)(idx / ny ));
     unsigned int initial_col_mult = idx - col_position;
 
+    printf("Index de multiplicción es %d\n", idx );
+
     float sum = 0.0;
 
     if (ix < nx && iy < ny)
@@ -93,8 +95,8 @@ int main(int argc, char **argv)
     dim3 block(dimx, 1);
     dim3 grid((nx + block.x - 1) / block.x, ny);
 
-    printMatrix(h_A, nx, ny);
-    printMatrix(h_B, nx, ny);
+    //printMatrix(h_A, nx, ny);
+    //printMatrix(h_B, nx, ny);
 
     auto start_cpu =  chrono::high_resolution_clock::now();
     multMatrixOnGPU2d1d<<<grid, block>>>(d_MatA, d_MatB, d_MatC, nx, ny);
