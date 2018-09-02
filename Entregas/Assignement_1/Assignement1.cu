@@ -153,12 +153,10 @@ int main(int argc, char **argv)
 
     // invoke kernel at host side
 
-    if (nx % 128 == 0) {
+    if (nx % 128 == 0)
       int dimx = 128 * (((nx + 128 - 1) / 128) + 1));
-    }
-    else{
-        dimx = 128 * ((nx + 128 - 1) / 128);
-    }
+    else
+      int dimx = 128 * ((nx + 128 - 1) / 128);
     dim3 block(dimx, 1);
     dim3 grid((nx + block.x - 1) / block.x, ny);
 
