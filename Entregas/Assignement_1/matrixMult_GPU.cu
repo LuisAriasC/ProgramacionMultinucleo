@@ -39,12 +39,14 @@ __global__ void multMatrixOnGPU2d1d(float *MatA, float *MatB, float *MatC, int n
     //unsigned int initial_col_mult = idx - col_position;
 
     int idx;
-    for (int iy = 0; iy < ny; iy++) {
-      idx = nx + ix;
-      printf("Index de multiplicción es %d con ix %d y iy %d\n", idx, ix, iy);
+    if (ix < nx) {
+      for (int iy = 0; iy < ny; iy++) {
+        idx = iy * nx + ix;
+        printf("Index de multiplicción es %d con ix %d y iy %d\n", idx, ix, iy);
+      }
     }
 
-    float sum = 0.0;
+    //float sum = 0.0;
 
     // if (ix < nx && iy < ny)
     //   for (int i = 0; i < nx; i++)
