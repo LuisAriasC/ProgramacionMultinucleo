@@ -1,4 +1,4 @@
-#include "custom.h"
+#include "common.h"
 #include "multMatrixOnGPU2d1d.h"
 #include <iostream>
 #include <cuda_runtime.h>
