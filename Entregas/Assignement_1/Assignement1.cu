@@ -53,19 +53,28 @@ void multMatrixOMP(float *A, float *B, float *C, const int nx, const int ny){
 // grid 2D block 1D
 __global__ void multMatrixOnGPU2d1d(float *MatA, float *MatB, float *MatC, int nx, int ny) {
 
+    // unsigned int ix = threadIdx.x + blockIdx.x * blockDim.x;
+    // unsigned int iy = blockIdx.y;
+    //
+    // unsigned int idx;
+    // if (ix < nx && iy < ny){
+    //     idx = iy * nx + ix;
+    //     unsigned int col_position = idx % nx;
+    //     unsigned int h_A_col_init = idx - col_position;
+    //     //printf("Index en h_R es %d con fil y col %d %d\nEn h_A comienza a multiplicar desde index %d \nEn h_B comienza a multiplicar desde index %d\n\n", idx, iy, col_position, h_A_col_init, col_position);
+    //     float sum = 0.0;
+    //     for (int i = 0; i < nx; i++)
+    //       sum = sum + MatA[h_A_col_init + i] * MatB[i * nx + col_position];
+    //     MatC[idx] = sum;
+    // }
+
     unsigned int ix = threadIdx.x + blockIdx.x * blockDim.x;
     unsigned int iy = blockIdx.y;
 
-    unsigned int idx;
     if (ix < nx && iy < ny){
-        idx = iy * nx + ix;
-        unsigned int col_position = idx % nx;
-        unsigned int h_A_col_init = idx - col_position;
-        //printf("Index en h_R es %d con fil y col %d %d\nEn h_A comienza a multiplicar desde index %d \nEn h_B comienza a multiplicar desde index %d\n\n", idx, iy, col_position, h_A_col_init, col_position);
-        float sum = 0.0;
-        for (int i = 0; i < nx; i++)
-          sum = sum + MatA[h_A_col_init + i] * MatB[i * nx + col_position];
-        MatC[idx] = sum;
+      for(int in =0;in<nx;in++){
+        MatC[ix*nx+iy] += MatA[ix*nx+in] * MatB[in*nx+iy];
+      }
     }
 }
 
