@@ -26,9 +26,11 @@ int main(int argc, char **argv)
     SAFE_CALL(cudaSetDevice(dev), "Error setting device");
 
     // set up data size of matrix
-    int nx = 1 << 9;
-    int ny = 1 << 9;
+    //int nx = 1 << 9;
+    //int ny = 1 << 9;
 
+    int nx = 1000;
+    int ny = 1000;
     int nxy = nx * ny;
     int nBytes = nxy * sizeof(float);
     printf("Matrix size: nx %d ny %d\n", nx, ny);
