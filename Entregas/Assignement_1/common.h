@@ -38,4 +38,25 @@ void initialData(float *ip, const int size){
     return;
 }
 
+void checkResult(float *hostRef, float *gpuRef, const int N)
+{
+    double epsilon = 1.0E-8;
+    bool match = 1;
+
+    for (int i = 0; i < N; i++)
+    {
+        if (abs(hostRef[i] - gpuRef[i]) > epsilon)
+        {
+            match = 0;
+            printf("Matrix 1 %f Matrix 2 %f\n", hostRef[i], gpuRef[i]);
+            break;
+        }
+    }
+
+    if (match)
+        printf("Arrays match.\n\n");
+    else
+        printf("Arrays do not match.\n\n");
+}
+
 #endif

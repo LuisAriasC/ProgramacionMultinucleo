@@ -117,7 +117,7 @@ int main(int argc, char **argv)
     }
 
     avTime_host = avTime_host / iterations;
-    printf("Average time for %d multiplications in host(no threads) with a matrix of %d x %d is %f\n", iterations, nx, ny, avTime_host );
+    printf("Average time for %d multiplications in host(no threads) with a matrix of %d x %d is %f ms\n", iterations, nx, ny, avTime_host );
 /**********************************************MULT IN HOST END******************************************************************************/
 
 /**********************************************MULT ON OMP START*****************************************************************************/
@@ -137,7 +137,7 @@ int main(int argc, char **argv)
     }
 
     avTime_omp = avTime_omp / iterations;
-    printf("Average time for %d multiplications in host(using OpenMP) with a matrix of %d x %d is %f\n", iterations, nx, ny, avTime_omp );
+    printf("Average time for %d multiplications in host(using OpenMP) with a matrix of %d x %d is %f ms\n", iterations, nx, ny, avTime_omp );
 /**********************************************MULT ON OMP END*******************************************************************************/
 
 
@@ -171,7 +171,7 @@ int main(int argc, char **argv)
     }
 
     avTime_gpu = avTime_gpu / iterations;
-    printf("Average time for %d multiplications in GPU with a matrix of %d x %d is %f\n", iterations, nx, ny, avTime_gpu);
+    printf("Average time for %d multiplications in GPU with a matrix of %d x %d is %f ms\n", iterations, nx, ny, avTime_gpu);
 /**********************************************MULT ON GPU END*******************************************************************************/
 
     // SAFE_CALL kernel error
@@ -179,7 +179,18 @@ int main(int argc, char **argv)
 
     // copy kernel result back to host side
     SAFE_CALL(cudaMemcpy(gpu_R, d_MatC, nBytes, cudaMemcpyDeviceToHost), "Error copying d_MatC");
-    //printMatrix(gpuRef, nx, ny);
+
+
+    // Check cpu and omp results
+    printf("Checking result between cpu and omp\n");
+    checkResult(h_R, omp_R, nxy);
+    // Check cpu and gpu results
+    printf("Checking result between cpu and gpu\n");
+    checkResult(h_R, gpu_R, nxy);
+    // Check omp and gpu results
+    printf("Checking result between omp and gpu\n");
+    checkResult(omp_R, gpu_R, nxy);
+
     // free device global memory
     SAFE_CALL(cudaFree(d_MatA), "Error freeing memory");
     SAFE_CALL(cudaFree(d_MatB), "Error freeing memory");
