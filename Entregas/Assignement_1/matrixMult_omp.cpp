@@ -33,7 +33,7 @@ void multMatrixOMP(float *A, float *B, float *C, const int nx, const int ny){
   float *ic = C;
 
   int i;
-  #pragma omp parallel for private(i,j) shared(ia, ib, ic)
+  #pragma omp parallel for private(i) shared(ia, ib, ic)
   for (i = 0; i < ny; i++)
   {
     for (int j = 0; j < nx; j++)
