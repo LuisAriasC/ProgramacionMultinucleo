@@ -54,8 +54,9 @@ int main(int argc, char **argv){
 
       int iterations = 100;
       printf("Calculating in CPU\n");
+      float avTime = 0.0;
       for (int i = 0; i < iterations; i++){
-        memset(m_R, 0, nBytes);
+        memset(h_R, 0, nBytes);
 
         // Matrix multiplication
         auto start_cpu =  chrono::high_resolution_clock::now();
@@ -67,7 +68,7 @@ int main(int argc, char **argv){
         avTime += duration_ms.count();
       }
 
-      avTime = avTime / arSize;
+      avTime = avTime / iterations;
       printf("Average time for %d iterations is %f ms for a multiplication in a %dx%d matrix on Host \n", arSize, avTime, nx, ny );
 
 
