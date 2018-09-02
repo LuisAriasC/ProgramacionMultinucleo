@@ -33,23 +33,18 @@ __global__ void multMatrixOnGPU2d1d(float *MatA, float *MatB, float *MatC, int n
     unsigned int ix = threadIdx.x + blockIdx.x * blockDim.x;
     unsigned int iy = blockIdx.y;
 
-    //unsigned int col_position = idx % nx;
-    //unsigned int row_position = (int)floorf ( (float)(idx / ny ));
-    //unsigned int initial_col_mult = idx - col_position;
-
     unsigned int idx;
     if (ix < nx && iy < ny){
         idx = iy * nx + ix;
         unsigned int col_position = idx % nx;
-        printf("Index en h_R es %d con fil y col %d %d\nEn h_A comienza a multiplicar desde index %d \nEn h_B comienza a multiplicar desde index %d\n\n", idx, iy, col_position, idx - col_position, col_position);
+        unsigned int h_A_col_init = idx - col_position;
+        printf("Index en h_R es %d con fil y col %d %d\nEn h_A comienza a multiplicar desde index %d \nEn h_B comienza a multiplicar desde index %d\n\n", idx, iy, col_position, h_A_col_init, col_position);
+
+        float sum = 0.0;
+        for (int i = 0; i < nx; i++)
+          sum = sum + MatA[h_A_col_init + i] * MatB[i * nx + col_position];
+        MatC[idx] = sum;
     }
-
-    //float sum = 0.0;
-
-    // if (ix < nx && iy < ny)
-    //   for (int i = 0; i < nx; i++)
-    //     sum = sum + MatA[initial_col_mult + i] * MatB[i * nx + row_position];
-    //   MatC[idx] = sum;
 }
 
 int main(int argc, char **argv)
