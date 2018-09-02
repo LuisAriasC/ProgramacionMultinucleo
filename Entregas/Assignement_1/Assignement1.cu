@@ -165,6 +165,7 @@ int main(int argc, char **argv)
     //   printf("Tamaño de dimx %d\n", dimx );
     // }
     int dimx = 128 * (((nx + 128 - 1) / 128));
+    printf("Tamaño de dimx %d\n", dimx );
     dim3 block(dimx, 1);
     dim3 grid((nx + block.x - 1) / block.x, ny);
 
