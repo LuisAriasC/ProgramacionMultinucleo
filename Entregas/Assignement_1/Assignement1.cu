@@ -127,7 +127,7 @@ int main(int argc, char **argv)
 
       // Matrix multiplication with OpenMP
       auto start_cpu =  chrono::high_resolution_clock::now();
-      multMatrixOMP(m_A, m_B, omp_R, nx, ny);
+      multMatrixOMP(h_A, h_B, omp_R, nx, ny);
       auto end_cpu =  chrono::high_resolution_clock::now();
       chrono::duration<float, std::milli> duration_ms = end_cpu - start_cpu;
       //printMatrix(m_R, nx, ny);
