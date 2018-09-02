@@ -1,4 +1,5 @@
 void multMatrixOMP(float *A, float *B, float *C, const int nx, const int ny){
+
   float *ia = A;
   float *ib = B;
   float *ic = C;
