@@ -41,7 +41,7 @@ __global__ void multMatrixOnGPU2d1d(float *MatA, float *MatB, float *MatC, int n
     if (ix < nx && iy < ny){
         idx = iy * nx + ix;
         unsigned int col_position = idx % nx;
-        printf("Index en h_R es %d con h_A col y fil %d %d\n", idx, col_position, iy);
+        printf("Index en h_R es %d con h_A fil y col %d %d\n", idx, iy, col_position);
     }
 
     //float sum = 0.0;
