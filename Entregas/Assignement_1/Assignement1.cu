@@ -7,6 +7,7 @@
 #include <cuda_fp16.h>
 #include <chrono>
 #include <string.h>
+#include <omp.h>
 
 using namespace std;
 
