@@ -40,7 +40,7 @@ __global__ void multMatrixOnGPU2d1d(float *MatA, float *MatB, float *MatC, int n
 
     int idx;
     for (int iy = 0; iy < ny; iy++) {
-      idx = iy * nx + ix;
+      idx = nx + ix;
       printf("Index de multiplicción es %d con ix %d y iy %d\n", idx, ix, iy);
     }
 
