@@ -34,14 +34,14 @@ void multMatrixOMP(float *A, float *B, float *C, const int nx, const int ny){
   float *ib = B;
   float *ic = C;
 
-  int i;
-  #pragma omp parallel for private(i) shared(ia, ib, ic)
+  int i,j,k;
+  #pragma omp parallel for private(i,j,k) shared(ia, ib, ic)
   for (i = 0; i < ny; i++)
   {
-    for (int j = 0; j < nx; j++)
+    for (j = 0; j < nx; j++)
     {
         float sum = 0.0;
-        for (int k = 0; k < ny ; k++)
+        for (k = 0; k < ny ; k++)
           sum = sum + ia[i * nx + k] * ib[k * nx + j];
         ic[i * nx + j] = sum;
     }
@@ -67,15 +67,6 @@ __global__ void multMatrixOnGPU2d1d(float *MatA, float *MatB, float *MatC, int n
           sum = sum + MatA[h_A_col_init + i] * MatB[i * nx + col_position];
         MatC[idx] = sum;
     }
-
-    // unsigned int ix = threadIdx.x + blockIdx.x * blockDim.x;
-    // unsigned int iy = blockIdx.y;
-    //
-    // if (ix < nx && iy < ny){
-    //   for(int in =0;in<nx;in++){
-    //     MatC[ix*nx+iy] += MatA[ix*nx+in] * MatB[in*nx+iy];
-    //   }
-    // }
 }
 
 int main(int argc, char **argv)
