@@ -32,17 +32,16 @@ __global__ void multMatrixOnGPU2d1d(float *MatA, float *MatB, float *MatC, int n
 
     unsigned int ix = threadIdx.x + blockIdx.x * blockDim.x;
     unsigned int iy = blockIdx.y;
-    //unsigned int idx = iy * nx + ix;
 
     //unsigned int col_position = idx % nx;
     //unsigned int row_position = (int)floorf ( (float)(idx / ny ));
     //unsigned int initial_col_mult = idx - col_position;
 
-    int idx;
-    if (ix < nx && iy < ny)
-    {
+    unsigned int idx;
+    if (ix < nx && iy < ny){
         idx = iy * nx + ix;
-        printf("Index de multiplicción es %d con ix %d y iy %d\n", idx, ix, iy);
+        unsigned int col_position = idx % nx;
+        printf("Index en h_R es %d con h_A col y fil %d %d\n", idx, col_pos, iy);
     }
 
     //float sum = 0.0;
