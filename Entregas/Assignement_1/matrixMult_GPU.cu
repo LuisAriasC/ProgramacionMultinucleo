@@ -29,7 +29,7 @@ int main(int argc, char **argv){
     SAFE_CALL(cudaGetDeviceProperties(&deviceProp, dev), "Error device prop");
     printf("Using Device %d: %s\n", dev, deviceProp.name);
     SAFE_CALL(cudaSetDevice(dev), "Error setting device");
-
+    printf("\n\n");
 
     for (int i = 0; i < 3; i++) {
       // set up data size of matrix
@@ -115,10 +115,10 @@ int main(int argc, char **argv){
       printf("Checking result between cpu and gpu\n");
       checkResult(h_R, gpu_R, nxy);
 
-      printf("Average time in CPU : %f\n", avTime);
-      printf("Average time in GPU : %f\n", avTime_gpu);
+      printf("Average time in CPU for %dx%d matrix: %f\n", nx, ny, avTime);
+      printf("Average time in GPU for %dx%d matrix: %f\n", nx, ny, avTime_gpu);
       printf("Speedup: %f\n", avTime / avTime_gpu);
-      
+
       // free device global memory
       SAFE_CALL(cudaFree(d_MatA), "Error freeing memory");
       SAFE_CALL(cudaFree(d_MatB), "Error freeing memory");
