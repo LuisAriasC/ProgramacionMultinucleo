@@ -156,6 +156,7 @@ int main(int argc, char **argv)
     int dimx;
     if (nx % 128 == 0)
       dimx = 128 * (((nx + 128 - 1) / 128) + 1);
+      printf("Tamaño de dimx %d\n", dimx );
     else
       dimx = 128 * ((nx + 128 - 1) / 128);
     dim3 block(dimx, 1);
