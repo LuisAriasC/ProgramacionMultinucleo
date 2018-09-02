@@ -81,10 +81,8 @@ int main(int argc, char **argv)
     SAFE_CALL(cudaSetDevice(dev), "Error setting device");
 
     // set up data size of matrix
-    int nx = 1 << 5;
-    int ny = 1 << 5;
-    //int nx = 100;
-    //int ny = 100;
+    int nx = 1 << 4;
+    int ny = 1 << 4;
 
     int nxy = nx * ny;
     int nBytes = nxy * sizeof(float);
@@ -154,18 +152,7 @@ int main(int argc, char **argv)
     SAFE_CALL(cudaMemcpy(d_MatB, h_B, nBytes, cudaMemcpyHostToDevice), "Error copying d_MatB");
 
     // invoke kernel at host side
-
-    // int dimx;
-    // if (nx % 128 == 0){
-    //   dimx = 128 * (((nx + 128 - 1) / 128) + 1);
-    //   printf("Tamaño de dimx %d\n", dimx );
-    // }
-    // else{
-    //   dimx = 128 * ((nx + 128 - 1) / 128);
-    //   printf("Tamaño de dimx %d\n", dimx );
-    // }
-    int dimx = 128 * (((nx + 128 - 1) / 128));
-    printf("Tamaño de dimx %d\n", dimx );
+    int dimx = 128;
     dim3 block(dimx, 1);
     dim3 grid((nx + block.x - 1) / block.x, ny);
 
@@ -199,10 +186,10 @@ int main(int argc, char **argv)
     checkResult(h_R, omp_R, nxy);
     // Check cpu and gpu results
     printf("Checking result between cpu and gpu\n");
-    checkResult(h_R, d_MatC, nxy);
+    checkResult(h_R, gpu_R, nxy);
     // Check omp and gpu results
     printf("Checking result between omp and gpu\n");
-    checkResult(omp_R, d_MatC, nxy);
+    checkResult(omp_R, gpu_R, nxy);
 
     // free device global memory
     SAFE_CALL(cudaFree(d_MatA), "Error freeing memory");
