@@ -1,5 +1,6 @@
 #include "common.h"
 #include "multMatrixOnGPU2d1d.h"
+#include "multMatrixOnHost.h"
 #include <iostream>
 #include <cuda_runtime.h>
 #include <cstdio>
@@ -7,9 +8,9 @@
 //#include <cuda_fp16.h>
 #include <chrono>
 
-#define N0  100
-#define N1  200
-#define N2  400
+#define N0  1000
+#define N1  2000
+#define N2  4000
 
 using namespace std;
 
@@ -40,15 +41,35 @@ int main(int argc, char **argv){
       printf("Matrix size: nx %d ny %d\n", nx, ny);
 
       // malloc host memory
-      float *h_A, *h_B, *gpu_R;
+      float *h_A, *h_B, *h_R, *gpu_R;
       h_A = (float *)malloc(nBytes);
       h_B = (float *)malloc(nBytes);
+      h_R = (float *)malloc(nBytes);
       gpu_R = (float *)malloc(nBytes);
 
       // initialize data at host side
 
       initialData(h_A, nxy);
       initialData(h_B, nxy);
+
+      int iterations = 100;
+      printf("Calculating in CPU\n");
+      for (int i = 0; i < iterations; i++){
+        memset(m_R, 0, nBytes);
+
+        // Matrix multiplication
+        auto start_cpu =  chrono::high_resolution_clock::now();
+        multMatrixOnHost(h_A, h_B, h_R, nx, ny);
+        auto end_cpu =  chrono::high_resolution_clock::now();
+        chrono::duration<float, std::milli> duration_ms = end_cpu - start_cpu;
+
+        //printf("multMatrixOnHost elapsed %f ms on iteration %d\n", duration_ms.count(), i);
+        avTime += duration_ms.count();
+      }
+
+      avTime = avTime / arSize;
+      printf("Average time for %d iterations is %f ms for a multiplication in a %dx%d matrix on Host \n", arSize, avTime, nx, ny );
+
 
       // malloc device global memory
       float *d_MatA, *d_MatB, *d_MatC;
@@ -65,9 +86,9 @@ int main(int argc, char **argv){
       dim3 block(dimx, 1);
       dim3 grid((nx + block.x - 1) / block.x, ny);
 
-      int iterations = 100;
 
       /**********************************************MULT ON GPU START*****************************************************************************/
+      printf("Calculating in GPU\n");
       float avTime_gpu = 0.0;
       for (int i = 0; i < iterations; i++) {
         SAFE_CALL(cudaMemset(d_MatC, 0, nBytes), "Error setting d_MatC to 0");
@@ -90,6 +111,9 @@ int main(int argc, char **argv){
       // copy kernel result back to host side
       SAFE_CALL(cudaMemcpy(gpu_R, d_MatC, nBytes, cudaMemcpyDeviceToHost), "Error copying d_MatC");
 
+      printf("Checking result between cpu and gpu\n");
+      checkResult(h_R, gpu_R, nxy);
+
       // free device global memory
       SAFE_CALL(cudaFree(d_MatA), "Error freeing memory");
       SAFE_CALL(cudaFree(d_MatB), "Error freeing memory");
@@ -98,6 +122,7 @@ int main(int argc, char **argv){
       // free host memory
       free(h_A);
       free(h_B);
+      free(h_R);
       free(gpu_R);
 
       printf("\n\n" );

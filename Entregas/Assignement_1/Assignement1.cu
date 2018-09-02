@@ -12,6 +12,10 @@
 #include <string.h>
 #include <omp.h>
 
+#define N0  1000
+#define N1  2000
+#define N2  4000
+
 using namespace std;
 
 int main(int argc, char **argv)
