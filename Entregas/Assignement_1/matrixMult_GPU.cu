@@ -38,8 +38,7 @@ __global__ void multMatrixOnGPU2d1d(float *MatA, float *MatB, float *MatC, int n
         idx = iy * nx + ix;
         unsigned int col_position = idx % nx;
         unsigned int h_A_col_init = idx - col_position;
-        printf("Index en h_R es %d con fil y col %d %d\nEn h_A comienza a multiplicar desde index %d \nEn h_B comienza a multiplicar desde index %d\n\n", idx, iy, col_position, h_A_col_init, col_position);
-
+        //printf("Index en h_R es %d con fil y col %d %d\nEn h_A comienza a multiplicar desde index %d \nEn h_B comienza a multiplicar desde index %d\n\n", idx, iy, col_position, h_A_col_init, col_position);
         float sum = 0.0;
         for (int i = 0; i < nx; i++)
           sum = sum + MatA[h_A_col_init + i] * MatB[i * nx + col_position];
@@ -59,8 +58,8 @@ int main(int argc, char **argv)
     SAFE_CALL(cudaSetDevice(dev), "Error setting device");
 
     // set up data size of matrix
-    int nx = 1 << 2;
-    int ny = 1 << 2;
+    int nx = 1 << 7;
+    int ny = 1 << 7;
 
     int nxy = nx * ny;
     int nBytes = nxy * sizeof(float);
@@ -97,23 +96,29 @@ int main(int argc, char **argv)
     //printMatrix(h_A, nx, ny);
     //printMatrix(h_B, nx, ny);
 
-    auto start_cpu =  chrono::high_resolution_clock::now();
-    multMatrixOnGPU2d1d<<<grid, block>>>(d_MatA, d_MatB, d_MatC, nx, ny);
-    SAFE_CALL(cudaDeviceSynchronize(), "Error executing kernel");
-    auto end_cpu =  chrono::high_resolution_clock::now();
+    float avTime = 0.0;
+    int iterations = 100;
 
-    chrono::duration<float, std::milli> duration_ms = end_cpu - start_cpu;
+    for (int i = 0; i < iteration; i++) {
+      auto start_cpu =  chrono::high_resolution_clock::now();
+      multMatrixOnGPU2d1d<<<grid, block>>>(d_MatA, d_MatB, d_MatC, nx, ny);
+      SAFE_CALL(cudaDeviceSynchronize(), "Error executing kernel");
+      auto end_cpu =  chrono::high_resolution_clock::now();
+      chrono::duration<float, std::milli> duration_ms = end_cpu - start_cpu;
 
-    printf("multMatrixOnGPU2d1d <<<(%d,%d), (%d,%d)>>> elapsed %f ms\n", grid.x,
-           grid.y,
-           block.x, block.y, duration_ms.count());
+      avTime += duration_ms.count();
+    }
+
+    avTime = avTime / iterations;
+    printf("Average time for %d iterations is %f ms for a multiplication in a %dx%d matrix with GPU \n", iterations, avTime, nx, ny );
+    //printf("multMatrixOnGPU2d1d <<<(%d,%d), (%d,%d)>>> elapsed %f ms\n", grid.x,grid.y,block.x, block.y, duration_ms.count());
 
     // SAFE_CALL kernel error
     SAFE_CALL(cudaGetLastError(), "Error with last error");
 
     // copy kernel result back to host side
     SAFE_CALL(cudaMemcpy(gpuRef, d_MatC, nBytes, cudaMemcpyDeviceToHost), "Error copying d_MatC");
-    printMatrix(gpuRef, nx, ny);
+    //printMatrix(gpuRef, nx, ny);
     // free device global memory
     SAFE_CALL(cudaFree(d_MatA), "Error freeing memory");
     SAFE_CALL(cudaFree(d_MatB), "Error freeing memory");

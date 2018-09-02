@@ -48,8 +48,8 @@ int main(int argc, char **argv){
     printf("%s starting...\n", argv[0]);
 
     // set up data size of matrix
-    int nx = 1 << 7;
-    int ny = 1 << 7;
+    int nx = 1 << 9;
+    int ny = 1 << 9;
 
     int nxy = nx * ny;
     int nBytes = nxy * sizeof(float);
