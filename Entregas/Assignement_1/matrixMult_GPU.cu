@@ -115,6 +115,10 @@ int main(int argc, char **argv){
       printf("Checking result between cpu and gpu\n");
       checkResult(h_R, gpu_R, nxy);
 
+      printf("Average time in CPU : %f\n", avTime);
+      printf("Average time in GPU : %f\n", avTime_gpu);
+      printf("Speedup: %f\n", avTime / avTime_gpu);
+      
       // free device global memory
       SAFE_CALL(cudaFree(d_MatA), "Error freeing memory");
       SAFE_CALL(cudaFree(d_MatB), "Error freeing memory");
