@@ -31,7 +31,7 @@ void initialData(float *ip, const int size){
 __global__ void multMatrixOnGPU2d1d(float *MatA, float *MatB, float *MatC, int nx, int ny) {
 
     unsigned int ix = threadIdx.x + blockIdx.x * blockDim.x;
-    //unsigned int iy = blockIdx.y;
+    unsigned int iy = blockIdx.y;
     //unsigned int idx = iy * nx + ix;
 
     //unsigned int col_position = idx % nx;
@@ -39,8 +39,8 @@ __global__ void multMatrixOnGPU2d1d(float *MatA, float *MatB, float *MatC, int n
     //unsigned int initial_col_mult = idx - col_position;
 
     int idx;
-    if (ix < nx) {
-      for (int iy = 0; iy < ny; iy++) {
+    if (ix < nx && iy < ny) {
+      for (int ixy = 0; ixy < ny; ixy++) {
         idx = iy * nx + ix;
         printf("Index de multiplicción es %d con ix %d y iy %d\n", idx, ix, iy);
       }
