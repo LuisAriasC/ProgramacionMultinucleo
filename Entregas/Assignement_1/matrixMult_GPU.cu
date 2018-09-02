@@ -38,18 +38,18 @@ __global__ void multMatrixOnGPU2d1d(float *MatA, float *MatB, float *MatC, int n
     //unsigned int row_position = (int)floorf ( (float)(idx / ny ));
     //unsigned int initial_col_mult = idx - col_position;
 
-    for (int iy = 0; iy < ny; i++) {
-      int idx = iy * nx + ix;
+    int idx;
+    for (int iy = 0; iy < ny; iy++) {
+      idx = iy * nx + ix;
+      printf("Index de multiplicción es %d con ix %d y iy %d\n", idx, ix, iy);
     }
-
-    printf("Index de multiplicción es %d con ix %d y iy %d\n", idx, ix, iy);
 
     float sum = 0.0;
 
-    if (ix < nx && iy < ny)
-      for (int i = 0; i < nx; i++)
-        sum = sum + MatA[initial_col_mult + i] * MatB[i * nx + row_position];
-      MatC[idx] = sum;
+    // if (ix < nx && iy < ny)
+    //   for (int i = 0; i < nx; i++)
+    //     sum = sum + MatA[initial_col_mult + i] * MatB[i * nx + row_position];
+    //   MatC[idx] = sum;
 }
 
 int main(int argc, char **argv)
