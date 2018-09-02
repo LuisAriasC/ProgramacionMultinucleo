@@ -40,7 +40,7 @@ void initialData(float *ip, const int size){
 
 void checkResult(float *hostRef, float *gpuRef, const int N)
 {
-    double epsilon = 1.0E-1;
+    double epsilon = 1.0E-8;
     bool match = 1;
 
     for (int i = 0; i < N; i++)
