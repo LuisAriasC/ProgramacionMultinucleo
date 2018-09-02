@@ -152,11 +152,12 @@ int main(int argc, char **argv)
     SAFE_CALL(cudaMemcpy(d_MatB, h_B, nBytes, cudaMemcpyHostToDevice), "Error copying d_MatB");
 
     // invoke kernel at host side
+
     if (nx % 128 == 0) {
-      int dimx = 128 * (()(nx + 128 - 1) / 128) + 1);
+      int dimx = 128 * (((nx + 128 - 1) / 128) + 1));
     }
     else{
-        int dimx = 128 * ((nx + 128 - 1) / 128);
+        dimx = 128 * ((nx + 128 - 1) / 128);
     }
     dim3 block(dimx, 1);
     dim3 grid((nx + block.x - 1) / block.x, ny);
