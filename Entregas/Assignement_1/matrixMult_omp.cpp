@@ -53,7 +53,7 @@ int main(int argc, char const *argv[]){
 
       // Matrix multiplication
       auto start_cpu =  chrono::high_resolution_clock::now();
-      //multMatrixOnHost(m_A, m_B, m_R, nx, ny);
+      multMatrixOnHost(m_A, m_B, m_R, nx, ny);
       auto end_cpu =  chrono::high_resolution_clock::now();
       chrono::duration<float, std::milli> duration_ms = end_cpu - start_cpu;
 

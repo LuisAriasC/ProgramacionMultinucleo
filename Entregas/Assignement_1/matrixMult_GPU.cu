@@ -8,9 +8,9 @@
 //#include <cuda_fp16.h>
 #include <chrono>
 
-#define N0  200
+#define N0  350
 #define N1  500
-#define N2  800
+#define N2  650
 
 using namespace std;
 
