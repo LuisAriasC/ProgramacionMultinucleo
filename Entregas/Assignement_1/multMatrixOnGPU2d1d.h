@@ -8,7 +8,7 @@ __global__ void multMatrixOnGPU2d1d(int *MatA, int *MatB, int *MatC, int nx, int
     for (int i = 0; i < nx; i++) {
       sum += MatA[iy * ny + i] * MatB[i * nx + ix];
     }
-    MatC[iy * rows + ix] = sum;
+    MatC[iy * ny + ix] = sum;
   }
 
 /*
