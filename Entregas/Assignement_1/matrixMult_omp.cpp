@@ -62,7 +62,7 @@ int main(int argc, char const *argv[]){
     }
 
     avTime = avTime / iterations;
-    printf("Average time for %d iterations is %f ms for a multiplication in a %dx%d matrix on Host \n", iterations, avTime, nx, ny );
+    //printf("Average time for %d iterations is %f ms for a multiplication in a %dx%d matrix on Host \n", iterations, avTime, nx, ny );
 
 
     printf("Calculating in OpenMP\n");
@@ -82,15 +82,12 @@ int main(int argc, char const *argv[]){
     }
 
     avTime_omp = avTime_omp / iterations;
-    printf("Average time for %d iterations is %f ms for a multiplication in a %dx%d matrix with OpenMP \n", iterations, avTime, nx, ny );
-
-
-    printf("Checking result between cpu and OpenMP\n");
-    checkResult(m_R, m_OMP, nxy);
-
+    //printf("Average time for %d iterations is %f ms for a multiplication in a %dx%d matrix with OpenMP \n", iterations, avTime_omp, nx, ny );
 
     printf("Average time in CPU %dx%d matrix: %f\n", nx, ny, avTime);
     printf("Average time in OpenMO %dx%d matrix: %f\n", nx, ny, avTime_omp);
+    printf("Checking result between cpu and OpenMP\n");
+    checkResult(m_R, m_OMP, nxy);
     printf("Speedup: %f\n", avTime / avTime_omp);
 
     // free host memory
