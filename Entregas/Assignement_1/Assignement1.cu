@@ -59,6 +59,7 @@ int main(int argc, char **argv){
 
   /**********************************************MULT IN HOST START****************************************************************************/
       float avTime_host = 0.0;
+      printf("Calculating on CPU with %dx%d\n", nx, ny);
       for (int i = 0; i < iterations; i++){
         memset(h_R, 0, nBytes);
 
@@ -77,6 +78,7 @@ int main(int argc, char **argv){
 
   /**********************************************MULT ON OMP START*****************************************************************************/
       float avTime_omp = 0.0;
+      printf("Calculating on OpenMP with %dx%d\n", nx, ny);
       for (int i = 0; i < iterations; i++){
         memset(omp_R, 0, nBytes);
 
@@ -114,6 +116,7 @@ int main(int argc, char **argv){
 
   /**********************************************MULT ON GPU START*****************************************************************************/
       float avTime_gpu = 0.0;
+      printf("Calculating on GPU with %dx%d\n", nx, ny);
       for (int i = 0; i < iterations; i++) {
         SAFE_CALL(cudaMemset(d_MatC, 0, nBytes), "Error setting d_MatC to 0");
         auto start_cpu =  chrono::high_resolution_clock::now();
@@ -134,10 +137,6 @@ int main(int argc, char **argv){
 
       // copy kernel result back to host side
       SAFE_CALL(cudaMemcpy(gpu_R, d_MatC, nBytes, cudaMemcpyDeviceToHost), "Error copying d_MatC");
-
-      printf("Average time in CPU for %dx%d matrix: %f\n", nx, ny, avTime_host);
-      printf("Average time in OpenMP for %dx%d matrix: %f\n", nx, ny, avTime_omp);
-      printf("Average time in GPU for %dx%d matrix: %f\n", nx, ny, avTime_gpu);
 
       // Check cpu and omp results
       printf("Checking result between cpu and omp\n");
