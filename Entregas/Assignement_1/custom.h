@@ -1,10 +1,11 @@
 #include <cstdlib>
 #include <cstdio>
 
-void printMatrix(float *mat, const int nx, const int ny){
+/*Print the matrix*/
+void printMatrix(int *mat, const int nx, const int ny){
   for (int iy = 0; iy < ny; iy++) {
     for (int ix = 0; ix < nx; ix++)
-			printf("%f ", mat[ix] );
+			printf("%d ", mat[ix] );
     printf("\n");
     mat += nx;
   }
@@ -12,16 +13,19 @@ void printMatrix(float *mat, const int nx, const int ny){
   return;
 }
 
+/*Initialize data in a matrix*/
 void initialData(int *ip, const int size){
     int i;
     for(i = 0; i < size; i++)
         //ip[i] = i * 2;
+        /*Set a random integer between 1 and 10*/
         ip[i] = (int)(rand() % 10) + 1;
     return;
 }
 
-void checkResult(int *hostRef, int *gpuRef, const int N)
-{
+/*Chech if two matrix are equal*/
+void checkResult(int *hostRef, int *gpuRef, const int N){
+
     double epsilon = 1.0E-8;
     bool match = 1;
 

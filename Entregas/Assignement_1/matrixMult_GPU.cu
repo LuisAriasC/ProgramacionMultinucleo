@@ -1,21 +1,23 @@
-#include "common.h"
-#include "multMatrixOnGPU2d1d.h"
-#include "multMatrixOnHost.h"
+#include "common.h"  /* Set cuda calls, print matix, set matrix and check results */
+#include "multMatrixOnGPU2d1d.h" /*Call the matrix multiplication on cuda*/
+#include "multMatrixOnHost.h" /* Call the matrix multiplication on CPU */
 #include <iostream>
 #include <cuda_runtime.h>
 #include <cstdio>
 #include <math.h>
-//#include <cuda_fp16.h>
 #include <chrono>
 
-#define N0  300
-#define N1  400
-#define N2  500
+/*These three numbers are going to be the size N for the matrix in NxN */
+#define N0  300 /*CHANGE FOR 1000*/
+#define N1  400 /*CHANGE FOR 2000*/
+#define N2  500 /*CHANGE FOR 4000*/
 
 using namespace std;
 
 int main(int argc, char **argv){
 
+
+  // Make an array with the three NxN sizes to test three different scenarios
     int test_n[3];
     test_n[0] = N0;
     test_n[1] = N1;
@@ -31,6 +33,7 @@ int main(int argc, char **argv){
     SAFE_CALL(cudaSetDevice(dev), "Error setting device");
     printf("\n\n");
 
+    // Main loop to test the 3 diferet scenarios with diferent NxN sizes
     for (int i = 0; i < 3; i++) {
       // set up data size of matrix
       int nx = test_n[i];
@@ -55,6 +58,8 @@ int main(int argc, char **argv){
       int iterations = 100;
       printf("Calculating in CPU\n");
       float avTime = 0.0;
+
+/**********************************************MULT IN HOST START****************************************************************************/
       for (int i = 0; i < iterations; i++){
         memset(h_R, 0, nBytes);
 
@@ -67,9 +72,8 @@ int main(int argc, char **argv){
         //printf("multMatrixOnHost elapsed %f ms on iteration %d\n", duration_ms.count(), i);
         avTime += duration_ms.count();
       }
-
-      avTime = avTime / iterations;
-      //printf("Average time for %d iterations is %f ms for a multiplication in a %dx%d matrix on Host \n", iterations, avTime, nx, ny );
+        avTime = avTime / iterations;
+/**********************************************MULT IN HOST END******************************************************************************/
 
 
       // malloc device global memory
@@ -88,7 +92,7 @@ int main(int argc, char **argv){
       dim3 grid((nx + block.x - 1) / block.x, ny);
 
 
-      /**********************************************MULT ON GPU START*****************************************************************************/
+/**********************************************MULT ON GPU START*****************************************************************************/
       printf("Calculating in GPU\n");
       float avTime_gpu = 0.0;
       for (int i = 0; i < iterations; i++) {
@@ -101,10 +105,8 @@ int main(int argc, char **argv){
 
         avTime_gpu += duration_ms.count();
       }
-
       avTime_gpu = avTime_gpu / iterations;
-      //printf("Average time for %d multiplications is %f ms for a multiplication in a %dx%d matrix on GPU\n", iterations, avTime_gpu, nx, ny);
-      /**********************************************MULT ON GPU END*******************************************************************************/
+/**********************************************MULT ON GPU END*******************************************************************************/
 
       // SAFE_CALL kernel error
       SAFE_CALL(cudaGetLastError(), "Error with last error");

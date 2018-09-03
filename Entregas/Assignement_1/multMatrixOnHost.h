@@ -1,3 +1,5 @@
+
+//Matrix multiplication on host with an array
 void multMatrixOnHost(int *A, int *B, int *C, const int nx, const int ny){
   int *ia = A;
   int *ib = B;

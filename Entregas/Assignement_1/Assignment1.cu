@@ -1,7 +1,7 @@
-#include "common.h"
-#include "multMatrixOnHost.h"
-#include "multMatrixOMP.h"
-#include "multMatrixOnGPU2d1d.h"
+#include "common.h"  /* Set cuda calls, print matix, set matrix and check results */
+#include "multMatrixOnHost.h" /* Call the matrix multiplication on CPU */
+#include "multMatrixOMP.h" /* Call the matrix multiplication on CPU with OPENMP*/
+#include "multMatrixOnGPU2d1d.h" /*Call the matrix multiplication on cuda*/
 #include <iostream>
 #include <cuda_runtime.h>
 #include <cstdio>
