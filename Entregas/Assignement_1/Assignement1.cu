@@ -114,18 +114,17 @@ int main(int argc, char **argv){
       // Invoke kernel at host side
 
       //Uncoment this to set the dinamicall threads calculation
-      /*
       int dimx;
       if (nx > 1024) {
+        //If nx > 1024 set the threads number in a block to 128
         dimx = 128;
       }
       else{
         //Dinamically set the number of threads per block
         dimx = 128 * ((nx + 128 -1) / 128);
       }
-      */
       // Comment the line bellow and uncoment the if and else above to set the dinamically calculation for threads
-      int dimx = 128;
+      //int dimx = 128;
       dim3 block(dimx, 1);
       dim3 grid((nx + block.x - 1) / block.x, ny);
 
