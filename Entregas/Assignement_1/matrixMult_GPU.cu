@@ -8,9 +8,9 @@
 //#include <cuda_fp16.h>
 #include <chrono>
 
-#define N0  350
-#define N1  500
-#define N2  650
+#define N0  300
+#define N1  400
+#define N2  500
 
 using namespace std;
 
@@ -69,7 +69,7 @@ int main(int argc, char **argv){
       }
 
       avTime = avTime / iterations;
-      printf("Average time for %d iterations is %f ms for a multiplication in a %dx%d matrix on Host \n", iterations, avTime, nx, ny );
+      //printf("Average time for %d iterations is %f ms for a multiplication in a %dx%d matrix on Host \n", iterations, avTime, nx, ny );
 
 
       // malloc device global memory
@@ -103,7 +103,7 @@ int main(int argc, char **argv){
       }
 
       avTime_gpu = avTime_gpu / iterations;
-      printf("Average time for %d multiplications is %f ms for a multiplication in a %dx%d matrix on GPU\n", iterations, avTime_gpu, nx, ny);
+      //printf("Average time for %d multiplications is %f ms for a multiplication in a %dx%d matrix on GPU\n", iterations, avTime_gpu, nx, ny);
       /**********************************************MULT ON GPU END*******************************************************************************/
 
       // SAFE_CALL kernel error
@@ -112,11 +112,10 @@ int main(int argc, char **argv){
       // copy kernel result back to host side
       SAFE_CALL(cudaMemcpy(gpu_R, d_MatC, nBytes, cudaMemcpyDeviceToHost), "Error copying d_MatC");
 
-      printf("Checking result between cpu and gpu\n");
-      checkResult(h_R, gpu_R, nxy);
-
       printf("Average time in CPU for %dx%d matrix: %f\n", nx, ny, avTime);
       printf("Average time in GPU for %dx%d matrix: %f\n", nx, ny, avTime_gpu);
+      printf("Checking result between cpu and gpu\n");
+      checkResult(h_R, gpu_R, nxy);
       printf("Speedup: %f\n", avTime / avTime_gpu);
 
       // free device global memory

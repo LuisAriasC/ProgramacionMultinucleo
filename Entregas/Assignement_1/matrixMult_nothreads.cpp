@@ -8,9 +8,9 @@
 #include <string.h>
 
 
-#define N0  350
-#define N1  500
-#define N2  650
+#define N0  300
+#define N1  400
+#define N2  500
 
 using namespace std;
 

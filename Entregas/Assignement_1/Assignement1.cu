@@ -12,9 +12,9 @@
 #include <string.h>
 #include <omp.h>
 
-#define N0  350
-#define N1  500
-#define N2  650
+#define N0  300 /*CHANGE FOR 1000*/
+#define N1  400 /*CHANGE FOR 2000*/
+#define N2  500 /*CHANGE FOR 3000*/
 
 using namespace std;
 
@@ -139,17 +139,17 @@ int main(int argc, char **argv){
       SAFE_CALL(cudaMemcpy(gpu_R, d_MatC, nBytes, cudaMemcpyDeviceToHost), "Error copying d_MatC");
 
       // Check cpu and omp results
-      printf("Checking result between cpu and omp\n");
+      printf("Checking result between CPU and OpenMP\n");
       checkResult(h_R, omp_R, nxy);
       printf("Speedup between CPU and OpenMP: %f\n", avTime_host / avTime_omp);
 
       // Check cpu and gpu results
-      printf("Checking result between cpu and gpu\n");
+      printf("Checking result between CPU and GPU\n");
       checkResult(h_R, gpu_R, nxy);
       printf("Speedup between CPU and GPU: %f\n", avTime_host / avTime_gpu);
 
       // Check omp and gpu results
-      printf("Checking result between omp and gpu\n");
+      printf("Checking result between OpenMP and GPU\n");
       checkResult(omp_R, gpu_R, nxy);
       printf("Speedup between OpenMP and GPU: %f\n", avTime_omp / avTime_gpu);
 
