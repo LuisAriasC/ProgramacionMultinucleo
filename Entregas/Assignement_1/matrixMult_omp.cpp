@@ -9,9 +9,9 @@
 #include <string.h>
 #include <omp.h>
 
-#define N0  400
-#define N1  500
-#define N2  600
+#define N0  300
+#define N1  400
+#define N2  500
 
 using namespace std;
 
