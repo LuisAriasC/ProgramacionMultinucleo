@@ -112,6 +112,8 @@ int main(int argc, char **argv){
       SAFE_CALL(cudaMemcpy(d_MatB, h_B, nBytes, cudaMemcpyHostToDevice), "Error copying d_MatB");
 
       // Invoke kernel at host side
+
+      //Uncoment this to set the dinamicall threads calculation
       /*
       int dimx;
       if (nx > 1024) {
@@ -122,7 +124,8 @@ int main(int argc, char **argv){
         dimx = 128 * ((nx + 128 -1) / 128);
       }
       */
-      int dimx = 512;
+      // Comment the line bellow and uncoment the if and else above to set the dinamically calculation for threads
+      int dimx = 128;
       dim3 block(dimx, 1);
       dim3 grid((nx + block.x - 1) / block.x, ny);
 
