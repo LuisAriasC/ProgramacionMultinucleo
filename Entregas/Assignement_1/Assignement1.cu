@@ -122,7 +122,7 @@ int main(int argc, char **argv){
         dimx = 128 * ((nx + 128 -1) / 128);
       }
       */
-      int dimx = 128;
+      int dimx = 384;
       dim3 block(dimx, 1);
       dim3 grid((nx + block.x - 1) / block.x, ny);
 
