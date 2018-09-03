@@ -112,8 +112,8 @@ int main(int argc, char **argv){
       SAFE_CALL(cudaMemcpy(d_MatB, h_B, nBytes, cudaMemcpyHostToDevice), "Error copying d_MatB");
 
       // Invoke kernel at host side
-      int dimx;
       /*
+      int dimx;
       if (nx > 1024) {
         dimx = 128;
       }
