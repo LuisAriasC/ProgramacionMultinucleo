@@ -5,7 +5,7 @@ __global__ void multMatrixOnGPU2d1d(int *MatA, int *MatB, long *MatC, int nx, in
   unsigned int ix = threadIdx.x + blockIdx.x * blockDim.x;
   unsigned int iy = blockIdx.y;
   if(ix < nx && iy < ny){
-    int sum = 0;
+    long sum = 0;
     for (int i = 0; i < nx; i++) {
       sum += MatA[iy * ny + i] * MatB[i * nx + ix];
     }
