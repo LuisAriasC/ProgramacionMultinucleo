@@ -1,5 +1,5 @@
 #include "common.h"  /* Set cuda calls, print matix, set matrix and check results */
-#include "multMatrixOnGPU2d1d.h" /*Call the matrix multiplication on cuda*/
+#include "multMatrixOnGPU.h" /*Call the matrix multiplication on cuda*/
 #include "multMatrixOnHost.h" /* Call the matrix multiplication on CPU */
 #include <iostream>
 #include <cuda_runtime.h>
