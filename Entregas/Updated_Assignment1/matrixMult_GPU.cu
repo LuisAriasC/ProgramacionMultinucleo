@@ -48,7 +48,8 @@ int main(int argc, char **argv){
   printf("Matrix size: nx %d ny %d\n", nx, ny);
 
   // malloc host memory
-  int *h_A, *h_B, *h_R, *gpu_R;
+  int *h_A, *h_B;
+  long *h_R, *gpu_R;
   h_A = (int *)malloc(nBytes);
   h_B = (int *)malloc(nBytes);
   h_R = (long *)malloc(lBytes);
