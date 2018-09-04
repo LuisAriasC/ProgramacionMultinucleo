@@ -6,9 +6,9 @@ __global__ void multMatrixOnGPU2d1d(int *MatA, int *MatB, long *MatC, int nx, in
   unsigned int iy = blockIdx.y;
   if(ix < nx && iy < ny){
     long sum = 0;
-    for (int i = 0; i < nx; i++) {
-      sum += MatA[iy * ny + i] * MatB[i * nx + ix];
+    for (int i = 0; i < ny; i++) {
+      sum += MatA[iy * nx + i] * MatB[i * ny + ix];
     }
-    MatC[iy * ny + ix] = sum;
+    MatC[iy * nx + ix] = sum;
   }
 }
