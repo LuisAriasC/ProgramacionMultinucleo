@@ -60,7 +60,6 @@ int main(int argc, char **argv){
   initialData(h_A, nxy);
   initialData(h_B, nxy);
 
-  int iterations = 100;
   printf("Calculating in CPU\n");
   float avTime = 0.0;
 
