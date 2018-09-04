@@ -34,7 +34,7 @@ void checkResult(long *hostRef, long *gpuRef, const int N){
         if (abs(hostRef[i] - gpuRef[i]) > epsilon)
         {
             match = 0;
-            printf("Matrix 1 %d Matrix 2 %d in %d\n", hostRef[i], gpuRef[i], i);
+            printf("Matrix 1 %ld Matrix 2 %ld in %d\n", hostRef[i], gpuRef[i], i);
             break;
         }
     }
