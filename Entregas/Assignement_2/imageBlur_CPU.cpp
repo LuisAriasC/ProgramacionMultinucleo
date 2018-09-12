@@ -114,7 +114,9 @@ void blur_CPU(const cv::Mat& input_Image, cv::Mat& output_Image, int blur_size){
 		green = 0;
 		red = 0;
 
-		for (int j = 0; j < M_input.rows; j++){
+		for (int j = 0; j < input_Image.rows; j++){
+
+/**/
 
       if ((i < margin) && (i > input_Image.cols - margin) && (j < margin) && (j > input_Image.rows - margin)) {
         input_index = j * colorWidthStep + (3 * i);
@@ -182,7 +184,7 @@ int main(int argc, char *argv[]){
 	cout << "Input image step: " << input.step << " rows: " << input.rows << " cols: " << input.cols << endl;
   */
 	// NO THREADS CPU TEST
-  
+
 	chrono::duration<float, std::milli> duration_ms = chrono::high_resolution_clock::duration::zero();
 	auto start =  chrono::high_resolution_clock::now();
 
