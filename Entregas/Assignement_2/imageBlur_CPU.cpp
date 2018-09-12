@@ -90,6 +90,8 @@ void blur_CPU(const cv::Mat& input_Image, cv::Mat& output_Image, int blur_size){
   int margin = floor(blur_size / 2.0);
   float multConstant = 1 / (blur_size * blur_size);
 
+  printf("Margin %d\n", margin );
+
 	size_t inputBytes = input_Image.step * input_Image.rows;
 	unsigned char *input, *output;
 	output = (unsigned char *) malloc(inputBytes * sizeof(unsigned char));
@@ -129,7 +131,7 @@ void blur_CPU(const cv::Mat& input_Image, cv::Mat& output_Image, int blur_size){
         red = input[input_index + 2];
       } else {
         input_index = 0;
-
+        printf("Fuera del margen\n");
         for (int bl_i = i - margin; bl_i <= i + margin; bl_i++) {
           for (int bl_j = j - margin; bl_j <= j + margin; bl_j++) {
             input_index = bl_j * colorWidthStep + (3 * bl_i);
