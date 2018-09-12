@@ -107,7 +107,7 @@ void blur_CPU(const cv::Mat& input_Image, cv::Mat& output_Image, int blur_size){
 
 	int input_index, output_index;
 
-	for (int i = 0; i < M_input.cols; i++){
+	for (int i = 0; i < input_Image.cols; i++){
 
     //Set bgr to 0
 		blue = 0;
@@ -160,7 +160,7 @@ int main(int argc, char *argv[]){
     blurMatrix_size = blurM_size;
   } else {
     inputImage = argv[1];
-    if (argv[2]%2 == 0) {
+    if (atoi(argv[2]) % 2 == 0) {
       blurMatrix_size = atoi(argv[2]);
     } else {
       blurMatrix_size = atoi(argv[2]) + 1;
@@ -182,6 +182,7 @@ int main(int argc, char *argv[]){
 	cout << "Input image step: " << input.step << " rows: " << input.rows << " cols: " << input.cols << endl;
   */
 	// NO THREADS CPU TEST
+  
 	chrono::duration<float, std::milli> duration_ms = chrono::high_resolution_clock::duration::zero();
 	auto start =  chrono::high_resolution_clock::now();
 
