@@ -120,6 +120,7 @@ void blur_CPU(const cv::Mat& input_Image, cv::Mat& output_Image, int blur_size){
 
 /**/
 
+      printf("%d\n", j);
       if ((i < margin) && (i > input_Image.cols - margin) && (j < margin) && (j > input_Image.rows - margin)) {
         input_index = j * colorWidthStep + (3 * i);
         blue = input[input_index];
