@@ -90,12 +90,12 @@ void blur_CPU(const cv::Mat& input_Image, cv::Mat& output_Image, int blur_size){
   int margin = floor(blur_size / 2.0);
   float multConstant = 1 / (blur_size * blur_size);
 
-  printf("Saca variantes\n");
-
 	size_t inputBytes = input_Image.step * input_Image.rows;
 	unsigned char *input, *output;
 	output = (unsigned char *) malloc(inputBytes * sizeof(unsigned char));
   input = (unsigned char *) malloc(inputBytes * sizeof(unsigned char));
+
+  printf("Malloc exitoso\n");
 
 	memcpy(input, input_Image.ptr(), inputBytes * sizeof(unsigned char));
 
