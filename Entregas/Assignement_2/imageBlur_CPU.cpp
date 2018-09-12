@@ -88,7 +88,7 @@ void blur_CPU(const cv::Mat& input_Image, cv::Mat& output_Image, int blur_size){
 
 	int colorWidthStep = static_cast<int>(input_Image.step);
   int margin = floor(blur_size / 2.0);
-  float multConstant = 1 / (blur_size * blur_size);
+  float multConstant =  (blur_size * blur_size);
 
   printf("Margin %d Mult constant %f\n", margin, multConstant );
 
