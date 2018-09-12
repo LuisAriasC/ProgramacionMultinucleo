@@ -90,7 +90,7 @@ void blur_CPU(const cv::Mat& input_Image, cv::Mat& output_Image, int blur_size){
   int margin = floor(blur_size / 2.0);
   float multConstant = 1 / (blur_size * blur_size);
 
-  printf("Margin %d\n", margin );
+  printf("Margin %d Mult constant %f\n", margin, multConstant );
 
 	size_t inputBytes = input_Image.step * input_Image.rows;
 	unsigned char *input, *output;
@@ -103,51 +103,45 @@ void blur_CPU(const cv::Mat& input_Image, cv::Mat& output_Image, int blur_size){
 	//const unsigned int marginSize = 2;
 
 	//Output pixels
-	float blue = 0;
-	float green = 0;
-	float red = 0;
+	float blue, green, red;
 
 	int input_index, output_index;
 
-	for (int i = 0; i < input_Image.cols; i++){
-
-    printf("%d\n", i);
-
-    //Set bgr to 0
+  for (int i = 0; i < input_Image.cols; i++){
 		blue = 0;
 		green = 0;
 		red = 0;
 
 		for (int j = 0; j < input_Image.rows; j++){
 
-/**/
+			if ((i >= margin) && (j >= margin) && (i < input_Image.cols - margin) && (j < input_Image.rows - margin)){
 
-      printf("%d\n", j);
-      if ((i < margin) && (i > input_Image.cols - margin) && (j < margin) && (j > input_Image.rows - margin)) {
-        printf("Dentro del margen\n");
-        input_index = j * colorWidthStep + (3 * i);
-        blue = input[input_index];
-        green = input[input_index + 1];
-        red = input[input_index + 2];
-      } else {
-        input_index = 0;
-        printf("Fuera del margen\n");
-        for (int bl_i = i - margin; bl_i <= i + margin; bl_i++) {
-          for (int bl_j = j - margin; bl_j <= j + margin; bl_j++) {
-            input_index = bl_j * colorWidthStep + (3 * bl_i);
-            blue += input[input_index];
-            green += input[input_index + 1];
-            red += input[input_index + 2];
-          }
-        }
-        blue = blue / multConstant;
-        green = green / multConstant;
-        red = red / multConstant;
-      }
-			output_index = j * colorWidthStep + (3 * i);
-			output[output_index] = static_cast<unsigned char>(blue);
-			output[output_index + 1] = static_cast<unsigned char>(green);
-			output[output_index + 2] = static_cast<unsigned char>(red);
+				input_index = 0;
+				//Average pixel color calculation
+				for (int m_i = i - margin; m_i <= i + margin; m_i++){
+
+					for (int m_j = j - margin; m_j <= j + margin; m_j++){
+
+						input_index = m_j * colorWidthStep + (3 * m_i);
+						blue += input[input_index];
+						out_green += input[input_index + 1];
+						out_red += input[input_index + 2];
+					}
+				}
+				blue *= multConstant;
+				green *= multConstant;
+				red *= multConstant;
+			}
+			else{
+				input_index = j * colorWidthStep + (3 * i);
+				blue = input[input_index];
+				out_green = input[input_index + 1];
+				out_red = input[input_index + 2];
+			}
+			outpu_index = j * colorWidthStep + (3 * i);
+			output[outp_index] = static_cast<unsigned char>(blue);
+			output[outpu_index+1] = static_cast<unsigned char>(green);
+			output[outp_index+2] = static_cast<unsigned char>(red);
 		}
 	}
 
