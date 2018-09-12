@@ -86,7 +86,7 @@ void OMP_blur_image(const cv::Mat& M_input, cv::Mat& M_output)
 
 void blur_CPU(const cv::Mat& input_Image, cv::Mat& output_Image, int blur_size){
 
-  printf("Entra a blut cpu\n", );
+  printf("Entra a blut cpu\n");
 
 	int colorWidthStep = static_cast<int>(input_Image.step);
   int margin = floor(blur_size / 2.0);
