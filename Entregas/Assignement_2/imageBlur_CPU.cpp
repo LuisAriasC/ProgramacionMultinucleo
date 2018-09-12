@@ -95,8 +95,6 @@ void blur_CPU(const cv::Mat& input_Image, cv::Mat& output_Image, int blur_size){
 	output = (unsigned char *) malloc(inputBytes * sizeof(unsigned char));
   input = (unsigned char *) malloc(inputBytes * sizeof(unsigned char));
 
-  printf("Malloc exitoso\n");
-
 	memcpy(input, input_Image.ptr(), inputBytes * sizeof(unsigned char));
 
 	//pixel margin for blur matrix
@@ -110,6 +108,8 @@ void blur_CPU(const cv::Mat& input_Image, cv::Mat& output_Image, int blur_size){
 	int input_index, output_index;
 
 	for (int i = 0; i < input_Image.cols; i++){
+
+    printf("%d\n", i);
 
     //Set bgr to 0
 		blue = 0;
