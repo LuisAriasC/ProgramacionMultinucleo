@@ -71,7 +71,7 @@ void OMP_blur_image(const cv::Mat& M_input, cv::Mat& M_output)
 				out_green = input[index + 1];
 				out_red = input[index + 2];
 			}
-      printf("%f %f %f\n",out_blue, out_green, out_red);
+      printf("%f i %f\n", out_blue, out_green );
 			out_index = j * colorWidthStep + (3 * i);
 			output[out_index] = static_cast<unsigned char>(out_blue);
 			output[out_index+1] = static_cast<unsigned char>(out_green);
