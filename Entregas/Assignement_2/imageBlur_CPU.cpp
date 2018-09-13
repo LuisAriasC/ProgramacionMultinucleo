@@ -63,6 +63,7 @@ void OMP_blur_image(const cv::Mat& M_input, cv::Mat& M_output)
 				out_blue /= 25;
 				out_green /= 25;
 				out_red /= 25;
+        printf("%f %f %f\n",out_blue, out_green, out_red);
 			}
 			else
 			{
