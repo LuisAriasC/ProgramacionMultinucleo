@@ -133,6 +133,9 @@ void blur_CPU(const cv::Mat& input_Image, cv::Mat& output_Image, int blur_size){
 				blue /= multConstant;
 				green /= multConstant;
 				red /= multConstant;
+        if (i%100 == 0) {
+          printf("Dividido %f %f %f\n", blue, green, red);
+        }
 			}
 			else{
 				input_index = j * colorWidthStep + (3 * i);
