@@ -15,7 +15,7 @@
 #include <opencv2/highgui/highgui.hpp>
 
 #define default_input_image "image.jpg"
-#define blurM_size 5
+#define blurM_size 3
 
  using namespace std;
 
