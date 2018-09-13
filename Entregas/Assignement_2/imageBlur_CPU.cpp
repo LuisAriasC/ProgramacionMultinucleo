@@ -15,7 +15,7 @@
 #include <opencv2/highgui/highgui.hpp>
 
 #define default_input_image "image.jpg"
-#define blurM_size 1
+#define blurM_size 5
 
  using namespace std;
 
@@ -138,7 +138,7 @@ void blur_CPU(const cv::Mat& input_Image, cv::Mat& output_Image, int blur_size){
 				green = input[input_index + 1];
 				red = input[input_index + 2];
 			}
-      if (blue < 1.0 && red < 1.0) {
+      if (blue < 5.0 && red < 5.0) {
         printf("%f %f %f\n", blue, green, red );
       }
 			output_index = j * colorWidthStep + (3 * i);
