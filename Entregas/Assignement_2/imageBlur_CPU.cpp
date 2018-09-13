@@ -108,19 +108,19 @@ void blur_CPU(const cv::Mat& input_Image, cv::Mat& output_Image, int blur_size){
 
 	int input_index, output_index;
 
-  for (int i = 0; i < input_Image.cols; i++){
+  for (int i = 0; i < input_Image.rows; i++){
 		blue = 0;
 		green = 0;
 		red = 0;
 
-		for (int j = 0; j < input_Image.rows; j++){
+		for (int j = 0; j < input_Image.cols; j++){
 
 			if ((i >= margin) && (j >= margin) && (i < input_Image.cols - margin) && (j < input_Image.rows - margin)){
 
 				input_index = 0;
 				//Average pixel color calculation
-				for (int m_i = i - margin; m_i <= i + margin; m_i++){
-					for (int m_j = j - margin; m_j <= j + margin; m_j++){
+				for (int m_i = i - margin; m_i < i + margin + 1; m_i++){
+					for (int m_j = j - margin; m_j < j + margin + 1; m_j++){
 
 						input_index = m_j * colorWidthStep + (3 * m_i);
 						blue += input[input_index];
