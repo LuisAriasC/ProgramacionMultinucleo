@@ -152,19 +152,24 @@ int main(int argc, char *argv[]){
 
   string inputImage;
   int blurMatrix_size;
+  int blurMatrix_size2;
 
 	if(argc < 2){
 		inputImage = default_input_image;
     blurMatrix_size = size1;
+    blurMatrix_size2 = size2;
   } else if (argc == 2 ){
     inputImage = argv[1];
     blurMatrix_size = size1;
+    blurMatrix_size2 = size2;
   } else {
     inputImage = argv[1];
     if (atoi(argv[2]) % 2 == 0) {
       blurMatrix_size = atoi(argv[2]);
+      blurMatrix_size2 = size2;
     } else {
       blurMatrix_size = atoi(argv[2]) + 1;
+      blurMatrix_size2 = size2;
     }
   }
 
@@ -181,12 +186,16 @@ int main(int argc, char *argv[]){
 
 	chrono::duration<float, std::milli> duration_ms = chrono::high_resolution_clock::duration::zero();
 	auto start =  chrono::high_resolution_clock::now();
-
 	blur_CPU(input, output, blurMatrix_size);
-
 	auto end =  chrono::high_resolution_clock::now();
 	duration_ms = end - start;
-	printf("Image blur elapsed %f ms in CPU\n", duration_ms.count());
+	printf("Image blur elapsed %f ms in CPU with a blur matrix of %dx%d\n", duration_ms.count(), blurMatrix_size, blurMatrix_size);
+
+  start =  chrono::high_resolution_clock::now();
+	blur_CPU(input, output, blurMatrix_size2);
+	end =  chrono::high_resolution_clock::now();
+	duration_ms = end - start;
+	printf("Image blur elapsed %f ms in CPU with a blur matrix of %dx%d\n", duration_ms.count(), blurMatrix_size2, blurMatrix_size2);
 
 	/* ********* DISPLAY IMAGES **********/
 	//Allow the windows to resize
