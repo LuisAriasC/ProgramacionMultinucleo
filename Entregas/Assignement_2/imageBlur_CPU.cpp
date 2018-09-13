@@ -7,7 +7,6 @@
 //g++ imageBlur_CPU.cpp `pkg-config --cflags --libs opencv`
 
 #include <iostream>
-#include <stdlib>
 #include <cstdio>
 #include <cmath>
 #include <string>
@@ -19,7 +18,7 @@
 #define size1 5
 #define size2 11
 
- using namespace std;
+using namespace std;
 
 void OMP_blur_image(const cv::Mat& M_input, cv::Mat& M_output)
 {
@@ -144,11 +143,9 @@ void blur_CPU(const cv::Mat& input_Image, cv::Mat& output_Image, int blur_size){
 	}
 
 	memcpy(output_Image.ptr(), output, inputBytes * sizeof(unsigned char));
-
-  string output = "output_" + to_string(blur_size) + "pixels.jpg"
-
+  
   //Write_image
-  cv::imwrite(output, output_Image);
+  cv::imwrite("output_" + to_string(blur_size) + "pixels.jpg", output_Image);
 }
 
 int main(int argc, char *argv[]){
