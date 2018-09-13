@@ -147,7 +147,7 @@ void blur_CPU(const cv::Mat& input_Image, cv::Mat& output_Image, int blur_size){
 
 	memcpy(output_Image.ptr(), output, inputBytes * sizeof(unsigned char));
 
-  cv::imwrite("output_cpu.jpg", output_Image);
+  cv::imwrite("output1.jpg", output_Image);
 }
 
 int main(int argc, char *argv[]){
