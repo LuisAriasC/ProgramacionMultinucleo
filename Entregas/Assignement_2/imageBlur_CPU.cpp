@@ -197,6 +197,7 @@ int main(int argc, char *argv[]){
 	duration_ms = end - start;
 	printf("Image blur elapsed %f ms in CPU with a blur matrix of %dx%d\n", duration_ms.count(), blurMatrix_size2, blurMatrix_size2);
 
+  printf("\n\n");
 	/* ********* DISPLAY IMAGES **********/
 	//Allow the windows to resize
 	//namedWindow("CPU INPUT", cv::WINDOW_NORMAL);
