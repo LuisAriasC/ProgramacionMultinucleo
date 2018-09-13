@@ -15,7 +15,7 @@
 #include <opencv2/highgui/highgui.hpp>
 
 #define default_input_image "input_image.jpeg"
-#define blurM_size 15
+#define blurM_size 5
 
  using namespace std;
 
@@ -152,7 +152,7 @@ void blur_CPU(const cv::Mat& input_Image, cv::Mat& output_Image, int blur_size){
 
 	memcpy(output_Image.ptr(), output, inputBytes * sizeof(unsigned char));
 
-  cv::imwrite("output2.jpg", output_Image);
+  cv::imwrite("output3.jpg", output_Image);
 }
 
 int main(int argc, char *argv[]){
