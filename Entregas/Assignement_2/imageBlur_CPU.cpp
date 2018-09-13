@@ -7,6 +7,7 @@
 //g++ imageBlur_CPU.cpp `pkg-config --cflags --libs opencv`
 
 #include <iostream>
+#include <stdlib>
 #include <cstdio>
 #include <cmath>
 #include <string>
