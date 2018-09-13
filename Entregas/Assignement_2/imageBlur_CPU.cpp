@@ -119,13 +119,15 @@ void blur_CPU(const cv::Mat& input_Image, cv::Mat& output_Image, int blur_size){
 				input_index = 0;
 				//Average pixel color calculation
 				for (int m_i = i - margin; m_i <= i + margin; m_i++){
-
 					for (int m_j = j - margin; m_j <= j + margin; m_j++){
 
 						input_index = m_j * colorWidthStep + (3 * m_i);
 						blue += input[input_index];
 						green += input[input_index + 1];
 						red += input[input_index + 2];
+            if (i%100 == 0) {
+              printf("%f %f %f\n", blue, green, red);
+            }
 					}
 				}
 				blue /= multConstant;
