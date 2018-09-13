@@ -128,9 +128,9 @@ void blur_CPU(const cv::Mat& input_Image, cv::Mat& output_Image, int blur_size){
 						red += input[input_index + 2];
 					}
 				}
-				blue *=  (1 / multConstant);
-				green *= (1 / multConstant);
-				red *= (1 / multConstant);
+				blue /= multConstant);
+				green /= multConstant);
+				red /= multConstant);
 			}
 			else{
 				input_index = j * colorWidthStep + (3 * i);
@@ -147,6 +147,7 @@ void blur_CPU(const cv::Mat& input_Image, cv::Mat& output_Image, int blur_size){
 
 	memcpy(output_Image.ptr(), output, inputBytes * sizeof(unsigned char));
 
+  cv::imwrite("output_cpu.jpg", output);
 }
 
 int main(int argc, char *argv[]){
@@ -193,8 +194,6 @@ int main(int argc, char *argv[]){
 	auto end =  chrono::high_resolution_clock::now();
 	duration_ms = end - start;
 	printf("Image blur elapsed %f ms in CPU\n", duration_ms.count());
-
-  cv::imwrite("output_cpu.jpg", output);
 
 	/* ********* DISPLAY IMAGES **********/
 	//Allow the windows to resize
