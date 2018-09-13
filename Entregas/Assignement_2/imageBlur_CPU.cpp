@@ -123,11 +123,14 @@ void blur_CPU(const cv::Mat& input_Image, cv::Mat& output_Image, int blur_size){
 					for (int m_j = j - margin; m_j <= j + margin; m_j++){
 
 						input_index = m_j * colorWidthStep + (3 * m_i);
-						blue += (input[input_index] / multConstant );
-						green += (input[input_index + 1] / multConstant);
-						red += (input[input_index + 2] / multConstant);
+						blue += input[input_index];
+						green += input[input_index + 1];
+						red += input[input_index + 2];
 					}
 				}
+				blue = blue / multConstant;
+				green = green / multConstant;
+				red = red / multConstant;
 			}
 			else{
 				input_index = j * colorWidthStep + (3 * i);
