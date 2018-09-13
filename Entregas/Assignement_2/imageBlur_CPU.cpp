@@ -40,6 +40,7 @@ void blur_OMP(const cv::Mat& input_Image, cv::Mat& output_Image, int blur_size){
 
 	int input_index, output_index;
 
+
   for (int i = 0; i < input_Image.cols; i++){
 		blue = 0;
 		green = 0;
@@ -51,7 +52,7 @@ void blur_OMP(const cv::Mat& input_Image, cv::Mat& output_Image, int blur_size){
 
 				input_index = 0;
         int cols, rows;
-				#pragma omp parallel for private(cols, rows) shared(input)
+				#pragma omp parallel for private(cols, rows) shared(input, output)
 				//Average pixel color calculation
 				for (int cols = i - margin; cols <= i + margin; cols++){
 					for (int rows = j - margin; rows <= j + margin; rows++){
@@ -229,28 +230,6 @@ int main(int argc, char *argv[]){
 
   printf("\n\n");
 
-	// OMP CPU TEST
-  /*
-	duration_ms = chrono::high_resolution_clock::duration::zero();
-	start =  chrono::high_resolution_clock::now();
-
-	OMP_blur_image(input, output);
-
-	end =  chrono::high_resolution_clock::now();
-	duration_ms = end - start;
-	printf("OMP image blurring elapsed %f ms\n\n", duration_ms.count());
-
-	//Allow the windows to resize
-	namedWindow("OMP INPUT", cv::WINDOW_NORMAL);
-	namedWindow("OMP OUTPUT", cv::WINDOW_NORMAL);
-
-	//Show the input and output
-	imshow("OMP INPUT", input);
-	imshow("OMP OUTPUT", output);
-
-	//Wait for key press
-	cv::waitKey();
-  */
 
 	return 0;
 }
