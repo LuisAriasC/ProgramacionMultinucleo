@@ -38,7 +38,7 @@ void blur_OMP(const cv::Mat& input_Image, cv::Mat& output_Image, int blur_size){
   //Pixeld for the output
 	float blue, green, red;
 
-	int input_index, output_index,
+	int input_index, output_index;
   int i, j, cols, rows;
 
 
