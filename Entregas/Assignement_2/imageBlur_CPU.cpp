@@ -15,7 +15,7 @@
 #include <opencv2/highgui/highgui.hpp>
 
 #define default_input_image "image.jpg"
-#define blurM_size 11
+#define blurM_size 5
 
  using namespace std;
 
@@ -63,7 +63,6 @@ void OMP_blur_image(const cv::Mat& M_input, cv::Mat& M_output)
 				out_blue /= 25;
 				out_green /= 25;
 				out_red /= 25;
-        printf("%f %f %f\n",out_blue, out_green, out_red);
 			}
 			else
 			{
@@ -72,6 +71,7 @@ void OMP_blur_image(const cv::Mat& M_input, cv::Mat& M_output)
 				out_green = input[index + 1];
 				out_red = input[index + 2];
 			}
+      printf("%f %f %f\n",out_blue, out_green, out_red);
 			out_index = j * colorWidthStep + (3 * i);
 			output[out_index] = static_cast<unsigned char>(out_blue);
 			output[out_index+1] = static_cast<unsigned char>(out_green);
