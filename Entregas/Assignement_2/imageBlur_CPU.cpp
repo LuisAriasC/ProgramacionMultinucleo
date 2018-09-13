@@ -143,7 +143,7 @@ void blur_CPU(const cv::Mat& input_Image, cv::Mat& output_Image, int blur_size){
 	}
 
 	memcpy(output_Image.ptr(), output, inputBytes * sizeof(unsigned char));
-  
+
   //Write_image
   cv::imwrite("output_" + to_string(blur_size) + "pixels.jpg", output_Image);
 }
@@ -155,10 +155,10 @@ int main(int argc, char *argv[]){
 
 	if(argc < 2){
 		inputImage = default_input_image;
-    blurMatrix_size = blurM_size;
+    blurMatrix_size = size1;
   } else if (argc == 2 ){
     inputImage = argv[1];
-    blurMatrix_size = blurM_size;
+    blurMatrix_size = size1;
   } else {
     inputImage = argv[1];
     if (atoi(argv[2]) % 2 == 0) {
