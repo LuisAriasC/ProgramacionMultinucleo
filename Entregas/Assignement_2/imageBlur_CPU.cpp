@@ -15,7 +15,8 @@
 #include <opencv2/highgui/highgui.hpp>
 
 #define default_input_image "image.jpg"
-#define blurM_size 5
+#define size1 5
+#define size2 11
 
  using namespace std;
 
@@ -91,19 +92,15 @@ void blur_CPU(const cv::Mat& input_Image, cv::Mat& output_Image, int blur_size){
   int margin = floor(blur_size / 2.0);
   float multConstant =  (blur_size * blur_size);
 
-  printf("Margin %d Mult constant %f\n", margin, multConstant );
+  printf("Margin %d -- Total pixels for blur matrix %f\n", margin, multConstant );
 
 	size_t inputBytes = input_Image.step * input_Image.rows;
 	unsigned char *input, *output;
 	output = (unsigned char *) malloc(inputBytes * sizeof(unsigned char));
   input = (unsigned char *) malloc(inputBytes * sizeof(unsigned char));
-
 	memcpy(input, input_Image.ptr(), inputBytes * sizeof(unsigned char));
 
-	//pixel margin for blur matrix
-	//const unsigned int marginSize = 2;
-
-	//Output pixels
+	//Pixeld for the output
 	float blue, green, red;
 
 	int input_index, output_index;
@@ -147,7 +144,10 @@ void blur_CPU(const cv::Mat& input_Image, cv::Mat& output_Image, int blur_size){
 
 	memcpy(output_Image.ptr(), output, inputBytes * sizeof(unsigned char));
 
-  cv::imwrite("output6.jpg", output_Image);
+  string output = "output_" + to_string(blur_size) + "pixels.jpg"
+
+  //Write_image
+  cv::imwrite(output, output_Image);
 }
 
 int main(int argc, char *argv[]){
@@ -180,11 +180,6 @@ int main(int argc, char *argv[]){
 	}
 
 	cv::Mat output(input.rows, input.cols, input.type());
-
-  /* Maybe eliminate
-	cout << "Input image step: " << input.step << " rows: " << input.rows << " cols: " << input.cols << endl;
-  */
-	// NO THREADS CPU TEST
 
 	chrono::duration<float, std::milli> duration_ms = chrono::high_resolution_clock::duration::zero();
 	auto start =  chrono::high_resolution_clock::now();
