@@ -82,7 +82,7 @@ void blur_OMP(const cv::Mat& input_Image, cv::Mat& output_Image, int blur_size){
 	memcpy(output_Image.ptr(), output, inputBytes * sizeof(unsigned char));
 
 	//Save resultant image
-	cv::imwrite("output_" + to_string(blir_size) + "pixelsOMP.jpg", output_Image);
+	cv::imwrite("output_" + to_string(blur_size) + "pixelsOMP.jpg", output_Image);
 }
 
 
