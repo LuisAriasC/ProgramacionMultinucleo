@@ -13,6 +13,7 @@
 #include <chrono>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include <omp.h>
 
 #define default_input_image "image.jpg"
 #define size1 5
@@ -20,72 +21,72 @@
 
 using namespace std;
 
-void OMP_blur_image(const cv::Mat& M_input, cv::Mat& M_output)
-{
-	int colorWidthStep = static_cast<int>(M_input.step);
-	size_t inputBytes = M_input.step*M_input.rows;
+void blur_OMP(const cv::Mat& input_Image, cv::Mat& output_Image, int blur_size){
+
+  int colorWidthStep = static_cast<int>(input_Image.step);
+  int margin = floor(blur_size / 2.0);
+  float multConstant =  (blur_size * blur_size);
+
+  printf("Margin %d -- Total pixels for blur matrix %f\n", margin, multConstant );
+
+	size_t inputBytes = input_Image.step * input_Image.rows;
 	unsigned char *input, *output;
-	output = input = (unsigned char *) malloc(inputBytes*sizeof(unsigned char));
+	output = (unsigned char *) malloc(inputBytes * sizeof(unsigned char));
+  input = (unsigned char *) malloc(inputBytes * sizeof(unsigned char));
+	memcpy(input, input_Image.ptr(), inputBytes * sizeof(unsigned char));
 
-	memcpy(input, M_input.ptr(), inputBytes*sizeof(unsigned char));
+  //Pixeld for the output
+	float blue, green, red;
 
-	//pixel margin for blur matrix
-	const unsigned int marginSize = 2;
+	int input_index, output_index;
 
-	//Output pixels
-	float out_blue = 0;
-	float out_green = 0;
-	float out_red = 0;
+  for (int i = 0; i < input_Image.cols; i++){
+		blue = 0;
+		green = 0;
+		red = 0;
 
-	int index, out_index;
-	for (int i = 0; i < M_input.cols; i++)
-	{
-		out_blue = 0;
-		out_green = 0;
-		out_red = 0;
-		for (int j = 0; j < M_input.rows; j++)
-		{
+		for (int j = 0; j < input_Image.rows; j++){
 
-			if ((i >= marginSize) && (j >= marginSize) && (i < M_input.cols - marginSize) && (j < M_input.rows - marginSize))
-			{
-				index = 0;
-				#pragma omp parallel for collapse(2) default(shared) reduction (+:out_blue, out_green, out_red)
+			if ((i >= margin) && (j >= margin) && (i < input_Image.cols - margin) && (j < input_Image.rows - margin)){
+
+				input_index = 0;
+        int cols, rows;
+				#pragma omp parallel for private(m_i, m_j) shared(input)
 				//Average pixel color calculation
-				for (int m_i = i - marginSize; m_i <= i + marginSize; m_i++)
+				for (int cols = i - marginSize; cols <= i + marginSize; cols++)
 				{
-					for (int m_j = j - marginSize; m_j <= j + marginSize; m_j++)
+					for (int rows = j - marginSize; rows <= j + marginSize; rows++)
 					{
-						index = m_j * colorWidthStep + (3 * m_i);
-						out_blue = out_blue + input[index];
-						out_green = out_green + input[index + 1];
-						out_red = out_red + input[index + 2];
+						index = rows * colorWidthStep + (3 * cols);
+						blue = blue + input[input_index];
+						green = green + input[input_index + 1];
+						red = red + input[input_index + 2];
 					}
 				}
-				out_blue /= 25;
-				out_green /= 25;
-				out_red /= 25;
+				blue = blue / multConstant;
+				green = green / multConstant;
+				red = red / multConstant;
+			} else {
+				input_index = j * colorWidthStep + (3 * i);
+				blue = input[input_index];
+				green = input[input_index + 1];
+				red = input[input_index + 2];
 			}
-			else
-			{
-				index = j * colorWidthStep + (3 * i);
-				out_blue = input[index];
-				out_green = input[index + 1];
-				out_red = input[index + 2];
-			}
-      printf("%f i %f\n", out_blue, out_green );
-			out_index = j * colorWidthStep + (3 * i);
-			output[out_index] = static_cast<unsigned char>(out_blue);
-			output[out_index+1] = static_cast<unsigned char>(out_green);
-			output[out_index+2] = static_cast<unsigned char>(out_red);
+			output_index = j * colorWidthStep + (3 * i);
+			output[output_index] = static_cast<unsigned char>(blue);
+			output[output_index + 1] = static_cast<unsigned char>(green);
+			output[output_index + 2] = static_cast<unsigned char>(red);
 		}
 	}
 
-	memcpy(M_output.ptr(), output, inputBytes*sizeof(unsigned char));
+	memcpy(output_Image.ptr(), output, inputBytes * sizeof(unsigned char));
 
 	//Save resultant image
-	cv::imwrite("OMP_Altered_Image.jpg", M_output);
+	cv::imwrite("output_" + to_string(blir_size) + "pixelsOMP.jpg", output_Image);
 }
 
+
+/*blur in cpu*/
 void blur_CPU(const cv::Mat& input_Image, cv::Mat& output_Image, int blur_size){
 
 	int colorWidthStep = static_cast<int>(input_Image.step);
@@ -115,11 +116,12 @@ void blur_CPU(const cv::Mat& input_Image, cv::Mat& output_Image, int blur_size){
 			if ((i >= margin) && (j >= margin) && (i < input_Image.cols - margin) && (j < input_Image.rows - margin)){
 
 				input_index = 0;
-				//Average pixel color calculation
-				for (int m_i = i - margin; m_i < i + margin + 1; m_i++){
-					for (int m_j = j - margin; m_j < j + margin + 1; m_j++){
 
-						input_index = m_j * colorWidthStep + (3 * m_i);
+				//Average pixel color calculation
+				for (int cols = i - margin; cols < i + margin + 1; cols++){
+					for (int rows = j - margin; rows < j + margin + 1; rows++){
+
+						input_index = rows * colorWidthStep + (3 * cols);
 						blue += input[input_index];
 						green += input[input_index + 1];
 						red += input[input_index + 2];
@@ -145,7 +147,7 @@ void blur_CPU(const cv::Mat& input_Image, cv::Mat& output_Image, int blur_size){
 	memcpy(output_Image.ptr(), output, inputBytes * sizeof(unsigned char));
 
   //Write_image
-  cv::imwrite("output_" + to_string(blur_size) + "pixels.jpg", output_Image);
+  cv::imwrite("output_" + to_string(blur_size) + "pixelsCPU.jpg", output_Image);
 }
 
 int main(int argc, char *argv[]){
@@ -184,6 +186,8 @@ int main(int argc, char *argv[]){
 
 	cv::Mat output(input.rows, input.cols, input.type());
 
+  printf("Test on CPU\n");
+
 	chrono::duration<float, std::milli> duration_ms = chrono::high_resolution_clock::duration::zero();
 	auto start =  chrono::high_resolution_clock::now();
 	blur_CPU(input, output, blurMatrix_size);
@@ -198,6 +202,7 @@ int main(int argc, char *argv[]){
 	printf("Image blur elapsed %f ms in CPU with a blur matrix of %dx%d\n", duration_ms.count(), blurMatrix_size2, blurMatrix_size2);
 
   printf("\n\n");
+
 	/* ********* DISPLAY IMAGES **********/
 	//Allow the windows to resize
 	//namedWindow("CPU INPUT", cv::WINDOW_NORMAL);
@@ -210,6 +215,21 @@ int main(int argc, char *argv[]){
 	//Wait for key press
 	//cv::waitKey();
 
+  printf("Test on OpenMP\n");
+
+  start =  chrono::high_resolution_clock::now();
+  blur_OMP(input, output, blurMatrix_size);
+  end =  chrono::high_resolution_clock::now();
+  duration_ms = end - start;
+  printf("Image blur elapsed %f ms in OpenMP with a blur matrix of %dx%d\n", duration_ms.count(), blurMatrix_size2, blurMatrix_size2);
+
+  start =  chrono::high_resolution_clock::now();
+  blur_OMP(input, output, blurMatrix_size2);
+  end =  chrono::high_resolution_clock::now();
+  duration_ms = end - start;
+  printf("Image blur elapsed %f ms in OpenMP with a blur matrix of %dx%d\n", duration_ms.count(), blurMatrix_size2, blurMatrix_size2);
+
+  printf("\n\n");
 
 	// OMP CPU TEST
   /*
