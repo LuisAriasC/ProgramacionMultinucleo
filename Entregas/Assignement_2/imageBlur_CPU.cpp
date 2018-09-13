@@ -51,11 +51,11 @@ void blur_OMP(const cv::Mat& input_Image, cv::Mat& output_Image, int blur_size){
 
 				input_index = 0;
         int cols, rows;
-				#pragma omp parallel for private(m_i, m_j) shared(input)
+				#pragma omp parallel for private(cols, rows) shared(input)
 				//Average pixel color calculation
-				for (int cols = i - marginSize; cols <= i + marginSize; cols++)
+				for (int cols = i - margin; cols <= i + margin; cols++)
 				{
-					for (int rows = j - marginSize; rows <= j + marginSize; rows++)
+					for (int rows = j - margin; rows <= j + margin; rows++)
 					{
 						index = rows * colorWidthStep + (3 * cols);
 						blue = blue + input[input_index];
