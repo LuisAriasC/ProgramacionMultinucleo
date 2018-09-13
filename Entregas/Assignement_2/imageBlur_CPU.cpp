@@ -138,7 +138,9 @@ void blur_CPU(const cv::Mat& input_Image, cv::Mat& output_Image, int blur_size){
 				green = input[input_index + 1];
 				red = input[input_index + 2];
 			}
-      printf("%f %f %f\n", blue, green, red );
+      if (blue < 1.0 && red < 1.0) {
+        printf("%f %f %f\n", blue, green, red );
+      }
 			output_index = j * colorWidthStep + (3 * i);
 			output[output_index] = static_cast<unsigned char>(blue);
 			output[output_index+1] = static_cast<unsigned char>(green);
