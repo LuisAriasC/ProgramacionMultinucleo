@@ -41,7 +41,7 @@ __global__ void blur_kernel(unsigned char* input_Image, unsigned char* output_Im
 		float red = 0;
 
 		//If pixel is inside the margins, blur it
-		if ((xIndex >= marginSize) && (xIndex < width - marginSize) && (yIndex >= marginSize) && (yIndex < height - marginSize)) {
+		if ((xIndex >= margin) && (xIndex < width - margin) && (yIndex >= margin) && (yIndex < height - margin)) {
 
 			int index = 0;
 
@@ -61,8 +61,8 @@ __global__ void blur_kernel(unsigned char* input_Image, unsigned char* output_Im
 			//Location of colored input pixel
 			int input_index = yIndex * colorWidthStep + (3 * xIndex);
 			blue = input_Image[input_index];
-			out_green = input_Image[input_index + 1];
-			out_red = input_Image[input_index + 2];
+			green = input_Image[input_index + 1];
+			red = input_Image[input_index + 2];
 		}
 		output_Image[output_index] = static_cast<unsigned char>(blue);
 		output_Image[output_index + 1] = static_cast<unsigned char>(green);
@@ -111,7 +111,7 @@ void blur_GPU(const cv::Mat& input, cv::Mat& output, int blurMatrix_size){
 	// Copy back data from destination device meory to OpenCV output image
 	SAFE_CALL(cudaMemcpy(output.ptr(), d_output, outputBytes, cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
 
-	cv::imwrite("output_gpu.jpg", output);
+	cv::imwrite("output" + to_string(blurMatrix_size) + "_gpu.jpg", output);
 
 	// Free the device memory
 	SAFE_CALL(cudaFree(d_input), "CUDA Free Failed");
