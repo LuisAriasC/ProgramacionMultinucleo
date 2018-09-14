@@ -7,9 +7,6 @@
   Compile line: g++ -o image_Blur_CPU imageBlur_CPU.cpp `pkg-config --cflags --libs opencv` -std=c++11 -fopenmp
  */
 
-/*
-g++ imageBlur_CPU.cpp `pkg-config --cflags --libs opencv` -std=c++11 -fopenmp
-*/
 #include <iostream>
 #include <cstdio>
 #include <cmath>

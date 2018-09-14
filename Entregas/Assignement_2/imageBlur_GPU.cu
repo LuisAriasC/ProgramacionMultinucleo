@@ -13,59 +13,62 @@
 #include "common.h"
 #include <cuda_runtime.h>
 
-#define default_input_image "input_image.jpg"
-#define blurM_size 5
+#define default_input_image "image.jpg"
+#define size1 5
+#define size2 11
 
 using namespace std;
 
-__global__ void blur_kernel(unsigned char* input, unsigned char* output, int width, int height, int colorWidthStep, int bM_size){
+__global__ void blur_kernel(unsigned char* input_Image, unsigned char* output_Image, int width, int height, int colorWidthStep, int bM_size){
 
   //pixel margin for blur matrix
-	const unsigned int marginSize = 2;
   const int margin = floor(bM_size / 2.0);
-  const float multConstant = 1 / (bM_size * bM_size);
+  const float multConstant = bM_size * bM_size;
 
 	// 2D Index of current thread
 	const int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
 	const int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
 
 	// Only valid threads perform memory I/O
-	if ((xIndex < width) && (yIndex < height)){
-
+	if ((xIndex < width) && (yIndex < height)) {
 		//Location of colored output pixel
-		const int outputTid = yIndex * colorWidthStep + (3 * xIndex);
 
-		//Pixel init in every position
+		int output_index = yIndex * colorWidthStep + (3 * xIndex);
+
+		//Output pixels
 		float blue = 0;
 		float green = 0;
 		float red = 0;
 
-    //Indexes are within the margin scope
-    if ((xIndex < margin) && (xIndex > width - margin) && (yIndex < margin) && (yIndex > height - margin)) {
-      int inputTid = yIndex * colorWidthStep + (3 * xIndex);
-      blue = input[inputTid];
-      green = input[inputTid + 1];
-      red = input[inputTid + 2];
-    }
-    //Indexes are in the scope of the image, out of the margin
-    else {
-      int outputIndex = 0;
-      for (int i = yIndex - margin; i < yIndex + margin - 1; i++) {
-        for (int j = xIndex - margin; j < xIndex + margin - 1; j++) {
-          index = i * colorWidthStep + (3 * j);
-          blue += input[index];
-          green += input[index + 1];
-          red += input[index + 2];
-        }
-      }
-      blue = blue / multConstant;
-      green = green / multConstant;
-      red = red / multConstant;
-    }
-		output[outputTid] = static_cast<unsigned char>(blue);
-		output[outputTid+1] = static_cast<unsigned char>(green);
-		output[outputTid+2] = static_cast<unsigned char>(red);
+		//If pixel is inside the margins, blur it
+		if ((xIndex >= marginSize) && (xIndex < width - marginSize) && (yIndex >= marginSize) && (yIndex < height - marginSize)) {
+
+			int index = 0;
+
+			//Average pixel color calculation (blurring)
+			for (int i = xIndex - margin; i < xIndex + margin + 1; i++) {
+				for (int j = yIndex - margin; j < yIndex + margin + 1; j++) {
+					index = j * colorWidthStep + (3 * i);
+					blue += input_Image[index];
+					green += input_Image[index + 1];
+					red += input_Image[index + 2];
+				}
+			}
+			blue = blue / multConstant;
+			green = green / multConstant;
+			red = red / multConstant;
+		} else {
+			//Location of colored input pixel
+			int input_index = yIndex * colorWidthStep + (3 * xIndex);
+			blue = input_Image[input_index];
+			out_green = input_Image[input_index + 1];
+			out_red = input_Image[input_index + 2];
+		}
+		output_Image[output_index] = static_cast<unsigned char>(blue);
+		output_Image[output_index + 1] = static_cast<unsigned char>(green);
+		output_Image[output_index + 2] = static_cast<unsigned char>(red);
 	}
+
 }
 
 void blur_GPU(const cv::Mat& input, cv::Mat& output, int blurMatrix_size){
@@ -100,13 +103,15 @@ void blur_GPU(const cv::Mat& input, cv::Mat& output, int blurMatrix_size){
 
 	auto end_gpu =  chrono::high_resolution_clock::now();
 	duration_ms = end_gpu - start_gpu;
-	printf("Image blur elapsed %f ms in GPU\n", duration_ms.count());
+	printf("Image blur elapsed %f ms in GPU with a blur matrix of %dx%d\n", duration_ms.count(), blurMatrix_size, blurMatrix_size);
 
 	// Synchronize to check for any kernel launch errors
 	SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
 
 	// Copy back data from destination device meory to OpenCV output image
 	SAFE_CALL(cudaMemcpy(output.ptr(), d_output, outputBytes, cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
+
+	cv::imwrite("output_gpu.jpg", output);
 
 	// Free the device memory
 	SAFE_CALL(cudaFree(d_input), "CUDA Free Failed");
@@ -117,19 +122,24 @@ int main(int argc, char *argv[]){
 
 	string inputImage;
   int blurMatrix_size;
+	int blurMatrix_size2;
 
 	if(argc < 2){
 		inputImage = default_input_image;
-    blurMatrix_size = blurM_size;
+    blurMatrix_size = size1;
+    blurMatrix_size2 = size2;
   } else if (argc == 2 ){
     inputImage = argv[1];
-    blurMatrix_size = blurM_size;
+    blurMatrix_size = size1;
+    blurMatrix_size2 = size2;
   } else {
     inputImage = argv[1];
-    if (argv[2]%2 == 0) {
+    if (atoi(argv[2]) % 2 == 0) {
       blurMatrix_size = atoi(argv[2]);
+      blurMatrix_size2 = size2;
     } else {
       blurMatrix_size = atoi(argv[2]) + 1;
+      blurMatrix_size2 = size2;
     }
   }
 
@@ -145,11 +155,10 @@ int main(int argc, char *argv[]){
 
 	cv::Mat output(input.rows, input.cols, input.type());
 
+
+	printf("Test on GPU\n");
 	//Call the wrapper function
 	blur_GPU(input, output, blurMatrix_size);
-
-  /* Save blurred image */
-  cv::imwrite("output_gpu.jpg", output);
 
 	/* Display images */
 	//Allow the windows to resize
