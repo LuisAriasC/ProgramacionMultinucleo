@@ -2,8 +2,6 @@
   Assignment 2 - Image Blurring
   Author: Luis Carlos Arias Camacho
   Student ID: A01364808
-
-
   Compile line: g++ -o image_Blur_CPU imageBlur_CPU.cpp `pkg-config --cflags --libs opencv` -std=c++11 -fopenmp
  */
 
@@ -204,18 +202,6 @@ int main(int argc, char *argv[]){
 
   printf("\n\n");
 
-	/* ********* DISPLAY IMAGES **********/
-	//Allow the windows to resize
-	//namedWindow("CPU INPUT", cv::WINDOW_NORMAL);
-	//namedWindow("CPU OUTPUT", cv::WINDOW_NORMAL);
-
-	//Show the input and output
-	//imshow("CPU INPUT", input);
-	//imshow("CPU OUTPUT", output);
-
-	//Wait for key press
-	//cv::waitKey();
-
   printf("Test on OpenMP\n");
 
   start =  chrono::high_resolution_clock::now();
@@ -232,6 +218,17 @@ int main(int argc, char *argv[]){
 
   printf("\n\n");
 
+  //Open windows to display images
+	//Allow the windows to resize
+	//namedWindow("CPU INPUT", cv::WINDOW_NORMAL);
+	//namedWindow("CPU OUTPUT", cv::WINDOW_NORMAL);
+
+	//Show the input and output
+	//imshow("CPU INPUT", input);
+	//imshow("CPU OUTPUT", output);
+
+	//Wait for key press
+	//cv::waitKey();
 
 	return 0;
 }

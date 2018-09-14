@@ -29,9 +29,8 @@ __global__ void blur_kernel(unsigned char* input_Image, unsigned char* output_Im
 	const int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
 	const int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
 
-	// Only valid threads perform memory I/O
+	// Only pixels out of margin
 	if ((xIndex < width) && (yIndex < height)) {
-		//Location of colored output pixel
 
 		int output_index = yIndex * colorWidthStep + (3 * xIndex);
 
@@ -40,12 +39,12 @@ __global__ void blur_kernel(unsigned char* input_Image, unsigned char* output_Im
 		float green = 0;
 		float red = 0;
 
-		//If pixel is inside the margins, blur it
+		//Pixels inside blur section
 		if ((xIndex >= margin) && (xIndex < width - margin) && (yIndex >= margin) && (yIndex < height - margin)) {
 
 			int index = 0;
 
-			//Average pixel color calculation (blurring)
+			//Calculate blur average
 			for (int i = xIndex - margin; i < xIndex + margin + 1; i++) {
 				for (int j = yIndex - margin; j < yIndex + margin + 1; j++) {
 					index = j * colorWidthStep + (3 * i);
@@ -58,7 +57,7 @@ __global__ void blur_kernel(unsigned char* input_Image, unsigned char* output_Im
 			green = green / multConstant;
 			red = red / multConstant;
 		} else {
-			//Location of colored input pixel
+			//If pixels are in margin range
 			int input_index = yIndex * colorWidthStep + (3 * xIndex);
 			blue = input_Image[input_index];
 			green = input_Image[input_index + 1];
@@ -111,6 +110,7 @@ void blur_GPU(const cv::Mat& input, cv::Mat& output, int blurMatrix_size){
 	// Copy back data from destination device meory to OpenCV output image
 	SAFE_CALL(cudaMemcpy(output.ptr(), d_output, outputBytes, cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
 
+	//Save image
 	cv::imwrite("output" + to_string(blurMatrix_size) + "_gpu.jpg", output);
 
 	// Free the device memory
@@ -159,11 +159,10 @@ int main(int argc, char *argv[]){
 	printf("Test on GPU\n");
 	//Call the wrapper function
 	blur_GPU(input, output, blurMatrix_size);
+	blur_GPU(input, output, blurMatrix_size2);
 
-	/* Display images */
-	//Allow the windows to resize
 
-  /********* DESCOMENTAR ***************/
+  //Open windows to display images
 	//namedWindow("Input", cv::WINDOW_NORMAL);
 	//namedWindow("Output", cv::WINDOW_NORMAL);
 
