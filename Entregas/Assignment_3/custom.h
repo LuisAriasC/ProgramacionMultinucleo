@@ -14,7 +14,7 @@ void printMatrix(int *mat, const int nx, const int ny){
 }
 
 /*Initialize data in a matrix*/
-void initialData(int *ip, const int size){
+void initialData(float *ip, const int size){
     int i;
     for(i = 0; i < size; i++)
         ip[i] = (rand() / (float)RAND_MAX * 10.0f);
