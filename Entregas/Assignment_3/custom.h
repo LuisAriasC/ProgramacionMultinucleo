@@ -2,7 +2,7 @@
 #include <cstdio>
 
 /*Print the matrix*/
-void printMatrix(int *mat, const int nx, const int ny){
+void printMatrix(float *mat, const int nx, const int ny){
   for (int iy = 0; iy < ny; iy++) {
     for (int ix = 0; ix < nx; ix++)
 			printf("%d ", mat[ix] );
