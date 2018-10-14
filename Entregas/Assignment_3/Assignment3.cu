@@ -17,17 +17,7 @@ using namespace std;
 //Tilling matrix size
 #define tSize 8
 
-
-//Funcion de llenado de la matriz en tre 0 y 10 obtenida de la primera tarea
-void fillMat(float * ip, const int size) {
-  int i;
-  for(i = 0; i < size; i++) {
-    ip[i] = (rand() / (float)RAND_MAX * 10.0f);
-  }
-}
-
-__global__ void multMatrixOnGPU2D(float *MatA, float *MatB, float *MatC, int nx, int ny)
-{
+__global__ void multMatrixOnGPU2D(float *MatA, float *MatB, float *MatC, int nx, int ny){
   unsigned int ix = threadIdx.x + blockIdx.x * blockDim.x;
   unsigned int iy = threadIdx.y + blockIdx.y * blockDim.y;
   if (ix < nx && iy < ny) {
@@ -64,11 +54,6 @@ __global__ void multMatrixTilled(float *A, float *B, float *C, int nx, int ny) {
     if((i * tSize + threadIdx.y) < ny && (ix < nx)) {
       matTempB[threadIdx.y][threadIdx.x] = B[(i*tSize+threadIdx.y) * nx + ix];
     }
-    /*//__syncthreads(); command is a block level synchronization barrier. That means it is safe to be used when all threads in a
-    //block reach the barrier. It is also possible to use __syncthreads() in conditional code but only when all
-    //threads evaluate identically such code otherwise
-    //the execution is likely to hang or produce unintended side effects*/
-
     __syncthreads(); //Tenemos que utilizar syncthreads despues de modificar las matrices en threadIdx
     for(int j = 0; j < tSize; j++) {
       sum += matTempA[threadIdx.y][j] * matTempB[j][threadIdx.x];
@@ -85,37 +70,11 @@ void multMatrixOnHost(float *A, float *B, float *C, const int nx, const int ny) 
   for(int i = 0; i < ny; i++) {
     for(int j = 0; j < nx; j++) {
       for(int k = 0; k < ny; k++) {
-        //Operacion para hacer la regla del karatzo fila por culumna
         C[i * nx + j] += (A[i * nx + k] * B[k + nx * j]);
       }
     }
   }
 }
-
-//Funcion que checa el resultado el cual ya teniamos de la primera tarea
-void checkResult(float *h_R, float *gpu_R, const int N)
-{
-  double epsilon = 1.0E-8;
-  bool match = 1;
-
-  for (int i = 0; i < N*N; i++){
-    if (fabs(h_R[i] - gpu_R[i]) > epsilon){
-      match = 0;
-      printf("host %f gpu %f\n", h_R[i], gpu_R[i]);
-      break;
-    }
-  }
-  if (match)
-    printf("YES\n\n");
-  else
-    printf("No\n\n");
-}
-
-
-
-
-
-
 
 int main(int argc, char **argv){
 
@@ -142,8 +101,8 @@ int main(int argc, char **argv){
     gpu_R = (float *)malloc(nBytes);
 
     // initialize data at host side
-    fillMat(h_A, nxy);
-    fillMat(h_B, nxy);
+    initialData(h_A, nxy);
+    initialData(h_B, nxy);
 
     memset(h_R, 0, nBytes);
     memset(gpu_R, 0, nBytes);

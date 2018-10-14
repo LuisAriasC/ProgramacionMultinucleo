@@ -17,10 +17,7 @@ void printMatrix(int *mat, const int nx, const int ny){
 void initialData(int *ip, const int size){
     int i;
     for(i = 0; i < size; i++)
-        //ip[i] = i * 2;
-        /*Set a random integer between 1 and 10*/
-        ip[i] = (int)(rand() % 10) + 1;
-    return;
+        ip[i] = (rand() / (float)RAND_MAX * 10.0f);
 }
 
 /*Chech if two matrix are equal*/
