@@ -41,28 +41,28 @@ __global__ void multMatrixOnGPU2D(float *MatA, float *MatB, float *MatC, int nx,
 __global__ void multMatrixTilled(float *A, float *B, float *C, int nx, int ny) {
   float sum = 0;
   //Algunas partes del codigo fueron obtenidas de los demos vistos en clase
-  unsigned int ix = threadIdx.x + blockIdx.x * DIM;
-  unsigned int iy = threadIdx.y + blockIdx.y * DIM;
+  unsigned int ix = threadIdx.x + blockIdx.x * tSize;
+  unsigned int iy = threadIdx.y + blockIdx.y * tSize;
 
-  __shared__ float matTempA[DIM][DIM];
-  __shared__ float matTempB[DIM][DIM];
+  __shared__ float matTempA[tSize][tSize];
+  __shared__ float matTempB[tSize][tSize];
 
   //Llenamos las matrices shared y iniciado de 0
-  for(int i = 0; i < DIM; i ++) {
-    for(int j = 0; j < DIM; j++) {
+  for(int i = 0; i < tSize; i ++) {
+    for(int j = 0; j < tSize; j++) {
       matTempA[i][j] = 0;
       matTempB[i][j] = 0;
     }
   }
 
   //vamos a traves de todos los tiles
-  for(int i = (DIM + nx - 1)/DIM; i >= 0; i--) {
-    if((i * DIM + threadIdx.x) < nx && (iy < ny)) {
-      matTempA[threadIdx.y][threadIdx.x] = A[(iy*ny) + (i*DIM+threadIdx.x)];
+  for(int i = (tSize + nx - 1)/tSize; i >= 0; i--) {
+    if((i * tSize + threadIdx.x) < nx && (iy < ny)) {
+      matTempA[threadIdx.y][threadIdx.x] = A[(iy*ny) + (i*tSize+threadIdx.x)];
     }
 
-    if((i * DIM + threadIdx.y) < ny && (ix < nx)) {
-      matTempB[threadIdx.y][threadIdx.x] = B[(i*DIM+threadIdx.y) * nx + ix];
+    if((i * tSize + threadIdx.y) < ny && (ix < nx)) {
+      matTempB[threadIdx.y][threadIdx.x] = B[(i*tSize+threadIdx.y) * nx + ix];
     }
     /*//__syncthreads(); command is a block level synchronization barrier. That means it is safe to be used when all threads in a
     //block reach the barrier. It is also possible to use __syncthreads() in conditional code but only when all
@@ -70,7 +70,7 @@ __global__ void multMatrixTilled(float *A, float *B, float *C, int nx, int ny) {
     //the execution is likely to hang or produce unintended side effects*/
 
     __syncthreads(); //Tenemos que utilizar syncthreads despues de modificar las matrices en threadIdx
-    for(int j = 0; j < DIM; j++) {
+    for(int j = 0; j < tSize; j++) {
       sum += matTempA[threadIdx.y][j] * matTempB[j][threadIdx.x];
     }
     __syncthreads();
