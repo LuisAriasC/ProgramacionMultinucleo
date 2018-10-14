@@ -195,8 +195,6 @@ int main(int argc, char **argv){
     SAFE_CALL(cudaDeviceSynchronize(), "Error executing kernel");
     end_cpu =  chrono::high_resolution_clock::now();
     duration_ms = end_cpu - start_cpu;
-    timeAverage += duration_ms.count();
-    performanceTime = timeAverage;
     printf("Matrix multiplication on GPU with a Tiling Matrix of %dx%d elapsed: %d ms\n", tSize, tSize, duration_ms.count());
 
     // SAFE_CALL kernel error
