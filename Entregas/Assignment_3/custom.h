@@ -21,7 +21,7 @@ void initialData(float *ip, const int size){
 }
 
 /*Chech if two matrix are equal*/
-void checkResult(int *hostRef, int *gpuRef, const int N){
+void checkResult(float *hostRef, float *gpuRef, const int N){
 
     double epsilon = 1.0E-8;
     bool match = 1;
