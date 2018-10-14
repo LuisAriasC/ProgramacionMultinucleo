@@ -220,15 +220,15 @@ int main(int argc, char *argv[]){
 
   //Open windows to display images
 	//Allow the windows to resize
-	//namedWindow("CPU INPUT", cv::WINDOW_NORMAL);
-	//namedWindow("CPU OUTPUT", cv::WINDOW_NORMAL);
+	namedWindow("CPU INPUT", cv::WINDOW_NORMAL);
+	namedWindow("CPU OUTPUT", cv::WINDOW_NORMAL);
 
 	//Show the input and output
-	//imshow("CPU INPUT", input);
-	//imshow("CPU OUTPUT", output);
+	imshow("CPU INPUT", input);
+	imshow("CPU OUTPUT", output);
 
 	//Wait for key press
-	//cv::waitKey();
+	cv::waitKey();
 
 	return 0;
 }

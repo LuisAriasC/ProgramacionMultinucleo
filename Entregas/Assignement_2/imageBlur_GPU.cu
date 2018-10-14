@@ -163,15 +163,15 @@ int main(int argc, char *argv[]){
 
 
   //Open windows to display images
-	//namedWindow("Input", cv::WINDOW_NORMAL);
-	//namedWindow("Output", cv::WINDOW_NORMAL);
+	namedWindow("Input", cv::WINDOW_NORMAL);
+	namedWindow("Output", cv::WINDOW_NORMAL);
 
 	//Show the input and output
-	//imshow("Input", input);
-	//imshow("Output", output);
+	imshow("Input", input);
+	imshow("Output", output);
 
 	//Wait for key press
-	//cv::waitKey();
+	cv::waitKey();
 
 	return 0;
 }
