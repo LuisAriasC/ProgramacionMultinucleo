@@ -67,13 +67,10 @@ __global__ void multMatrixTilled(float *A, float *B, float *C, int nx, int ny) {
 
 //Funcion obtenida de la primera matriz
 void multMatrixOnHost(float *A, float *B, float *C, const int nx, const int ny) {
-  for(int i = 0; i < ny; i++) {
-    for(int j = 0; j < nx; j++) {
-      for(int k = 0; k < ny; k++) {
+  for(int i = 0; i < ny; i++)
+    for(int j = 0; j < nx; j++)
+      for(int k = 0; k < ny; k++)
         C[i * nx + j] += (A[i * nx + k] * B[k + nx * j]);
-      }
-    }
-  }
 }
 
 int main(int argc, char **argv){
@@ -169,6 +166,11 @@ int main(int argc, char **argv){
     SAFE_CALL(cudaFree(d_MatA), "Error freeing memory");
     SAFE_CALL(cudaFree(d_MatB), "Error freeing memory");
     SAFE_CALL(cudaFree(d_MatC), "Error freeing memory");
+
+
+    printMatrix( h_R, mSize, mSize);
+    printf("\n\n\n");
+    printMatrix( gpu_R, mSize, mSize);
 
     // free host memory
     free(h_A);
