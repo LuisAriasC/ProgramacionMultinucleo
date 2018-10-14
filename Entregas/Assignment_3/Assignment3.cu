@@ -177,7 +177,7 @@ int main(int argc, char **argv){
     SAFE_CALL(cudaDeviceSynchronize(), "Error executing kernel");
     end_cpu =  chrono::high_resolution_clock::now();
     duration_ms = end_cpu - start_cpu;
-    printf("Matrix multiplication on GPU elapsed: %d ms\n", duration_ms.count());
+    printf("Matrix multiplication on GPU elapsed: %f ms\n", duration_ms.count());
 
     // SAFE_CALL kernel error
     SAFE_CALL(cudaGetLastError(), "Error with last error");
@@ -195,7 +195,7 @@ int main(int argc, char **argv){
     SAFE_CALL(cudaDeviceSynchronize(), "Error executing kernel");
     end_cpu =  chrono::high_resolution_clock::now();
     duration_ms = end_cpu - start_cpu;
-    printf("Matrix multiplication on GPU with a Tiling Matrix of %dx%d elapsed: %d ms\n", tSize, tSize, duration_ms.count());
+    printf("Matrix multiplication on GPU with a Tiling Matrix of %dx%d elapsed: %f ms\n", tSize, tSize, duration_ms.count());
 
     // SAFE_CALL kernel error
     SAFE_CALL(cudaGetLastError(), "Error with last error");
