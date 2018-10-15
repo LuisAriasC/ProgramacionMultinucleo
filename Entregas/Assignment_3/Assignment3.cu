@@ -13,45 +13,33 @@ using namespace std;
 
 
 //Funcion de llenado de la matriz en tre 0 y 10 obtenida de la primera tarea
-void fillMat(float * ip, const int size) {
+void fillMat(long * ip, const int size) {
   int i;
   for(i = 0; i < size; i++) {
-    ip[i] = (rand() / (float)RAND_MAX * 10.0f);
+    ip[i] = (rand() / (long)RAND_MAX * 10.0f);
   }
 }
 
-/*
-__global__ void matrixMultOnHostGPU(int *a, int *b, int *c) {
- int k, sum = 0;
- int col = threadIdx.x + blockDim.x * blockIdx.x;
- int fil = threadIdx.y + blockDim.y * blockIdx.y;
- if (col < N && fil < N) {
-  for (k = 0; k < N; k++) {
-   sum += a[fil * N + k] * b[k * N + col];
-  }
-  c[fil * N + col] = sum;
- }
-}*/
-__global__ void multMatrixOnGPU2D(float *MatA, float *MatB, float *MatC, int nx, int ny)
-{
-  unsigned int ix = threadIdx.x + blockIdx.x * blockDim.x;
-  unsigned int iy = threadIdx.y + blockIdx.y * blockDim.y;
-  if (ix < nx && iy < ny) {
-    for(int i = 0; i < ny; i++) {
-      MatC[ix*ny+iy] += MatA[ix*ny+i] * MatB[i*ny+iy];
+__global__ void multMatrixOnGPU2D(long *matA, long *matB, long *matC, const int n) {
+    unsigned int ix = threadIdx.x + blockIdx.x * blockDim.x;
+    unsigned int iy = threadIdx.y + blockIdx.y * blockDim.y;
+
+    if (ix < n && iy < n) {
+        for(int k=0; k<n; k++) {
+            matC[iy*n+ix] += matA[iy*n+k] * matB[k*n+ix];
+        }
     }
-  }
 }
 
 //Funcion de matrix mult con tiles
-__global__ void multMatrixOnTiles(float *A, float *B, float *C, int nx, int ny) {
-  float sum = 0;
+__global__ void multMatrixOnTiles(long *A, long *B, long *C, int nx, int ny) {
+  long sum = 0;
   //Algunas partes del codigo fueron obtenidas de los demos vistos en clase
   unsigned int ix = threadIdx.x + blockIdx.x * DIM;
   unsigned int iy = threadIdx.y + blockIdx.y * DIM;
 
-  __shared__ float matTempA[DIM][DIM];
-  __shared__ float matTempB[DIM][DIM];
+  __shared__ long matTempA[DIM][DIM];
+  __shared__ long matTempB[DIM][DIM];
 
   //Llenamos las matrices shared y iniciado de 0
   for(int i = 0; i < DIM; i ++) {
@@ -87,7 +75,7 @@ __global__ void multMatrixOnTiles(float *A, float *B, float *C, int nx, int ny) 
 }
 
 //Funcion obtenida de la primera matriz
-void multMat(float *A, float *B, float *C, const int nx, const int ny) {
+void multMat(long *A, long *B, long *C, const int nx, const int ny) {
   for(int i = 0; i < ny; i++) {
     for(int j = 0; j < nx; j++) {
       for(int k = 0; k < ny; k++) {
@@ -99,7 +87,7 @@ void multMat(float *A, float *B, float *C, const int nx, const int ny) {
 }
 
 //Funcion que checa el resultado el cual ya teniamos de la primera tarea
-void checkResult(float *hostRef, float *gpuRef, const int N)
+void checkResult(long *hostRef, long *gpuRef, const int N)
 {
   double epsilon = 1.0E-8;
   bool match = 1;
@@ -131,15 +119,15 @@ int main(int argc, char **argv)
     int nx = NTM;
     int ny = NTM;
     int nxy = nx * ny;
-    int nBytes = nxy * sizeof(float);
+    int nBytes = nxy * sizeof(long);
     printf("Tamano de la matriz: nx %d ny %d\n", nx, ny);
 
     // malloc host memory
-    float *h_A, *h_B, *hostRef, *gpuRef;
-    h_A = (float *)malloc(nBytes);
-    h_B = (float *)malloc(nBytes);
-    hostRef = (float *)malloc(nBytes);
-    gpuRef = (float *)malloc(nBytes);
+    long *h_A, *h_B, *hostRef, *gpuRef;
+    h_A = (long *)malloc(nBytes);
+    h_B = (long *)malloc(nBytes);
+    hostRef = (long *)malloc(nBytes);
+    gpuRef = (long *)malloc(nBytes);
 
     // Inicializar nuestros datos
     fillMat(h_A, nxy);
@@ -152,12 +140,12 @@ int main(int argc, char **argv)
     auto start_cpu =  chrono::high_resolution_clock::now();
     multMat(h_A, h_B, hostRef, nx, ny);
     auto end_cpu =  chrono::high_resolution_clock::now();
-    chrono::duration<float, std::milli> duration_ms = end_cpu - start_cpu;
+    chrono::duration<long, std::milli> duration_ms = end_cpu - start_cpu;
 
     printf("MultMat en Host elapsed %f ms\n\n", duration_ms.count());
 
     // malloc device global memory
-    float *d_MatA, *d_MatB, *d_MatC;
+    long *d_MatA, *d_MatB, *d_MatC;
     SAFE_CALL(cudaMalloc((void **)&d_MatA, nBytes), "Error allocating d_MatA");
     SAFE_CALL(cudaMalloc((void **)&d_MatB, nBytes), "Error allocating d_MatB");
     SAFE_CALL(cudaMalloc((void **)&d_MatC, nBytes), "Error allocating d_MatC");
