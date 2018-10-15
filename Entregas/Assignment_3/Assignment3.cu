@@ -76,7 +76,7 @@ __global__ void multMatrixOnGPUWithTiles(long* MatA, long* MatB, long* MatC, con
     }
 
     if (ix < size && iy < size){
-      C[iy * size +ix] = sum;
+      MatC[iy * size +ix] = sum;
     }
 }
 
@@ -159,7 +159,7 @@ int main(int argc, char **argv)
 
     /*******************Tiles********************************/
     start_cpu =  chrono::high_resolution_clock::now();
-    multMatrixOnGPUWithTiles<<<grid, block>>>(d_MatA, d_MatB, d_MatC, N, TILE);
+    multMatrixOnGPUWithTiles<<<grid, block>>>(d_MatA, d_MatB, d_MatC, N);
     SAFE_CALL(cudaDeviceSynchronize(), "Error executing kernel");
     end_cpu =  chrono::high_resolution_clock::now();
     duration_ms = end_cpu - start_cpu;
