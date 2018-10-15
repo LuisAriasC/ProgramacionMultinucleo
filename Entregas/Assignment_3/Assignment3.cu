@@ -95,7 +95,7 @@ void checkResult(long *hostRef, long *gpuRef, const int N)
   for (int i = 0; i < N*N; i++){
     if (fabs(hostRef[i] - gpuRef[i]) > epsilon){
       match = 0;
-      printf("host %f gpu %f\n", hostRef[i], gpuRef[i]);
+      printf("host %li gpu %li\n", hostRef[i], gpuRef[i]);
       break;
     }
   }
