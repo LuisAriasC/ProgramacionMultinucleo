@@ -156,8 +156,8 @@ int main(int argc, char **argv)
 
     // initialize data at host side
 
-    fillMatrix(h_m1);
-    fillMatrix(h_m2);
+    initialData(h_m1);
+    initialData(h_m2);
 
     memset(hostRef, 0, nBytes);
     memset(gpuRefTiles, 0, nBytes);
