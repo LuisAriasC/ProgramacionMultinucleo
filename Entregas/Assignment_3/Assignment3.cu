@@ -11,19 +11,19 @@ using namespace std;
 #define TX 16
 #define TY 16
 
-void fillMatrix(float * matrix)
+void fillMatrix(long * matrix)
 {
     int i;
     int size = N*N;
     for(i = 0; i < size; i++)
     {
-        matrix[i] = (float)rand()/(RAND_MAX/ 10.0f);
+        matrix[i] = (long)rand()/(RAND_MAX/ 10.0f);
     }
 
     return;
 }
 
-int checkResult(float *hostRef, float *gpuRef)
+int checkResult(long *hostRef, long *gpuRef)
 {
     double epsilon = 0.5;
     bool match = 1;
@@ -34,7 +34,7 @@ int checkResult(float *hostRef, float *gpuRef)
         if (abs(hostRef[i] - gpuRef[i]) > epsilon)
         {
             match = 0;
-            printf("host %f gpu %f dif %f\n", hostRef[i], gpuRef[i],hostRef[i] - gpuRef[i]);
+            printf("host %li gpu %li dif %li\n", hostRef[i], gpuRef[i],hostRef[i] - gpuRef[i]);
             break;
         }
     }
@@ -43,7 +43,7 @@ int checkResult(float *hostRef, float *gpuRef)
 }
 
 //Print the matrix
-void printMatrix(float * m_r)
+void printMatrix(long * m_r)
 {
   int size = N*N;
   int x;
@@ -53,26 +53,16 @@ void printMatrix(float * m_r)
       {
         printf("\n");
       }
-      printf("%f ", m_r[x]);
+      printf("%li ", m_r[x]);
   }
 }
 
 //multiplication of matrices in cpu
-void mulMatrix(float * m_r, float * m1, float * m2)
-{
-  int x;
-  int y;
-  int z;
-  for(y=0;y<N;y++)
-  {
-    for(z = 0; z < N; z++)
-    {
-      for(x = 0; x < N; x++)
-      {
-          m_r[y*N+z] += m1[x+y*N] * m2[x*N+z];
-      }
-    }
-  }
+void mulMatrix(long * m_r, long * m1, long * m2){
+  for (int i = 0; i < N; i++)
+    for (int j = 0; j < N; j++)
+      for (int k = 0; k < N; k++)
+        m_r[i * N + j] += m1[k + i * N] * m2[k * N + j];
 }
 
 __global__ void mulMatrixGPU2D(float *MatA, float *MatB, float *MatC)
