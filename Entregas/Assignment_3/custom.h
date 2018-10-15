@@ -7,7 +7,7 @@ void printMatrix(long * ip, const int nx, const int ny){
     for (int ix = 0; ix < nx; ix++)
 			printf("%f ", ip[ix] );
     printf("\n");
-    mat += nx;
+    ip += nx;
   }
 }
 
