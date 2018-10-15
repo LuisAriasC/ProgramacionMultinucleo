@@ -173,7 +173,7 @@ int main(int argc, char **argv)
 
     // copy kernel result back to host side
     SAFE_CALL(cudaMemcpy(gpuRefTiles, d_MatC, nBytes, cudaMemcpyDeviceToHost), "Error copying d_MatC");
-    checkResult(hostRef, gpuRefTiles, nxy)
+    checkResult(hostRef, gpuRefTiles, nxy);
 
 
 
