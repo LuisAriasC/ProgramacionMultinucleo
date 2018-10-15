@@ -189,9 +189,9 @@ int main(int argc, char **argv){
     printf("     On GPU: %f\n", avGPU_Time);
     printf("     Tilled GPU: %f\n\n", avTile_Time);
 
-    printf("Match between CPU and GPU?\n", );
+    printf("Match between CPU and GPU?\n");
     checkResult(h_R, gpu_R, nxy);
-    printf("Match between GPU and Tilling?\n", );
+    printf("Match between GPU and Tilling?\n");
     checkResult(h_R, gpu_RT, nxy);
 
 
