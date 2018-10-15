@@ -157,10 +157,7 @@ int main(int argc, char **argv)
 
     // copy kernel result back to host side
     SAFE_CALL(cudaMemcpy(gpuRef, d_MatC, nBytes, cudaMemcpyDeviceToHost), "Error copying d_MatC");
-    if(checkResult(hostRef, gpuRef))
-      printf("They are equal\n\n");
-    else
-      printf("They are different\n\n");
+    checkResult(hostRef, gpuRef, nxy);
 
     /*******************Tiles********************************/
     start_cpu =  chrono::high_resolution_clock::now();
@@ -176,10 +173,7 @@ int main(int argc, char **argv)
 
     // copy kernel result back to host side
     SAFE_CALL(cudaMemcpy(gpuRefTiles, d_MatC, nBytes, cudaMemcpyDeviceToHost), "Error copying d_MatC");
-    if(checkResult(hostRef, gpuRefTiles))
-      printf("They are equal\n\n");
-    else
-      printf("They are different\n\n");
+    checkResult(hostRef, gpuRefTiles, nxy)
 
 
 
