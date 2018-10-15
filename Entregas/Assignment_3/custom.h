@@ -19,20 +19,9 @@ void printMatrix(float *mat, const int nx, const int ny){
 void initialData(long * ip, const int size){
     for(int i = 0; i < size; i++)
         ip[i] = (long)rand()/(RAND_MAX/ 10.0f);
-    retur;
-}
-
-void fillMatrix(long * matrix)
-{
-    int i;
-    int size = N*N;
-    for(i = 0; i < size; i++)
-    {
-        matrix[i] = (long)rand()/(RAND_MAX/ 10.0f);
-    }
-
     return;
 }
+
 
 /*Chech if two matrix are equal*/
 /*
