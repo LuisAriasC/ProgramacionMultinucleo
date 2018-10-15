@@ -75,34 +75,32 @@ __global__ void multMatrixOnTiles(long *A, long *B, long *C, int nx, int ny) {
 }
 
 //Funcion obtenida de la primera matriz
-void multMat(long *A, long *B, long *C, const int nx, const int ny) {
-  for(int i = 0; i < ny; i++) {
-    for(int j = 0; j < nx; j++) {
-      for(int k = 0; k < ny; k++) {
-        //Operacion para hacer la regla del karatzo fila por culumna
-        C[i * nx + j] += (A[i * nx + k] * B[k + nx * j]);
-      }
+// Multiplies matrices in host
+void multMat(long *matA, long *matB, long *matC, int n) {
+    for(int i = 0; i<n; i++) {
+        for(int j=0; j<n; j++) {
+            for(int k=0; k<n; k++) {
+                matC[i*n+j] += matA[i*n+k] * matB[j+k*n];
+            }
+        }
     }
-  }
 }
 
 //Funcion que checa el resultado el cual ya teniamos de la primera tarea
-void checkResult(long *hostRef, long *gpuRef, const int N)
-{
-  double epsilon = 1.0E-8;
-  bool match = 1;
+void checkResult(long *hostRef, long *gpuRef, const int n) {
+    double epsilon = 1.0E-8;
+    bool match = 1;
 
-  for (int i = 0; i < N*N; i++){
-    if (fabs(hostRef[i] - gpuRef[i]) > epsilon){
-      match = 0;
-      printf("host %li gpu %li\n", hostRef[i], gpuRef[i]);
-      break;
+    for (int i = 0; i < n*n; i++) {
+        if (abs(hostRef[i] - gpuRef[i]) > epsilon) {
+            match = 0;
+            printf("host %ld gpu %ld\n", hostRef[i], gpuRef[i]);
+            break;
+        }
     }
-  }
-  if (match)
-    printf("YES\n\n");
-  else
-    printf("No\n\n");
+
+    if (match) printf("Matrix match.\n\n");
+    else printf("Matrix does not not match.\n\n");
 }
 
 //Main que ya teniamos de los otros ejemplos solo cambio nombres de la funciones y mandado a llamar de algunas
