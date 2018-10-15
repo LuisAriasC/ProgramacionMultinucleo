@@ -5,7 +5,7 @@
 void printMatrix(float *mat, const int nx, const int ny){
   for (int iy = 0; iy < ny; iy++) {
     for (int ix = 0; ix < nx; ix++)
-			printf("%d ", mat[ix] );
+			printf("%f ", mat[ix] );
     printf("\n");
     mat += nx;
   }
