@@ -136,7 +136,7 @@ int main(int argc, char **argv)
 
     // add matrix at host side for result SAFE_CALLs
     auto start_cpu =  chrono::high_resolution_clock::now();
-    multMat(h_A, h_B, hostRef, nx, ny);
+    multMat(h_A, h_B, hostRef, NTM);
     auto end_cpu =  chrono::high_resolution_clock::now();
     chrono::duration<float, std::milli> duration_ms = end_cpu - start_cpu;
 
