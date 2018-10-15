@@ -140,7 +140,7 @@ int main(int argc, char **argv)
     auto start_cpu =  chrono::high_resolution_clock::now();
     multMat(h_A, h_B, hostRef, nx, ny);
     auto end_cpu =  chrono::high_resolution_clock::now();
-    chrono::duration<long, std::milli> duration_ms = end_cpu - start_cpu;
+    chrono::duration<float, std::milli> duration_ms = end_cpu - start_cpu;
 
     printf("MultMat en Host elapsed %f ms\n\n", duration_ms.count());
 
@@ -166,7 +166,7 @@ int main(int argc, char **argv)
     // add matrix at host side for result SAFE_CALLs
     //Lo sacamos del ejemplo de clase
     start_cpu =  chrono::high_resolution_clock::now();
-    multMatrixOnGPU2D<<<grid, block>>>(d_MatA, d_MatB, d_MatC, nx, ny);
+    multMatrixOnGPU2D<<<grid, block>>>(d_MatA, d_MatB, d_MatC, NTM);
     SAFE_CALL(cudaDeviceSynchronize(), "Error executing kernel");
     end_cpu =  chrono::high_resolution_clock::now();
     duration_ms = end_cpu - start_cpu;
