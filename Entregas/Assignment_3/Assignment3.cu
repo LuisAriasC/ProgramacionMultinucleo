@@ -12,7 +12,7 @@ using namespace std;
 #define TY 16
 
 
-//multiplication of matrices in cpu
+//Matrix Multiplication on CPU
 void mulMatrix(long * MatA, long * MatB, long * MatR, const int size){
   for (int i = 0; i < size; i++)
     for (int j = 0; j < size; j++)
@@ -20,6 +20,7 @@ void mulMatrix(long * MatA, long * MatB, long * MatR, const int size){
         MatR[i * size + j] += MatA[k + i * size] * MatB[k * size + j];
 }
 
+//Matrix Multiplication on GPU with a 2D2D implementation
 __global__ void multMatrixOnGPU2d2d(long *MatA, long *MatB, long *MatC, const int size){
 
   unsigned int ix = threadIdx.x + blockIdx.x * blockDim.x;
@@ -33,49 +34,48 @@ __global__ void multMatrixOnGPU2d2d(long *MatA, long *MatB, long *MatC, const in
   }
 }
 
+//Matrix Multiplication on GPU with Tiles
+__global__ void multMatrixOnGPUWithTiles(long* MatA, long* MatB, long* MatC, const int size, const int tileSize){
 
-__global__ void mulMatrixGPUTiles(long* A, long* B, long* C)
-{
-  long sum = 0;
-
-  unsigned int ix = threadIdx.x + TILE * blockIdx.x;
-  unsigned int iy = threadIdx.y + TILE * blockIdx.y;
-
+  unsigned int ix = threadIdx.x + tileSize * blockIdx.x;
+  unsigned int iy = threadIdx.y + tileSize * blockIdx.y;
   unsigned int x = threadIdx.x;
   unsigned int y = threadIdx.y;
 
+  __shared__ long tileA[tileSize][tileSize];
+  __shared__ long tileB[tileSize][tileSize];
 
-  __shared__ long SharedA[TILE][TILE];
-  __shared__ long SharedB[TILE][TILE];
 
-  for(int a = 0; a < TILE;a++)// Se inician en 0 los arreglos
-  {
-    for(int b = 0; b < TILE; b++)
-    {
-      SharedA[a][b] = 0.0;
-      SharedB[a][b] = 0.0;
+  //Init tile to 0
+  for(int i = 0; i < tileSize; i++){
+    for(int j = 0; j < tileSize; j++){
+      tileA[i][j] = 0;
+      tileB[i][j] = 0;
     }
   }
 
-  for (int a = (TILE + N - 1)/TILE; a >=0; a--) //Recorrer todas las tiles se hace Ceil para asegurar de tener todos los datos, se recorre de forma invertida para conservar los 0s.
-    {
-      if (a*TILE + x < N && iy < N) //Para que no intente acceder a espacios que no existen de la matriz A
-        SharedA[y][x] = A[iy*N + a*TILE + x];
+  long sum = 0;
 
-      if (a*TILE + y < N && ix < N)
-        SharedB[y][x] = B[(a*TILE + y)*N + ix];
+  //Run over Tile in decreasive manner
+  for (int i = (tileSize + size - 1) / tileSize; i >= 0; i--){
+      //Just write the values for tileA[][]
+      if (i * tileSize + x < size && iy < size)
+        tileA[y][x] = MatA[(iy * size) + (i * tileSize) + x];
+
+      //Just write the values for tileB[][]
+      if (i * tileSize + y < size && ix < size)
+        tileB[y][x] = MatB[(i * tileSize + y) * size + ix];
 
       __syncthreads();
 
-      for (int b = 0; b < TILE; b++)
-          sum += SharedA[y][b] * SharedB[b][x];
+      for (int j = 0; j < tileSize; j++)
+          sum += tileA[y][j] * tileB[j][x];
 
       __syncthreads();
     }
 
-    if (ix < N && iy < N)
-    {
-      C[iy*N+ix] = sum;
+    if (ix < size && iy < size){
+      C[iy * size +ix] = sum;
     }
 }
 
@@ -158,7 +158,7 @@ int main(int argc, char **argv)
 
     /*******************Tiles********************************/
     start_cpu =  chrono::high_resolution_clock::now();
-    mulMatrixGPUTiles<<<grid, block>>>(d_MatA, d_MatB, d_MatC);
+    multMatrixOnGPUWithTiles<<<grid, block>>>(d_MatA, d_MatB, d_MatC, N, TILE);
     SAFE_CALL(cudaDeviceSynchronize(), "Error executing kernel");
     end_cpu =  chrono::high_resolution_clock::now();
     duration_ms = end_cpu - start_cpu;
