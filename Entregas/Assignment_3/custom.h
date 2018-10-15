@@ -33,7 +33,7 @@ void checkResult(long *hostRef, long *gpuRef, const int N){
     }
 
     if (match)
-        printf("Arrays match.\n\n");
+        printf("MATCH!!!!.\n\n");
     else
-        printf("Arrays do not match.\n\n");
+        printf("DO NOT MATCH!!!!.\n\n");
 }

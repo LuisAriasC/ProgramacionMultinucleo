@@ -13,26 +13,23 @@ using namespace std;
 
 
 //multiplication of matrices in cpu
-void mulMatrix(long * m_r, long * m1, long * m2){
-  for (int i = 0; i < N; i++)
-    for (int j = 0; j < N; j++)
-      for (int k = 0; k < N; k++)
-        m_r[i * N + j] += m1[k + i * N] * m2[k * N + j];
+void mulMatrix(long * MatA, long * MatB, long * MatR, const int size){
+  for (int i = 0; i < size; i++)
+    for (int j = 0; j < size; j++)
+      for (int k = 0; k < size; k++)
+        MatR[i * size + j] += MatA[k + i * size] * MatB[k * size + j];
 }
 
-__global__ void mulMatrixGPU2D(long *MatA, long *MatB, long *MatC)
-{
+__global__ void multMatrixOnGPU2d2d(long *MatA, long *MatB, long *MatC, const int size){
+
   unsigned int ix = threadIdx.x + blockIdx.x * blockDim.x;
   unsigned int iy = threadIdx.y + blockIdx.y * blockDim.y;
   long sum = 0;
 
-  if (ix < N && iy < N)
-  {
-    for(int in =0;in<N;in++)
-    {
-        sum += MatA[ix*N+in] * MatB[in*N+iy];
-    }
-    MatC[ix*N+iy]=sum;
+  if (ix < size && iy < size){
+    for(int i = 0;i < size; i++)
+        sum += MatA[ix * size + i] * MatB[i * size +iy];
+    MatC[ix * size + iy] = sum;
   }
 }
 
@@ -120,7 +117,7 @@ int main(int argc, char **argv)
 
     // add matrix at host side for result SAFE_CALLs
     auto start_cpu =  chrono::high_resolution_clock::now();
-    mulMatrix(hostRef, h_m1, h_m2);
+    mulMatrix(h_m1, h_m2, hostRef, N);
     auto end_cpu =  chrono::high_resolution_clock::now();
     chrono::duration<float, std::milli> duration_ms = end_cpu - start_cpu;
 
@@ -144,7 +141,7 @@ int main(int argc, char **argv)
 
     /*******************Normal********************************/
     start_cpu =  chrono::high_resolution_clock::now();
-    mulMatrixGPU2D<<<grid, block>>>(d_MatA, d_MatB, d_MatC);
+    multMatrixOnGPU2d2d<<<grid, block>>>(d_MatA, d_MatB, d_MatC);
     SAFE_CALL(cudaDeviceSynchronize(), "Error executing kernel");
     end_cpu =  chrono::high_resolution_clock::now();
     duration_ms = end_cpu - start_cpu;
