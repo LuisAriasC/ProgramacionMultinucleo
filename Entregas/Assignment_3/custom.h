@@ -5,7 +5,7 @@
 void printMatrix(long * ip, const int nx, const int ny){
   for (int iy = 0; iy < ny; iy++) {
     for (int ix = 0; ix < nx; ix++)
-			printf("%f ", ip[ix] );
+			printf("%li ", ip[ix] );
     printf("\n");
     ip += nx;
   }
@@ -27,7 +27,7 @@ void checkResult(long *hostRef, long *gpuRef, const int N){
 
         if (abs(hostRef[i] - gpuRef[i]) > epsilon){
             match = 0;
-            printf("Matrix 1 %f Matrix 2 %f in %d\n", hostRef[i], gpuRef[i], i);
+            printf("Matrix 1 %li Matrix 2 %li in %li\n", hostRef[i], gpuRef[i], i);
             break;
         }
     }
