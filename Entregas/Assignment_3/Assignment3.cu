@@ -65,11 +65,11 @@ void mulMatrix(long * m_r, long * m1, long * m2){
         m_r[i * N + j] += m1[k + i * N] * m2[k * N + j];
 }
 
-__global__ void mulMatrixGPU2D(float *MatA, float *MatB, float *MatC)
+__global__ void mulMatrixGPU2D(long *MatA, long *MatB, long *MatC)
 {
   unsigned int ix = threadIdx.x + blockIdx.x * blockDim.x;
   unsigned int iy = threadIdx.y + blockIdx.y * blockDim.y;
-  float sum = 0;
+  long sum = 0;
 
   if (ix < N && iy < N)
   {
@@ -82,9 +82,9 @@ __global__ void mulMatrixGPU2D(float *MatA, float *MatB, float *MatC)
 }
 
 
-__global__ void mulMatrixGPUTiles(float* A, float* B, float* C)
+__global__ void mulMatrixGPUTiles(long* A, long* B, long* C)
 {
-  float sum = 0;
+  long sum = 0;
 
   unsigned int ix = threadIdx.x + TILE * blockIdx.x;
   unsigned int iy = threadIdx.y + TILE * blockIdx.y;
@@ -93,8 +93,8 @@ __global__ void mulMatrixGPUTiles(float* A, float* B, float* C)
   unsigned int y = threadIdx.y;
 
 
-  __shared__ float SharedA[TILE][TILE];
-  __shared__ float SharedB[TILE][TILE];
+  __shared__ long SharedA[TILE][TILE];
+  __shared__ long SharedB[TILE][TILE];
 
   for(int a = 0; a < TILE;a++)// Se inician en 0 los arreglos
   {
@@ -143,16 +143,16 @@ int main(int argc, char **argv)
     int ny = N;
 
     int nxy = nx * ny;
-    int nBytes = nxy * sizeof(float);
+    int nBytes = nxy * sizeof(long);
     printf("Matrix size: nx %d ny %d\n", nx, ny);
 
     // malloc host memory
-    float *h_m1, *h_m2, *hostRef, *gpuRef, *gpuRefTiles;
-    h_m1 = (float *)malloc(nBytes);
-    h_m2 = (float *)malloc(nBytes);
-    hostRef = (float *)malloc(nBytes);
-    gpuRef = (float *)malloc(nBytes);
-    gpuRefTiles = (float *)malloc(nBytes);
+    long *h_m1, *h_m2, *hostRef, *gpuRef, *gpuRefTiles;
+    h_m1 = (long *)malloc(nBytes);
+    h_m2 = (long *)malloc(nBytes);
+    hostRef = (long *)malloc(nBytes);
+    gpuRef = (long *)malloc(nBytes);
+    gpuRefTiles = (long *)malloc(nBytes);
 
     // initialize data at host side
 
@@ -172,7 +172,7 @@ int main(int argc, char **argv)
     printf("sumMatrixOnHost elapsed %f ms\n\n", duration_ms.count());
 
     // malloc device global memory
-    float *d_MatA, *d_MatB, *d_MatC;
+    long *d_MatA, *d_MatB, *d_MatC;
     SAFE_CALL(cudaMalloc((void **)&d_MatA, nBytes), "Error allocating d_MatA");
     SAFE_CALL(cudaMalloc((void **)&d_MatB, nBytes), "Error allocating d_MatB");
     SAFE_CALL(cudaMalloc((void **)&d_MatC, nBytes), "Error allocating d_MatC");
