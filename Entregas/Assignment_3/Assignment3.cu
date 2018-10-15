@@ -11,17 +11,6 @@ using namespace std;
 #define TX 16
 #define TY 16
 
-void fillMatrix(long * matrix)
-{
-    int i;
-    int size = N*N;
-    for(i = 0; i < size; i++)
-    {
-        matrix[i] = (long)rand()/(RAND_MAX/ 10.0f);
-    }
-
-    return;
-}
 
 int checkResult(long *hostRef, long *gpuRef)
 {

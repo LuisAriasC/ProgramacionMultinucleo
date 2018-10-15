@@ -2,6 +2,7 @@
 #include <cstdio>
 
 /*Print the matrix*/
+/*
 void printMatrix(float *mat, const int nx, const int ny){
   for (int iy = 0; iy < ny; iy++) {
     for (int ix = 0; ix < nx; ix++)
@@ -12,6 +13,7 @@ void printMatrix(float *mat, const int nx, const int ny){
 
   return;
 }
+*/
 
 /*Initialize data in a matrix*/
 void initialData(long * ip, const int size){
@@ -33,6 +35,7 @@ void fillMatrix(long * matrix)
 }
 
 /*Chech if two matrix are equal*/
+/*
 void checkResult(float *hostRef, float *gpuRef, const int N){
 
     double epsilon = 1.0E-8;
@@ -53,3 +56,4 @@ void checkResult(float *hostRef, float *gpuRef, const int N){
     else
         printf("Arrays do not match.\n\n");
 }
+*/

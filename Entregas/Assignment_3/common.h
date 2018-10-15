@@ -3,7 +3,7 @@
 #define COMMON_H
 
 #include <cuda_runtime.h>
-//#include "custom.h"
+#include "custom.h"
 #include <cstdlib>
 #include <cstdio>
 
