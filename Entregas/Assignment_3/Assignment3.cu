@@ -7,9 +7,9 @@
 
 using namespace std;
 #define matrixSize 2000
-#define tileSize 8
+//#define tileSize 8
 //#define tileSize 16
-//#define tileSize 32
+#define tileSize 32
 
 //Matrix Multiplication on CPU
 void mulMatrixOnHost(long * MatA, long * MatB, long * MatR, const int size){
