@@ -12,40 +12,6 @@ using namespace std;
 #define TY 16
 
 
-int checkResult(long *hostRef, long *gpuRef)
-{
-    double epsilon = 0.5;
-    bool match = 1;
-    int size = N*N;
-
-    for (int i = 0; i < size; i++)
-    {
-        if (abs(hostRef[i] - gpuRef[i]) > epsilon)
-        {
-            match = 0;
-            printf("host %li gpu %li dif %li\n", hostRef[i], gpuRef[i],hostRef[i] - gpuRef[i]);
-            break;
-        }
-    }
-
-    return match;
-}
-
-//Print the matrix
-void printMatrix(long * m_r)
-{
-  int size = N*N;
-  int x;
-  for(x = 0; x < size; x++)
-  {
-      if(x%N==0)
-      {
-        printf("\n");
-      }
-      printf("%li ", m_r[x]);
-  }
-}
-
 //multiplication of matrices in cpu
 void mulMatrix(long * m_r, long * m1, long * m2){
   for (int i = 0; i < N; i++)
