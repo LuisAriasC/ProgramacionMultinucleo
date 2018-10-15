@@ -8,6 +8,7 @@
 using namespace std;
 #define N 2000
 #define TILE 16
+#define tileSize 16
 #define TX 16
 #define TY 16
 
@@ -35,7 +36,7 @@ __global__ void multMatrixOnGPU2d2d(long *MatA, long *MatB, long *MatC, const in
 }
 
 //Matrix Multiplication on GPU with Tiles
-__global__ void multMatrixOnGPUWithTiles(long* MatA, long* MatB, long* MatC, const int size, const int tileSize){
+__global__ void multMatrixOnGPUWithTiles(long* MatA, long* MatB, long* MatC, const int size){
 
   unsigned int ix = threadIdx.x + tileSize * blockIdx.x;
   unsigned int iy = threadIdx.y + tileSize * blockIdx.y;
