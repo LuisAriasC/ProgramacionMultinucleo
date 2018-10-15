@@ -129,65 +129,39 @@ int main(int argc, char **argv){
     dim3 block(dimx, dimy);
     dim3 grid((nx + block.x - 1) / block.x, (ny + block.y - 1) / block.y);
 
-
-    float avCPU_Time, avGPU_Time, avTile_Time;
-    avCPU_Time = avGPU_Time = avTile_Time = 0.0;
-
-    for (int i = 0; i < iterations; i++) {
-      memset(h_R, 0, nBytes);
-
-      // MATRIX MULT ON CPU
-      auto start_cpu =  chrono::high_resolution_clock::now();
-      mulMatrixOnHost(h_a, h_b, h_R, matrixSize);
-      auto end_cpu =  chrono::high_resolution_clock::now();
-      chrono::duration<float, std::milli> duration_ms = end_cpu - start_cpu;
-      printf("sumMatrixOnHost elapsed %f ms in iteration %d\n", duration_ms.count(), i);
-      avCPU_Time += duration_ms.count();
+    // MATRIX MULT ON CPU
+    memset(h_R, 0, nBytes);
+    auto start_cpu =  chrono::high_resolution_clock::now();
+    mulMatrixOnHost(h_a, h_b, h_R, matrixSize);
+    auto end_cpu =  chrono::high_resolution_clock::now();
+    chrono::duration<float, std::milli> duration_ms = end_cpu - start_cpu;
+    printf("sumMatrixOnHost elapsed %f ms\n", duration_ms.count());
 
 
-      /* MATRIX MULT ON GPU */
-      SAFE_CALL(cudaMemset(d_MatC, 0, nBytes), "Error setting d_MatC to 0");
-      start_cpu =  chrono::high_resolution_clock::now();
-      multMatrixOnGPU2d2d<<<grid, block>>>(d_MatA, d_MatB, d_MatC, matrixSize);
-      SAFE_CALL(cudaDeviceSynchronize(), "Error executing kernel");
-      end_cpu =  chrono::high_resolution_clock::now();
-      duration_ms = end_cpu - start_cpu;
-      printf("sumMatrixOnGPU2D <<<(%d,%d), (%d,%d)>>> elapsed %f ms in iteration %d\n", grid.x, grid.y, block.x, block.y, duration_ms.count(), i);
-      avGPU_Time += duration_ms.count();
+    /* MATRIX MULT ON GPU */
+    SAFE_CALL(cudaMemset(d_MatC, 0, nBytes), "Error setting d_MatC to 0");
+    start_cpu =  chrono::high_resolution_clock::now();
+    multMatrixOnGPU2d2d<<<grid, block>>>(d_MatA, d_MatB, d_MatC, matrixSize);
+    SAFE_CALL(cudaDeviceSynchronize(), "Error executing kernel");
+    end_cpu =  chrono::high_resolution_clock::now();
+    duration_ms = end_cpu - start_cpu;
+    printf("sumMatrixOnGPU2D <<<(%d,%d), (%d,%d)>>> elapsed %f ms\n", grid.x, grid.y, block.x, block.y, duration_ms.count());
 
-      SAFE_CALL(cudaGetLastError(), "Error with last error");
-
-      if (i == iterations-1) {
-        // copy kernel result back to host side
-        SAFE_CALL(cudaMemcpy(gpu_R, d_MatC, nBytes, cudaMemcpyDeviceToHost), "Error copying d_MatC");
-      }
+    SAFE_CALL(cudaGetLastError(), "Error with last error");
+    SAFE_CALL(cudaMemcpy(gpu_R, d_MatC, nBytes, cudaMemcpyDeviceToHost), "Error copying d_MatC");
 
 
-      /* MATRIX MULT WITH TILES */
-      SAFE_CALL(cudaMemset(d_MatC, 0, nBytes), "Error setting d_MatC to 0");
-      start_cpu =  chrono::high_resolution_clock::now();
-      multMatrixOnGPUWithTiles<<<grid, block>>>(d_MatA, d_MatB, d_MatC, matrixSize);
-      SAFE_CALL(cudaDeviceSynchronize(), "Error executing kernel");
-      end_cpu =  chrono::high_resolution_clock::now();
-      duration_ms = end_cpu - start_cpu;
-      printf("sumMatrixOnGPUTiles <<<(%d,%d), (%d,%d)>>> elapsed %f ms in iteration %d\n", grid.x,grid.y,block.x, block.y, duration_ms.count(), i);
-      avTile_Time += duration_ms.count();
+    /* MATRIX MULT WITH TILES */
+    SAFE_CALL(cudaMemset(d_MatC, 0, nBytes), "Error setting d_MatC to 0");
+    start_cpu =  chrono::high_resolution_clock::now();
+    multMatrixOnGPUWithTiles<<<grid, block>>>(d_MatA, d_MatB, d_MatC, matrixSize);
+    SAFE_CALL(cudaDeviceSynchronize(), "Error executing kernel");
+    end_cpu =  chrono::high_resolution_clock::now();
+    duration_ms = end_cpu - start_cpu;
+    printf("sumMatrixOnGPUTiles <<<(%d,%d), (%d,%d)>>> elapsed %f ms\n", grid.x,grid.y,block.x, block.y, duration_ms.count());
 
-      SAFE_CALL(cudaGetLastError(), "Error with last error");
-
-      if (i == iterations-1) {
-        // copy kernel result back to host side
-        SAFE_CALL(cudaMemcpy(gpu_RT, d_MatC, nBytes, cudaMemcpyDeviceToHost), "Error copying d_MatC");
-      }
-    }
-    avCPU_Time = avCPU_Time / iterations;
-    avGPU_Time = avGPU_Time / iterations;
-    avTile_Time = avTile_Time / iterations;
-
-    printf("Average Times:\n");
-    printf("     On CPU: %f\n", avCPU_Time);
-    printf("     On GPU: %f\n", avGPU_Time);
-    printf("     Tilled GPU: %f\n\n", avTile_Time);
+    SAFE_CALL(cudaGetLastError(), "Error with last error");
+    SAFE_CALL(cudaMemcpy(gpu_RT, d_MatC, nBytes, cudaMemcpyDeviceToHost), "Error copying d_MatC");
 
     printf("Match between CPU and GPU?\n");
     checkResult(h_R, gpu_R, nxy);
