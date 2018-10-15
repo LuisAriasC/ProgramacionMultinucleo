@@ -3,215 +3,251 @@
 #include <cstdlib>
 #include <math.h>
 #include <chrono>
-#include <iostream>
+
 
 using namespace std;
-//Tamaño de la matriz
-#define NTM 2000
-//Bloques de pruebaen este caso se probara con tres 8*8, 16*16 y 32*32
-#define DIM 8
+#define N 2000
+#define TILE 16
+#define TX 16
+#define TY 16
 
+void fillMatrix(float * matrix)
+{
+    int i;
+    int size = N*N;
+    for(i = 0; i < size; i++)
+    {
+        matrix[i] = (float)rand()/(RAND_MAX/ 10.0f);
+    }
 
-//Funcion de llenado de la matriz en tre 0 y 10 obtenida de la primera tarea
-void fillMat(long * ip, const int size) {
-  int i;
-  for(i = 0; i < size; i++) {
-    ip[i] = (rand() / (long)RAND_MAX * 10.0f);
-  }
+    return;
 }
 
-__global__ void multMatrixOnGPU2D(long *matA, long *matB, long *matC, const int n) {
-    unsigned int ix = threadIdx.x + blockIdx.x * blockDim.x;
-    unsigned int iy = threadIdx.y + blockIdx.y * blockDim.y;
-
-    if (ix < n && iy < n) {
-        for(int k=0; k<n; k++) {
-            matC[iy*n+ix] += matA[iy*n+k] * matB[k*n+ix];
-        }
-    }
-}
-
-//Funcion de matrix mult con tiles
-__global__ void multMatrixOnTiles(long *A, long *B, long *C, int nx, int ny) {
-  long sum = 0;
-  //Algunas partes del codigo fueron obtenidas de los demos vistos en clase
-  unsigned int ix = threadIdx.x + blockIdx.x * DIM;
-  unsigned int iy = threadIdx.y + blockIdx.y * DIM;
-
-  __shared__ long matTempA[DIM][DIM];
-  __shared__ long matTempB[DIM][DIM];
-
-  //Llenamos las matrices shared y iniciado de 0
-  for(int i = 0; i < DIM; i ++) {
-    for(int j = 0; j < DIM; j++) {
-      matTempA[i][j] = 0;
-      matTempB[i][j] = 0;
-    }
-  }
-
-  //vamos a traves de todos los tiles
-  for(int i = (DIM + nx - 1)/DIM; i >= 0; i--) {
-    if((i * DIM + threadIdx.x) < nx && (iy < ny)) {
-      matTempA[threadIdx.y][threadIdx.x] = A[(iy*ny) + (i*DIM+threadIdx.x)];
-    }
-
-    if((i * DIM + threadIdx.y) < ny && (ix < nx)) {
-      matTempB[threadIdx.y][threadIdx.x] = B[(i*DIM+threadIdx.y) * nx + ix];
-    }
-    /*//__syncthreads(); command is a block level synchronization barrier. That means it is safe to be used when all threads in a
-    //block reach the barrier. It is also possible to use __syncthreads() in conditional code but only when all
-    //threads evaluate identically such code otherwise
-    //the execution is likely to hang or produce unintended side effects*/
-
-    __syncthreads(); //Tenemos que utilizar syncthreads despues de modificar las matrices en threadIdx
-    for(int j = 0; j < DIM; j++) {
-      sum += matTempA[threadIdx.y][j] * matTempB[j][threadIdx.x];
-    }
-    __syncthreads();
-  }
-  if(ix < nx && iy < ny) {
-    C[iy*ny+ix] = sum;
-  }
-}
-
-//Funcion obtenida de la primera matriz
-// Multiplies matrices in host
-void multMat(long *matA, long *matB, long *matC, int n) {
-    for(int i = 0; i<n; i++) {
-        for(int j=0; j<n; j++) {
-            for(int k=0; k<n; k++) {
-                matC[i*n+j] += matA[i*n+k] * matB[j+k*n];
-            }
-        }
-    }
-}
-
-//Funcion que checa el resultado el cual ya teniamos de la primera tarea
-void checkResult(long *hostRef, long *gpuRef, const int n) {
-    double epsilon = 1.0E-8;
+int checkResult(float *hostRef, float *gpuRef)
+{
+    double epsilon = 0.5;
     bool match = 1;
+    int size = N*N;
 
-    for (int i = 0; i < n*n; i++) {
-        if (abs(hostRef[i] - gpuRef[i]) > epsilon) {
+    for (int i = 0; i < size; i++)
+    {
+        if (abs(hostRef[i] - gpuRef[i]) > epsilon)
+        {
             match = 0;
-            printf("host %ld gpu %ld\n", hostRef[i], gpuRef[i]);
+            printf("host %f gpu %f dif %f\n", hostRef[i], gpuRef[i],hostRef[i] - gpuRef[i]);
             break;
         }
     }
 
-    if (match) printf("Matrix match.\n\n");
-    else printf("Matrix does not not match.\n\n");
+    return match;
 }
 
-//Main que ya teniamos de los otros ejemplos solo cambio nombres de la funciones y mandado a llamar de algunas
+//Print the matrix
+void printMatrix(float * m_r)
+{
+  int size = N*N;
+  int x;
+  for(x = 0; x < size; x++)
+  {
+      if(x%N==0)
+      {
+        printf("\n");
+      }
+      printf("%f ", m_r[x]);
+  }
+}
+
+//multiplication of matrices in cpu
+void mulMatrix(float * m_r, float * m1, float * m2)
+{
+  int x;
+  int y;
+  int z;
+  for(y=0;y<N;y++)
+  {
+    for(z = 0; z < N; z++)
+    {
+      for(x = 0; x < N; x++)
+      {
+          m_r[y*N+z] += m1[x+y*N] * m2[x*N+z];
+      }
+    }
+  }
+}
+
+__global__ void mulMatrixGPU2D(float *MatA, float *MatB, float *MatC)
+{
+  unsigned int ix = threadIdx.x + blockIdx.x * blockDim.x;
+  unsigned int iy = threadIdx.y + blockIdx.y * blockDim.y;
+  float sum = 0;
+
+  if (ix < N && iy < N)
+  {
+    for(int in =0;in<N;in++)
+    {
+        sum += MatA[ix*N+in] * MatB[in*N+iy];
+    }
+    MatC[ix*N+iy]=sum;
+  }
+}
+
+
+__global__ void mulMatrixGPUTiles(float* A, float* B, float* C)
+{
+  float sum = 0;
+
+  unsigned int ix = threadIdx.x + TILE * blockIdx.x;
+  unsigned int iy = threadIdx.y + TILE * blockIdx.y;
+
+  unsigned int x = threadIdx.x;
+  unsigned int y = threadIdx.y;
+
+
+  __shared__ float SharedA[TILE][TILE];
+  __shared__ float SharedB[TILE][TILE];
+
+  for(int a = 0; a < TILE;a++)// Se inician en 0 los arreglos
+  {
+    for(int b = 0; b < TILE; b++)
+    {
+      SharedA[a][b] = 0.0;
+      SharedB[a][b] = 0.0;
+    }
+  }
+
+  for (int a = (TILE + N - 1)/TILE; a >=0; a--) //Recorrer todas las tiles se hace Ceil para asegurar de tener todos los datos, se recorre de forma invertida para conservar los 0s.
+    {
+      if (a*TILE + x < N && iy < N) //Para que no intente acceder a espacios que no existen de la matriz A
+        SharedA[y][x] = A[iy*N + a*TILE + x];
+
+      if (a*TILE + y < N && ix < N)
+        SharedB[y][x] = B[(a*TILE + y)*N + ix];
+
+      __syncthreads();
+
+      for (int b = 0; b < TILE; b++)
+          sum += SharedA[y][b] * SharedB[b][x];
+
+      __syncthreads();
+    }
+
+    if (ix < N && iy < N)
+    {
+      C[iy*N+ix] = sum;
+    }
+}
+
 int main(int argc, char **argv)
 {
+    printf("%s Starting...\n", argv[0]);
+
     // set up device
     int dev = 0;
     cudaDeviceProp deviceProp;
     SAFE_CALL(cudaGetDeviceProperties(&deviceProp, dev), "Error device prop");
-    printf("Tarjeta %d: %s\n", dev, deviceProp.name);
+    printf("Using Device %d: %s\n", dev, deviceProp.name);
     SAFE_CALL(cudaSetDevice(dev), "Error setting device");
 
     // set up data size of matrix
-    int nx = NTM;
-    int ny = NTM;
+    int nx = N;
+    int ny = N;
+
     int nxy = nx * ny;
-    int nBytes = nxy * sizeof(long);
-    printf("Tamano de la matriz: nx %d ny %d\n", nx, ny);
+    int nBytes = nxy * sizeof(float);
+    printf("Matrix size: nx %d ny %d\n", nx, ny);
 
     // malloc host memory
-    long *h_A, *h_B, *hostRef, *gpuRef;
-    h_A = (long *)malloc(nBytes);
-    h_B = (long *)malloc(nBytes);
-    hostRef = (long *)malloc(nBytes);
-    gpuRef = (long *)malloc(nBytes);
+    float *h_m1, *h_m2, *hostRef, *gpuRef, *gpuRefTiles;
+    h_m1 = (float *)malloc(nBytes);
+    h_m2 = (float *)malloc(nBytes);
+    hostRef = (float *)malloc(nBytes);
+    gpuRef = (float *)malloc(nBytes);
+    gpuRefTiles = (float *)malloc(nBytes);
 
-    // Inicializar nuestros datos
-    fillMat(h_A, nxy);
-    fillMat(h_B, nxy);
+    // initialize data at host side
+
+    fillMatrix(h_m1);
+    fillMatrix(h_m2);
 
     memset(hostRef, 0, nBytes);
+    memset(gpuRefTiles, 0, nBytes);
     memset(gpuRef, 0, nBytes);
 
     // add matrix at host side for result SAFE_CALLs
     auto start_cpu =  chrono::high_resolution_clock::now();
-    multMat(h_A, h_B, hostRef, NTM);
+    mulMatrix(hostRef, h_m1, h_m2);
     auto end_cpu =  chrono::high_resolution_clock::now();
     chrono::duration<float, std::milli> duration_ms = end_cpu - start_cpu;
 
-    printf("MultMat en Host elapsed %f ms\n\n", duration_ms.count());
+    printf("sumMatrixOnHost elapsed %f ms\n\n", duration_ms.count());
 
     // malloc device global memory
-    long *d_MatA, *d_MatB, *d_MatC;
+    float *d_MatA, *d_MatB, *d_MatC;
     SAFE_CALL(cudaMalloc((void **)&d_MatA, nBytes), "Error allocating d_MatA");
     SAFE_CALL(cudaMalloc((void **)&d_MatB, nBytes), "Error allocating d_MatB");
     SAFE_CALL(cudaMalloc((void **)&d_MatC, nBytes), "Error allocating d_MatC");
 
     // transfer data from host to device
-    SAFE_CALL(cudaMemcpy(d_MatA, h_A, nBytes, cudaMemcpyHostToDevice), "Error copying d_MatA");
-    SAFE_CALL(cudaMemcpy(d_MatB, h_B, nBytes, cudaMemcpyHostToDevice), "Error copying d_MatB");
+    SAFE_CALL(cudaMemcpy(d_MatA, h_m1, nBytes, cudaMemcpyHostToDevice), "Error copying d_MatA");
+    SAFE_CALL(cudaMemcpy(d_MatB, h_m2, nBytes, cudaMemcpyHostToDevice), "Error copying d_MatB");
 
     // invoke kernel at host side
-    int dimx = DIM;
-    int dimy = DIM;
+    int dimx = TX;
+    int dimy = TY;
     dim3 block(dimx, dimy);
     dim3 grid((nx + block.x - 1) / block.x, (ny + block.y - 1) / block.y);
 
-    //MULTMAT ON GPU 2D_2D (ya se tenia)
-    //Multiplicar matrices con cantidad de repeticiones
-    int timeAverage = 0;
-    // add matrix at host side for result SAFE_CALLs
-    //Lo sacamos del ejemplo de clase
+    /*******************Normal********************************/
     start_cpu =  chrono::high_resolution_clock::now();
-    multMatrixOnGPU2D<<<grid, block>>>(d_MatA, d_MatB, d_MatC, NTM);
+    mulMatrixGPU2D<<<grid, block>>>(d_MatA, d_MatB, d_MatC);
     SAFE_CALL(cudaDeviceSynchronize(), "Error executing kernel");
     end_cpu =  chrono::high_resolution_clock::now();
     duration_ms = end_cpu - start_cpu;
-    timeAverage += duration_ms.count();
-    int performanceTime = timeAverage;
-    printf("Ejecucion con GPU con threads: %d ms\n", performanceTime);
-    printf("Matriz: %d x %d\n", nx, ny);
+
+
+    printf("sumMatrixOnGPU2D <<<(%d,%d), (%d,%d)>>> elapsed %f ms\n", grid.x, grid.y, block.x, block.y, duration_ms.count());
 
     // SAFE_CALL kernel error
     SAFE_CALL(cudaGetLastError(), "Error with last error");
 
     // copy kernel result back to host side
     SAFE_CALL(cudaMemcpy(gpuRef, d_MatC, nBytes, cudaMemcpyDeviceToHost), "Error copying d_MatC");
+    if(checkResult(hostRef, gpuRef))
+      printf("They are equal\n\n");
+    else
+      printf("They are different\n\n");
 
-    // check device results
-    checkResult(hostRef, gpuRef, nxy);
-
-    //MULTMAT CON TILING GPU
-    timeAverage = 0;
-    // add matrix at host side for result SAFE_CALLs
+    /*******************Tiles********************************/
     start_cpu =  chrono::high_resolution_clock::now();
-    multMatrixOnTiles<<<grid, block>>>(d_MatA, d_MatB, d_MatC, nx, ny);
+    mulMatrixGPUTiles<<<grid, block>>>(d_MatA, d_MatB, d_MatC);
     SAFE_CALL(cudaDeviceSynchronize(), "Error executing kernel");
     end_cpu =  chrono::high_resolution_clock::now();
     duration_ms = end_cpu - start_cpu;
-    timeAverage += duration_ms.count();
-    performanceTime = timeAverage;
-    printf("Ejecucion con Tiling: %d x %d es alrededor de: %d ms\n", DIM, DIM, performanceTime);
-    printf("Matriz: %d x %d\n", nx, ny);
+
+    printf("sumMatrixOnGPUTiles <<<(%d,%d), (%d,%d)>>> elapsed %f ms\n", grid.x,grid.y,block.x, block.y, duration_ms.count());
 
     // SAFE_CALL kernel error
     SAFE_CALL(cudaGetLastError(), "Error with last error");
 
     // copy kernel result back to host side
-    SAFE_CALL(cudaMemcpy(gpuRef, d_MatC, nBytes, cudaMemcpyDeviceToHost), "Error copying d_MatC");
+    SAFE_CALL(cudaMemcpy(gpuRefTiles, d_MatC, nBytes, cudaMemcpyDeviceToHost), "Error copying d_MatC");
+    if(checkResult(hostRef, gpuRefTiles))
+      printf("They are equal\n\n");
+    else
+      printf("They are different\n\n");
 
-    // check device results
-    checkResult(hostRef, gpuRef, nxy);
+
+
 
     // free device global memory
     SAFE_CALL(cudaFree(d_MatA), "Error freeing memory");
     SAFE_CALL(cudaFree(d_MatB), "Error freeing memory");
     SAFE_CALL(cudaFree(d_MatC), "Error freeing memory");
 
+
     // free host memory
-    free(h_A);
-    free(h_B);
+    free(h_m1);
+    free(h_m2);
     free(hostRef);
     free(gpuRef);
 
