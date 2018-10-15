@@ -141,7 +141,7 @@ int main(int argc, char **argv)
 
     /*******************Normal********************************/
     start_cpu =  chrono::high_resolution_clock::now();
-    multMatrixOnGPU2d2d<<<grid, block>>>(d_MatA, d_MatB, d_MatC);
+    multMatrixOnGPU2d2d<<<grid, block>>>(d_MatA, d_MatB, d_MatC, N);
     SAFE_CALL(cudaDeviceSynchronize(), "Error executing kernel");
     end_cpu =  chrono::high_resolution_clock::now();
     duration_ms = end_cpu - start_cpu;
