@@ -1,3 +1,8 @@
+/*
+  STUDENT: LUIS CARLOS ARIAS CAMACHO
+  STUDENT ID: A01364808
+*/
+
 #include "common.h"
 #include <cstdio>
 #include <cstdlib>
@@ -8,8 +13,8 @@
 using namespace std;
 #define matrixSize 2000
 //#define tileSize 8
-//#define tileSize 16
-#define tileSize 32
+#define tileSize 16
+//#define tileSize 32
 
 //Matrix Multiplication on CPU
 void mulMatrixOnHost(long * MatA, long * MatB, long * MatR, const int size){
@@ -41,9 +46,9 @@ __global__ void multMatrixOnGPUWithTiles(long* MatA, long* MatB, long* MatC, con
   unsigned int x = threadIdx.x;
   unsigned int y = threadIdx.y;
 
+  //Create tileA and tileB
   __shared__ long tileA[tileSize][tileSize];
   __shared__ long tileB[tileSize][tileSize];
-
 
   //Init tile to 0
   for(int i = 0; i < tileSize; i++){
@@ -54,7 +59,6 @@ __global__ void multMatrixOnGPUWithTiles(long* MatA, long* MatB, long* MatC, con
   }
 
   long sum = 0;
-
   //Run over Tile in decreasive manner
   for (int i = (tileSize + size - 1) / tileSize; i >= 0; i--){
       //Just write the values for tileA[][]
@@ -64,19 +68,21 @@ __global__ void multMatrixOnGPUWithTiles(long* MatA, long* MatB, long* MatC, con
       //Just write the values for tileB[][]
       if (i * tileSize + y < size && ix < size)
         tileB[y][x] = MatB[(i * tileSize + y) * size + ix];
-
       __syncthreads();
 
+      //Perfom partial sum on tile
       for (int j = 0; j < tileSize; j++)
           sum += tileA[y][j] * tileB[j][x];
-
       __syncthreads();
     }
 
+    //Perform total sum of cell
     if (ix < size && iy < size){
       MatC[iy * size +ix] = sum;
     }
 }
+
+
 
 int main(int argc, char **argv){
 
@@ -129,14 +135,12 @@ int main(int argc, char **argv){
     dim3 grid((nx + block.x - 1) / block.x, (ny + block.y - 1) / block.y);
 
     // MATRIX MULT ON CPU
-    /*
     memset(h_R, 0, nBytes);
     auto start_cpu =  chrono::high_resolution_clock::now();
     mulMatrixOnHost(h_a, h_b, h_R, matrixSize);
     auto end_cpu =  chrono::high_resolution_clock::now();
     chrono::duration<float, std::milli> duration_ms = end_cpu - start_cpu;
     printf("sumMatrixOnHost elapsed %f ms\n", duration_ms.count());
-    */
 
     /* MATRIX MULT ON GPU */
     SAFE_CALL(cudaMemset(d_MatC, 0, nBytes), "Error setting d_MatC to 0");
@@ -162,17 +166,15 @@ int main(int argc, char **argv){
     SAFE_CALL(cudaGetLastError(), "Error with last error");
     SAFE_CALL(cudaMemcpy(gpu_RT, d_MatC, nBytes, cudaMemcpyDeviceToHost), "Error copying d_MatC");
 
-    //printf("Match between CPU and GPU?\n");
-    //checkResult(h_R, gpu_R, nxy);
+    printf("Match between CPU and GPU?\n");
+    checkResult(h_R, gpu_R, nxy);
     printf("Match between GPU and Tilling?\n");
     checkResult(h_R, gpu_RT, nxy);
-
 
     // free device global memory
     SAFE_CALL(cudaFree(d_MatA), "Error freeing memory");
     SAFE_CALL(cudaFree(d_MatB), "Error freeing memory");
     SAFE_CALL(cudaFree(d_MatC), "Error freeing memory");
-
 
     // free host memory
     free(h_a);

@@ -1,3 +1,8 @@
+/*
+  STUDENT: LUIS CARLOS ARIAS CAMACHO
+  STUDENT ID: A01364808
+*/
+
 #include <cstdlib>
 #include <cstdio>
 
