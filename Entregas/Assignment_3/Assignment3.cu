@@ -6,10 +6,9 @@
 
 
 using namespace std;
-#define iterations 20
 #define matrixSize 2000
-//#define tileSize 8
-#define tileSize 16
+#define tileSize 8
+//#define tileSize 16
 //#define tileSize 32
 
 //Matrix Multiplication on CPU
@@ -130,13 +129,14 @@ int main(int argc, char **argv){
     dim3 grid((nx + block.x - 1) / block.x, (ny + block.y - 1) / block.y);
 
     // MATRIX MULT ON CPU
+    /*
     memset(h_R, 0, nBytes);
     auto start_cpu =  chrono::high_resolution_clock::now();
     mulMatrixOnHost(h_a, h_b, h_R, matrixSize);
     auto end_cpu =  chrono::high_resolution_clock::now();
     chrono::duration<float, std::milli> duration_ms = end_cpu - start_cpu;
     printf("sumMatrixOnHost elapsed %f ms\n", duration_ms.count());
-
+    */
 
     /* MATRIX MULT ON GPU */
     SAFE_CALL(cudaMemset(d_MatC, 0, nBytes), "Error setting d_MatC to 0");
@@ -150,7 +150,6 @@ int main(int argc, char **argv){
     SAFE_CALL(cudaGetLastError(), "Error with last error");
     SAFE_CALL(cudaMemcpy(gpu_R, d_MatC, nBytes, cudaMemcpyDeviceToHost), "Error copying d_MatC");
 
-
     /* MATRIX MULT WITH TILES */
     SAFE_CALL(cudaMemset(d_MatC, 0, nBytes), "Error setting d_MatC to 0");
     start_cpu =  chrono::high_resolution_clock::now();
@@ -163,8 +162,8 @@ int main(int argc, char **argv){
     SAFE_CALL(cudaGetLastError(), "Error with last error");
     SAFE_CALL(cudaMemcpy(gpu_RT, d_MatC, nBytes, cudaMemcpyDeviceToHost), "Error copying d_MatC");
 
-    printf("Match between CPU and GPU?\n");
-    checkResult(h_R, gpu_R, nxy);
+    //printf("Match between CPU and GPU?\n");
+    //checkResult(h_R, gpu_R, nxy);
     printf("Match between GPU and Tilling?\n");
     checkResult(h_R, gpu_RT, nxy);
 
