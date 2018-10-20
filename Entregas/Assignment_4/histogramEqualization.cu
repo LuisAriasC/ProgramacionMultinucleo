@@ -10,7 +10,7 @@
 #include "common.h"
 #include <cuda_runtime.h>
 
-#define default_image "images/dog1.jpeg"
+#define default_image "Images/dog1.jpeg"
 
 using namespace std;
 
@@ -79,7 +79,7 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output){
 	SAFE_CALL(cudaMemcpy(output.ptr(), d_output, grayBytes, cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
 
   //Write the black & white image
-  cv::imwrite("images/bw_outputImage.jpg" , output);
+  cv::imwrite("Images/bw_outputImage.jpg" , output);
 
 	// Free the device memory
 	SAFE_CALL(cudaFree(d_input), "CUDA Free Failed");
