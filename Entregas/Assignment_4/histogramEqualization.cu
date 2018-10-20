@@ -79,7 +79,7 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output){
 	SAFE_CALL(cudaMemcpy(output.ptr(), d_output, grayBytes, cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
 
   //Write the black & white image
-  cv::imwrite("images/bw_outputImage.jpg" + default_image, output);
+  cv::imwrite("images/bw_outputImage.jpg" , output);
 
 	// Free the device memory
 	SAFE_CALL(cudaFree(d_input), "CUDA Free Failed");
@@ -91,12 +91,12 @@ int main(int argc, char *argv[]){
 	string inputImage;
 
 	if(argc < 2)
-		imagePath = default_image;
-  	else
-  		imagePath = argv[1];
+		inputImage = default_image;
+  else
+  	inputImage = argv[1];
 
 	// Read input image from the disk
-	cv::Mat input = cv::imread(imagePath, CV_LOAD_IMAGE_COLOR);
+	cv::Mat input = cv::imread(inputImage, CV_LOAD_IMAGE_COLOR);
 
 	if (input.empty()){
 		cout << "Image Not Found!" << std::endl;
@@ -108,7 +108,7 @@ int main(int argc, char *argv[]){
 	cv::Mat output(input.rows, input.cols, CV_8UC1);
 
 	//Call the wrapper function
-	convert_to_gray(input, output, imagePath);
+	convert_to_gray(input, output);
 
 	//Allow the windows to resize
   /*
