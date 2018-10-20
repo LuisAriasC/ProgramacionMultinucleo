@@ -16,6 +16,48 @@ using namespace std;
 #define tileSize 16
 //#define tileSize 32
 
+/*
+
+cv::cvtColor(Mat, cv_BGR2GRAY)
+
+//PARA SUMA DE HISTOGRAMA EN i ----  h_S[i] = Suma de i a j de h[i]
+// h_s[i] * (255 / (w * h))
+
+__global__ void multMatrixOnGPUWithTiles(long* M, long* N, long* R, int cols, int rows){
+__shared__ long s_M[TILE_WIDTH*TILE_WIDTH];
+__shared__ long s_N[TILE_WIDTH*TILE_WIDTH];
+
+  int tx = threadIdx.x;
+  int ty = threadIdx.y;
+  int Row = blockIdx.y * blockDim.y + ty;
+  int Col = blockIdx.x * blockDim.x + tx;
+
+  long result = 0;
+
+  for (int p = 0; p < (cols + TILE_WIDTH -1) / TILE_WIDTH; p++) {
+    if (Row < rows && p*TILE_WIDTH+tx < cols)
+      s_M[ty * TILE_WIDTH + tx] = M[Row*cols + p*TILE_WIDTH+tx];
+    else
+      s_M[ty*TILE_WIDTH+tx] = M[Rows*cols + p*TILE_WIDTH+tx];
+
+    if(Col < cols && p*TILE_WIDTH+ty < rows)
+      s_N[ty*TILE_WIDTH+tx] = N[(p*TILE_WIDTH+ty)*cols + Col];
+    else
+      s_N[ty*TILE_WIDTH+tx] = 0.0f;
+
+    __syncthreads();
+
+    for (int i = 0; i < TILE_WIDTH; i++)
+      result += s_M[ty*TILE_WIDTH+i] * s_N[i*TILE_WIDTH+tx];
+
+    __syncthreads();
+  }
+
+  if (Row < rows && Col < cols)
+    R[Row * cols + Col] = result;
+}
+*/
+
 //Matrix Multiplication on CPU
 void mulMatrixOnHost(long * MatA, long * MatB, long * MatR, const int size){
   for (int i = 0; i < size; i++)
