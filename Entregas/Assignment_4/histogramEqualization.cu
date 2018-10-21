@@ -52,35 +52,18 @@ __global__ void equalize_image_kernel(unsigned char* output, int* histo,int widt
   //int sizeImage = width * height;
 
 	if ((xIndex < width) && (yIndex < height)){
-    int h_index = (y * step_x) + x;
+
     int o_index = (yIndex * grayWidthStep) + xIndex;
-
-    n_histo[h_index] = 0;
-    __syncthreads();
-
     const int tid = yIndex * grayWidthStep + xIndex;
     atomicAdd(&histo[(int)output[tid]], 1);
     __syncthreads();
 
-    //Normalized histogram
-    int i;
-    for (i = 0; i <= h_index; i++)
-      atomicAdd(&n_histo[h_index], histo[i]);
-      //n_histo[h_index] += histo[i];
-    __syncthreads();
-
-    /*
-    unsigned int aux = (n_histo[h_index] * C_SIZE) / sizeImage;
-    n_histo[h_index] = aux;
-    __syncthreads();
-
-    output[o_index] = n_histo[h_index];
-    */
     if (o_index == 0) {
       for (i = 0; i < C_SIZE; i++) {
-        printf("%d\n", n_histo[i]);
+        printf("%d\n", histo[i]);
       }
     }
+    
 	}
 }
 
