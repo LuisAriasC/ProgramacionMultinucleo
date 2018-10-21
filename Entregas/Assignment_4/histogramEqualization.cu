@@ -79,8 +79,8 @@ __global__ void equalize_image_kernel(unsigned char* output, int* histo,int widt
     if (o_index == 0) {
       int sum = 0;
       for (int i = 0; i < C_SIZE; i++) {
-        sum += histo[i];
-        printf("%d : %d\n", i, histo[i]);
+        sum += n_histo[i];
+        printf("%d : %d\n", i, n_histo[i]);
         //printf("%d\n", histo[i]);
       }
       printf("%d - %d\n", sizeImage, sum);
