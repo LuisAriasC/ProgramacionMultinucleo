@@ -115,13 +115,17 @@ void histog(const cv::Mat &input, cv::Mat &output){
       n_histo[i] = aux;
   }
 
+  for (int i = 0; i < size_; i++)
+    output.ptr()[i] = n_histo[input.ptr()[i]];
+
+  /*
   for (int i = 0; i < height; i++){
       for(int j = 0; j < width; j++){
           int index = (int)input.at<uchar>(i,j);
           output.at<uchar>(i,j) = n_histo[index];
       }
   }
-
+  */
   cv::imwrite("Images/eq_outputImage.jpg" , output);
 }
 
