@@ -17,6 +17,7 @@
 using namespace std;
 
 int * equalize(int * histogram, int total,int length){
+  /*
     int step = total/length;
     int currentCumulative = 0;
     int * nhistogram = (int * )calloc(256,sizeof(int));
@@ -26,6 +27,17 @@ int * equalize(int * histogram, int total,int length){
         nhistogram[i] = currentCumulative/step;
     }
     return nhistogram;
+*/
+
+    //Normalized histogram
+    int * n_histo = (int *)calloc(256, sizeof(int));
+    for (int i = 0; i < C_SIZE; i++){
+        for(int j = 0; j <= i; j++)
+            n_histo[i] += histogram[j];
+        unsigned int aux  = (n_histo[i]*C_SIZE) / size_;
+        n_histo[i] = aux;
+    }
+    return n_histo;
 }
 /*
 int * equalize(int * histogram, int size,int length){
