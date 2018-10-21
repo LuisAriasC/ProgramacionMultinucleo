@@ -103,11 +103,10 @@ void equalize_image_cpu(const cv::Mat &input, int * histo){
 
   int size_ = input.rows * input.cols;
   for (int i = 0; i < size_; i++) {
-    printf("%d\n", input.ptr()[i]);
+    histo[intput.ptr()[i]]++;
   }
 
-
-    free(aux_histo);
+  free(aux_histo);
 }
 
 int main(int argc, char *argv[]){
@@ -141,6 +140,8 @@ int main(int argc, char *argv[]){
 	//Call the wrapper function
 	convert_to_gray(input, output);
   equalize_image_cpu(output, histo);
+  for (int i = 0; i < 256; i++)
+    printf("%d : %d\n", i, histo[i]);
 
 	//Allow the windows to resize
   /*
