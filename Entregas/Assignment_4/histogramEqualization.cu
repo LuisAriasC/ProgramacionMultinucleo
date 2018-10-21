@@ -51,7 +51,7 @@ __global__ void equalize_image_kernel(unsigned char* output, int * histo, int wi
 
 	if ((xIndex < width) && (yIndex < height)){
     const int tid = yIndex * grayWidthStep + xIndex;
-    atomicAdd(histo_[(int)output[tid]], 1);
+    atomicAdd(histo[(int)output[tid]], 1);
     __syncthreads();
 	}
 
@@ -60,7 +60,7 @@ __global__ void equalize_image_kernel(unsigned char* output, int * histo, int wi
   if (tid == 0) {
     int sum = 0;
     for (int i = 0; i < 256; i++) {
-      sum += (int)histo_[i];
+      sum += (int)histo[i];
     }
     printf("%d : %d\n", width * height, sum);
   }
@@ -73,7 +73,7 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, string imageName){
 	size_t grayBytes = output.step * output.rows;
 
 	unsigned char *d_input, *d_output;
-  int histogram[256]{};
+  //int histogram[256]{};
   int * d_histogram;
 
 	// Allocate device memory
