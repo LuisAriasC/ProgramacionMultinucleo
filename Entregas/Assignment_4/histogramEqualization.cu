@@ -118,7 +118,7 @@ void equalize_image_cpu(const cv::Mat &input, const cv::Mat &output, int * histo
     g_output[i] = transfer_function[input.ptr()[i]];
   }
 
-  memcpy(output.ptr(), g_output, grayBytes);
+  memcpy((void *)output.ptr(), g_output, grayBytes);
 
   cv::imwrite("Images/eq_outputImage.jpg" , output);
   free(g_output);
