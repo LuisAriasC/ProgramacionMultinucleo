@@ -118,7 +118,7 @@ void equalizer_cpu(const cv::Mat &input, cv::Mat &output, string imageName){
   for (int i = 0; i < size_; i++)
     output.ptr()[i] = n_histo[input.ptr()[i]];
 
-  cv::imwrite(img_dest + "eq_" + imageName , output);
+  cv::imwrite("Images/eq" + imageName , output);
 }
 
 int main(int argc, char *argv[]){
