@@ -26,7 +26,7 @@ int * gpu_equalize(int * histogram, int size, int len){
         n_histogram[i] = sum / step;
     }
 
-    return nhistogram;
+    return n_histogram;
 }
 
 // input - input image one dimensional array
