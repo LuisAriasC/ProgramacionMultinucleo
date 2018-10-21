@@ -127,7 +127,7 @@ int main(int argc, char *argv[]){
   int *histo;
   histo = (int *)malloc(nBytes);
   for (int i = 0; i < 256; i++)
-    aux_histo[i] = 0;
+    histo[i] = 0;
 
 	if (input.empty()){
 		cout << "Image Not Found!" << std::endl;
