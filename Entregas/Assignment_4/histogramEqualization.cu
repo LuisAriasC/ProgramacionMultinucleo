@@ -64,7 +64,8 @@ __global__ void equalize_image_kernel(unsigned char* output, int* histo,int widt
     __syncthreads();
 
     //Normalized histogram
-    for (int i = 0; i <= (y * step_x) + x); i++)
+    int i;
+    for (i = 0; i <= h_index; i++)
       n_histo[h_index] += histo[i];
     __syncthreads();
 
