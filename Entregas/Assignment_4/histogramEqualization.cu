@@ -93,7 +93,7 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output){
 	SAFE_CALL(cudaFree(d_output), "CUDA Free Failed");
 }
 
-void histog(const cv::Mat &input, const cv::Mat &output){
+void histog(const cv::Mat &input, cv::Mat &output){
 
   int width = input.cols;
   int height = input.rows;
