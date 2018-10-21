@@ -112,6 +112,10 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_output, 
   //Write the black & white image
   cv::imwrite("Images/bw_" + imageName , output);
 
+  printf("In CPU\n");
+  equalizer_cpu(output, eq_output, imageName);
+  printf("END CPU\n");
+  
   get_histogram_kernel<<<grid, block >>>(d_output, d_histogram, input.cols, input.rows, static_cast<int>(output.step));
   // Synchronize to check for any kernel launch errors
 	SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
@@ -163,6 +167,9 @@ void equalizer_cpu(const cv::Mat &input, cv::Mat &output, string imageName){
       unsigned int aux  = (n_histo[i]*C_SIZE) / size_;
       n_histo[i] = aux;
   }
+
+  for (int i = 0; i < C_SIZE; i++)
+    printf("%d\n", n_histo[i]);
 
   for (int i = 0; i < size_; i++)
     output.ptr()[i] = n_histo[input.ptr()[i]];
