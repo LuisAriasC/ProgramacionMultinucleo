@@ -53,7 +53,7 @@ __global__ void equalize_image_kernel(unsigned char* output, int* histo,int widt
     atomicAdd(histogram[(int)output[tid] % 256], 1);
     __syncthreads();
 
-    for ( i = 0; i < count; i++) {
+    for (int i = 0; i < count; i++) {
       /* code */
     }
 	}
@@ -87,7 +87,7 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output){
 
 	// Copy back data from destination device meory to OpenCV output image
 	SAFE_CALL(cudaMemcpy(output.ptr(), d_output, grayBytes, cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
-  SAFE_CALL(cudaMemcpy(histo, histogram, (256 * sizeof(int)), cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
+  //SAFE_CALL(cudaMemcpy(histo, histogram, (256 * sizeof(int)), cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
 
   //Write the black & white image
   cv::imwrite("Images/bw_outputImage.jpg" , output);
@@ -105,9 +105,9 @@ void equalize_image_cpu(const cv::Mat &input, int * histo){
   for (int i = 0; i < 256; i++)
     aux_histo[i] = 0;
 
-  int size_ = input.rows * input.colums;
+  int size_ = input.rows * input.cols;
   for (int i = 0; i < size_; i++) {
-    printf("%s\n", input[i]);
+    printf("%s\n", input.ptr()[i]);
   }
 
 
