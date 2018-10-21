@@ -103,7 +103,7 @@ __global__ void set_image_kernel(unsigned char* input, unsigned char* output, in
   if ((xIndex < width) && (yIndex < height)){
       int i = y * step_x + x;
       s_histo[i] = histo[i];
-      __syncthreads()
+      __syncthreads();
 
       const int tid = yIndex * grayWidthStep + xIndex;
       output[tid] =static_cast<unsigned char>(s_histo[input[tid]]);
