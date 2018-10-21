@@ -100,22 +100,23 @@ void histog(const cv::Mat &input, const cv::Mat &output){
   int size_ = width * height;
 
   //Histogram
-  int nBytes = 256 * sizeof(int);
-  int *histo;
+  //int nBytes = 256 * sizeof(int);
+  int histo[256]{};
+  /*
   histo = (int *)malloc(nBytes);
   for (int i = 0; i < 256; i++)
     histo[i] = 0;
-
+  */
   //Fill histogram
   for (int i = 0; i < size_; i++)
     histo[input.ptr()[i]]++;
 
-  int sum = 0;
+  /*
+  int *aux_histo;
+  histo = (int *)malloc(nBytes);
   for (int i = 0; i < 256; i++)
-    sum += histo[i];
-    //printf("%d : %d\n", i, histo[i]);
-
-  printf("%d %d\n",size_, sum );
+    histo[i] = 0;
+  */
     /*
     int x = image.cols;
     int y = image.rows;
