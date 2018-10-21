@@ -17,7 +17,6 @@
 using namespace std;
 
 int * gpu_equalize(int * histogram, int size){
-  /*
     int step = size / C_SIZE;
     int sum = 0;
     int * n_histogram = (int * )calloc(C_SIZE,sizeof(int));
@@ -26,17 +25,6 @@ int * gpu_equalize(int * histogram, int size){
         sum += histogram[i];
         n_histogram[i] = sum / step;
     }
-*/
-
-    int * n_histogram = (int * )calloc(C_SIZE,sizeof(int));
-
-    for (int i = 0; i < C_SIZE; i++){
-        for(int j = 0; j <= i; j++)
-            n_histogram[i] += histogram[j];
-        unsigned int aux  = (n_histogram[i] * C_SIZE) / size;
-        n_histogram[i] = aux;
-    }
-
     return n_histogram;
 }
 
@@ -130,7 +118,7 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_output, 
   SAFE_CALL(cudaMemcpy(histogram, d_histogram, C_SIZE * sizeof(int), cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
 
   int * f_histogram = gpu_equalize(histogram, imSize);
-  
+
   int sum = 0;
   for (int i = 0; i < C_SIZE; i++)
     sum += histogram[i];
