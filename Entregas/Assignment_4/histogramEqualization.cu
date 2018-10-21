@@ -45,6 +45,10 @@ __global__ void equalize_image_kernel(unsigned char* output, int* histo,int widt
 	const int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
 	const int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
 
+  for (int i = 0; i < 256; i++)
+    histogram[i] = 0;
+  __syncthreads();
+  
 	if ((xIndex < width) && (yIndex < height)){
     const int tid = yIndex * grayWidthStep + xIndex;
     atomicAdd(histogram[(int)output[tid] % 256], 1);
@@ -117,9 +121,6 @@ int main(int argc, char *argv[]){
 
 	//Call the wrapper function
 	convert_to_gray(input, output);
-
-  for (int i = 0; i < 256; i++)
-    histogram[i] = 0;
 
 	//Allow the windows to resize
   /*
