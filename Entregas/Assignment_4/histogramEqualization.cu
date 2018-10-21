@@ -48,7 +48,6 @@ __global__ void equalize_image_kernel(unsigned char* output, int* histo,int widt
   const int x = threadIdx.x;
   const int y = threadIdx.y;
   const int step_x = blockDim.x;
-  const int step_y = blockDim.y;
 
   int sizeImage = width * height;
 
@@ -82,7 +81,7 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, string imageName){
 
 	size_t colorBytes = input.step * input.rows;
 	size_t grayBytes = output.step * output.rows;
-  int imSize = input.cols * input.rows;
+  //int imSize = input.cols * input.rows;
 
 	unsigned char *d_input, *d_output;
   int * d_histogram;
