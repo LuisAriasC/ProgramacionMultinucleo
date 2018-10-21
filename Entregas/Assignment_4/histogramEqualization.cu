@@ -95,11 +95,11 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output){
 
 void equalize_image_cpu(const cv::Mat &input, const cv::Mat &output, int * histo){
 
-  unsigned char *g_output;
+  int *g_output;
   int size_ = input.rows * input.cols;
   const int grayBytes = input.step * input.rows;
 
-  g_output = (unsigned char *)malloc(size_ * sizeof(char));
+  g_output = (int *)malloc(size_ * sizeof(int));
   for (int i = 0; i < size_; i++) {
     histo[input.ptr()[i]]++;
   }
