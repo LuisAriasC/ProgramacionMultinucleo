@@ -58,6 +58,14 @@ __global__ void equalize_image_kernel(unsigned char* output, int* histo, int wid
     atomicAdd(histo_[(int)output[tid]], 1);
     __syncthreads();
 	}
+
+  if (tid == 0) {
+    int sum = 0;
+    for (int i = 0; i < 256; i++) {
+      sum += histogram[i];
+    }
+    printf("%d : %d\n", output.rows * output.cols, sum);
+  }
 }
 
 void convert_to_gray(const cv::Mat& input, cv::Mat& output, string imageName){
@@ -85,11 +93,6 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, string imageName){
 	// Launch the color conversion kernel
 	bgr_to_gray_kernel <<<grid, block >>>(d_input, d_output, input.cols, input.rows, static_cast<int>(input.step), static_cast<int>(output.step));
   equalize_image_kernel <<<grid, block>>>(d_input, histogram, output.cols, output.rows, static_cast<int>(output.step));
-  int sum = 0;
-  for (int i = 0; i < 256; i++) {
-    sum += histogram[i];
-  }
-  printf("%d : %d\n", output.rows * output.cols, );
 
 	// Synchronize to check for any kernel launch errors
 	SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
