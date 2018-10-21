@@ -12,6 +12,7 @@
 
 #define img_dest "Images/"
 #define default_image "dog1.jpeg"
+#define C_SIZE 256
 
 __shared__ int * histogram[256];
 
@@ -45,13 +46,13 @@ __global__ void equalize_image_kernel(unsigned char* output, int* histo,int widt
 	const int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
 	const int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
 
-  for (int i = 0; i < 256; i++)
+  for (int i = 0; i < C_SIZE; i++)
     histogram[i] = 0;
   __syncthreads();
 
 	if ((xIndex < width) && (yIndex < height)){
     const int tid = yIndex * grayWidthStep + xIndex;
-    atomicAdd(histogram[(int)output[tid] % 256], 1);
+    atomicAdd(histogram[(int)output[tid] % C_SIZE], 1);
     __syncthreads();
 	}
 
@@ -65,6 +66,11 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, string imageName){
 	size_t grayBytes = output.step * output.rows;
 
 	unsigned char *d_input, *d_output;
+  int * histogram = (int *)malloc(C_SIZE * sizeof(int));
+  for (int i = 0; i < C_SIZE; i++)
+    histogram[i] = (int)malloc(sizeof(int));
+    for (int i = 0; i < C_SIZE; i++)
+      histogram[i] = 0;
 
 	// Allocate device memory
 	SAFE_CALL(cudaMalloc<unsigned char>(&d_input, colorBytes), "CUDA Malloc Failed");
@@ -100,18 +106,18 @@ void equalizer_cpu(const cv::Mat &input, cv::Mat &output, string imageName){
   int size_ = width * height;
 
   //Histogram
-  int histo[256]{};
+  int histo[C_SIZE]{};
 
   //Fill histogram
   for (int i = 0; i < size_; i++)
     histo[input.ptr()[i]]++;
 
   //Normalized histogram
-  long n_histo[256]{};
-  for (int i = 0; i < 256; i++){
+  long n_histo[C_SIZE]{};
+  for (int i = 0; i < C_SIZE; i++){
       for(int j = 0; j <= i; j++)
           n_histo[i] += histo[j];
-      unsigned int aux  = (n_histo[i]*255) / size_;
+      unsigned int aux  = (n_histo[i]*C_SIZE) / size_;
       n_histo[i] = aux;
   }
 
