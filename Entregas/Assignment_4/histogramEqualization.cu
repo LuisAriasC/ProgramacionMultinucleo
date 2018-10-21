@@ -77,7 +77,7 @@ __global__ void equalize_image_kernel(unsigned char* output, int* histo,int widt
     */
     if (o_index == 0) {
       for (i = 0; i < C_SIZE; i++) {
-        printf("%d\n", n_histo[i]);
+        printf("%d\n", histo[i]);
       }
     }
 	}
