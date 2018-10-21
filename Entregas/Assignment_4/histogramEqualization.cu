@@ -121,8 +121,13 @@ int main(int argc, char *argv[]){
 
 	// Read input image from the disk
 	cv::Mat input = cv::imread(inputImage, CV_LOAD_IMAGE_COLOR);
+
   //Histogram
-  int * histo[256]{};
+  int nBytes = 256 * sizeof(int);
+  int *histo;
+  histo = (int *)malloc(nBytes);
+  for (int i = 0; i < 256; i++)
+    aux_histo[i] = 0;
 
 	if (input.empty()){
 		cout << "Image Not Found!" << std::endl;
