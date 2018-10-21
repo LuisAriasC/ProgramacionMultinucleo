@@ -52,10 +52,6 @@ __global__ void equalize_image_kernel(unsigned char* output, int* histo,int widt
     const int tid = yIndex * grayWidthStep + xIndex;
     atomicAdd(histogram[(int)output[tid] % 256], 1);
     __syncthreads();
-
-    for (int i = 0; i < count; i++) {
-      /* code */
-    }
 	}
 
 
@@ -139,7 +135,7 @@ int main(int argc, char *argv[]){
 
 	//Call the wrapper function
 	convert_to_gray(input, output);
-  void equalize_image_cpu(output, histo){
+  equalize_image_cpu(output, histo);
 
 	//Allow the windows to resize
   /*
