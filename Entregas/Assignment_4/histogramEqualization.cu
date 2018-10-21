@@ -117,7 +117,7 @@ void histog(const cv::Mat &input, const cv::Mat &output){
 
   for (int i = 0; i < height; i++){
       for(int j = 0; j < width; j++){
-          unsigned int index = (int)image.at<uchar>(i,j);
+          int index = (int)input.at<uchar>(i,j);
           output.at<uchar>(i,j) = n_histo[index];
       }
   }
