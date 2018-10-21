@@ -105,15 +105,13 @@ void histog(const cv::Mat &input, const cv::Mat &output){
   histo = (int *)malloc(nBytes);
 
   for (int i = 0; i < size_; i++)
-    printf("%d\n", input.ptr()[i]);
-    //histo[input.ptr()[i]]++;
+    //printf("%d\n", input.ptr()[i]);
+    histo[input.ptr()[i]]++;
 
-
-  int sum = 0;
   for (int i = 0; i < 256; i++)
-    sum += histo[i];
+    printf("%d : %d\n", i, histo[i]);
 
-  printf("%d %d\n",size_, sum );
+  //printf("%d %d\n",size_, sum );
     /*
     int x = image.cols;
     int y = image.rows;
