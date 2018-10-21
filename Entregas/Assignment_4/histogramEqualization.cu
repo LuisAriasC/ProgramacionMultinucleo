@@ -49,7 +49,7 @@ __global__ void equalize_image_kernel(unsigned char* output, int* histo,int widt
   const int y = threadIdx.y;
   const int step_x = blockDim.x;
 
-  int sizeImage = width * height;
+  //int sizeImage = width * height;
 
 	if ((xIndex < width) && (yIndex < height)){
     int h_index = (y * step_x) + x;
@@ -76,8 +76,8 @@ __global__ void equalize_image_kernel(unsigned char* output, int* histo,int widt
     output[o_index] = n_histo[h_index];
     */
     if (o_index == 0) {
-      for (int i = 0; i < C_SIZE; i++) {
-        cout << n_histo[i]  << " "; 
+      for (i = 0; i < C_SIZE; i++) {
+        printf("%d\n", n_histo[i]);
       }
     }
 	}
