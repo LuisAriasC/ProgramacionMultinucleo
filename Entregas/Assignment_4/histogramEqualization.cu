@@ -88,7 +88,7 @@ __global__ void equalize_image_kernel(unsigned char* output, int* histo,int widt
 	}
 }
 
-void convert_to_gray(const cv::Mat& input, cv::Mat& output, string imageName){
+void convert_to_gray(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_output, string imageName){
 
 
 	size_t colorBytes = input.step * input.rows;
@@ -121,6 +121,8 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, string imageName){
   SAFE_CALL(cudaMemcpy(output.ptr(), d_output, grayBytes, cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
   //Write the black & white image
   cv::imwrite("Images/bw_" + imageName , output);
+
+  equalizer_cpu(output, eq_output, imageName);
 
   equalize_image_kernel<<<grid, block >>>(d_output, d_histogram, input.cols, input.rows, static_cast<int>(output.step));
   // Synchronize to check for any kernel launch errors
@@ -166,6 +168,13 @@ void equalizer_cpu(const cv::Mat &input, cv::Mat &output, string imageName){
   for (int i = 0; i < size_; i++)
     output.ptr()[i] = n_histo[input.ptr()[i]];
 
+  int sum = 0;
+  for (int i = 0; i < C_SIZE; i++){
+    sum += n_histo[i];
+    printf("%d : %d\n", i, n_histo[i]);
+  }
+  printf("Histo sum %d\n", sum);
+
   cv::imwrite("Images/eq_" + imageName , output);
 }
 
@@ -193,7 +202,7 @@ int main(int argc, char *argv[]){
   cv::Mat eq_output(input.rows, input.cols, CV_8UC1);
 
 	//Convert image to gray
-	convert_to_gray(input, output, inputImage);
+	convert_to_gray(input, output, eq_output, inputImage);
   //equalizer_cpu(output, eq_output, inputImage);
 
 	//Allow the windows to resize
