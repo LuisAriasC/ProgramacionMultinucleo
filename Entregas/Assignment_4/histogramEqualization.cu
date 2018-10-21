@@ -87,7 +87,7 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, string imageName){
 	// Launch the color conversion kernel
 	bgr_to_gray_kernel <<<grid, block >>>(d_input, d_output, input.cols, input.rows, static_cast<int>(input.step), static_cast<int>(output.step));
   // Synchronize to check for any kernel launch errors
-	SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
+	//SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
 
 
 
