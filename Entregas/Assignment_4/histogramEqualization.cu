@@ -90,7 +90,7 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, string imageName){
 
 	// Launch the color conversion kernel
 	bgr_to_gray_kernel <<<grid, block >>>(d_input, d_output, input.cols, input.rows, static_cast<int>(input.step), static_cast<int>(output.step));
-  equalize_image_kernel <<<grid, block>>>(d_input, d_histogram, output.cols, output.rows, static_cast<int>(output.step));
+  //equalize_image_kernel <<<grid, block>>>(d_input, d_histogram, output.cols, output.rows, static_cast<int>(output.step));
 
 	// Synchronize to check for any kernel launch errors
 	SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
@@ -160,7 +160,7 @@ int main(int argc, char *argv[]){
 
 	//Convert image to gray
 	convert_to_gray(input, output, inputImage);
-  //equalizer_cpu(output, eq_output, inputImage);
+  equalizer_cpu(output, eq_output, inputImage);
 
 	//Allow the windows to resize
   /*
