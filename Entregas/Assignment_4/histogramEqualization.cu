@@ -28,7 +28,7 @@ int * gpu_equalize(int * histogram, int size){
     }
 */
 
-    int n_histogram = (int * )calloc(C_SIZE,sizeof(int));
+    int * n_histogram = (int * )calloc(C_SIZE,sizeof(int));
 
     for (int i = 0; i < C_SIZE; i++){
         for(int j = 0; j <= i; j++)
