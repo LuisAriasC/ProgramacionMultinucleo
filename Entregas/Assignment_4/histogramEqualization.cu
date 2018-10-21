@@ -95,7 +95,9 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output){
 
 void equalize_image_cpu(const cv::Mat &input, const cv::Mat &output, int * histo){
 
+  unsigned char *g_output;
   int size_ = input.rows * input.cols;
+  g_output = (char *)malloc(size_ * sizeof(char));
   for (int i = 0; i < size_; i++) {
     histo[input.ptr()[i]]++;
   }
@@ -111,11 +113,10 @@ void equalize_image_cpu(const cv::Mat &input, const cv::Mat &output, int * histo
   }
 
   for (int i = 0; i < size_; i++) {
-    output.ptr()[i] = transfer_function[input.ptr()[i]];
+    g_output[i] = transfer_function[input.ptr()[i]];
   }
 
   cv::imwrite("Images/eq_outputImage.jpg" , output);
-  free(aux_histo);
   free(transfer_function);
 }
 
