@@ -118,7 +118,7 @@ void equalizer_cpu(const cv::Mat &input, cv::Mat &output, string imageName){
     sum += n_histo[i];
     printf("%d : %d\n", i, n_histo[i]);
   }
-  printf("Histo sum %d\n", sum);
+  printf("Histo sum %li\n", sum);
 
   cv::imwrite("Images/eq_" + imageName , output);
 }
