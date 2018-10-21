@@ -103,7 +103,7 @@ void equalize_image_cpu(const cv::Mat &input, int * histo){
 
   int size_ = input.rows * input.cols;
   for (int i = 0; i < size_; i++) {
-    printf("%s\n", input.ptr()[i]);
+    printf("%d\n", input.ptr()[i]);
   }
 
 
