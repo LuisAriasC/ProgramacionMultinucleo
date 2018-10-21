@@ -65,7 +65,7 @@ __global__ void get_histogram_kernel(unsigned char* output, int* histo,int width
 
 __global__ void set_image_kernel(unsigned char* input, unsigned char* output, int* histo,int width, int height, int grayWidthStep){
 
-  __shared__ int s_histo[C_SIZE];
+  __shared__ int * s_histo;
   for(int i = 0; i < C_SIZE; i++)
       s_histo[i] = histo[i];
   __syncthreads();
