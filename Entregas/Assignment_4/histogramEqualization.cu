@@ -15,6 +15,8 @@
 
 using namespace std;
 
+
+__shared__ int * histo_[256];
 // input - input image one dimensional array
 // ouput - output image one dimensional array
 // width, height - width and height of the images
@@ -42,6 +44,7 @@ __global__ void equalize_image_kernel(unsigned char* output, int* histo, int wid
   __shared__ int n_histogram[256];
 
   for (int i = 0; i < 256; i++){
+    histo_[i] = 0;
     n_histogram[i] = 0;
   }
   __syncthreads();
