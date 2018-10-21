@@ -21,8 +21,7 @@ using namespace std;
 // width, height - width and height of the images
 // colorWidthStep - number of color bytes (cols * colors)
 // grayWidthStep - number of gray bytes
-__global__ void bgr_to_gray_kernel(unsigned char* input, unsigned char* output, int width, int height, int colorWidthStep, int grayWidthStep)
-{
+__global__ void bgr_to_gray_kernel(unsigned char* input, unsigned char* output, int width, int height, int colorWidthStep, int grayWidthStep){
 	// 2D Index of current thread
 	const int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
 	const int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
@@ -48,7 +47,7 @@ __global__ void equalize_image_kernel(unsigned char* output, int* histo,int widt
   for (int i = 0; i < 256; i++)
     histogram[i] = 0;
   __syncthreads();
-  
+
 	if ((xIndex < width) && (yIndex < height)){
     const int tid = yIndex * grayWidthStep + xIndex;
     atomicAdd(histogram[(int)output[tid] % 256], 1);
@@ -89,6 +88,7 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output){
 
 	// Copy back data from destination device meory to OpenCV output image
 	SAFE_CALL(cudaMemcpy(output.ptr(), d_output, grayBytes, cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
+  SAFE_CALL(cudaMemcpy(histo, histogram, (256 * sizeof(int)), cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
 
   //Write the black & white image
   cv::imwrite("Images/bw_outputImage.jpg" , output);
