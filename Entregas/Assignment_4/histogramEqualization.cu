@@ -14,8 +14,6 @@
 #define default_image "dog1.jpeg"
 #define C_SIZE 256
 
-__shared__ int * histogram[256];
-
 using namespace std;
 
 // input - input image one dimensional array
@@ -46,13 +44,9 @@ __global__ void equalize_image_kernel(unsigned char* output, int* histo,int widt
 	const int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
 	const int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
 
-  for (int i = 0; i < C_SIZE; i++)
-    histogram[i] = 0;
-  __syncthreads();
-
 	if ((xIndex < width) && (yIndex < height)){
     const int tid = yIndex * grayWidthStep + xIndex;
-    atomicAdd(histogram[(int)output[tid]], 1);
+    atomicAdd(histo[(int)output[tid]], 1);
     __syncthreads();
 	}
 
@@ -88,8 +82,6 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, string imageName){
 	bgr_to_gray_kernel <<<grid, block >>>(d_input, d_output, input.cols, input.rows, static_cast<int>(input.step), static_cast<int>(output.step));
   // Synchronize to check for any kernel launch errors
 	//SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
-
-
 
   equalize_image_kernel<<<grid, block >>>(d_output, d_histogram, input.cols, input.rows, static_cast<int>(output.step));
   // Synchronize to check for any kernel launch errors
