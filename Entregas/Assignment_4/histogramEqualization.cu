@@ -108,7 +108,7 @@ void histog(const cv::Mat &input, const cv::Mat &output){
 
   for (int i = 0; i < size_; i++){
     //printf("%d = %d\n", i, input.ptr()[i]);
-    histo[input.ptr()[i]] += 1;
+    histo[input.ptr()[i]]++;
   }
   for (int i = 0; i < 256; i++)
     printf("%d : %d\n", i, histo[i]);
