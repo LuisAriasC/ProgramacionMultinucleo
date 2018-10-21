@@ -17,6 +17,7 @@
 using namespace std;
 
 int * gpu_equalize(int * histogram, int size){
+  /*
     int step = size / C_SIZE;
     int sum = 0;
     int * n_histogram = (int * )calloc(C_SIZE,sizeof(int));
@@ -24,6 +25,16 @@ int * gpu_equalize(int * histogram, int size){
     for(int i=0; i < C_SIZE; i++){
         sum += histogram[i];
         n_histogram[i] = sum / step;
+    }
+*/
+
+    int n_histogram = (int * )calloc(C_SIZE,sizeof(int));
+
+    for (int i = 0; i < C_SIZE; i++){
+        for(int j = 0; j <= i; j++)
+            n_histogram[i] += histogram[j];
+        unsigned int aux  = (n_histogram[i] * C_SIZE) / size;
+        n_histogram[i] = aux;
     }
 
     return n_histogram;
@@ -158,7 +169,7 @@ void equalizer_cpu(const cv::Mat &input, cv::Mat &output, string imageName){
     histo[input.ptr()[i]]++;
 
   //Normalized histogram
-  long n_histo[C_SIZE]{};
+  int n_histo[C_SIZE]{};
   for (int i = 0; i < C_SIZE; i++){
       for(int j = 0; j <= i; j++)
           n_histo[i] += histo[j];
