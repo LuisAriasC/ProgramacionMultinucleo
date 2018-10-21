@@ -49,7 +49,7 @@ __global__ void equalize_image_kernel(unsigned char* output, int* histo,int widt
   const int y = threadIdx.y;
   const int step_x = blockDim.x;
 
-  //int sizeImage = width * height;
+  int sizeImage = width * height;
 
 	if ((xIndex < width) && (yIndex < height)){
     int h_index = (y * step_x) + x;
