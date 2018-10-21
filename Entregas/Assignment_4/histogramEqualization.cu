@@ -13,8 +13,6 @@
 #define img_dest "Images/"
 #define default_image "dog1.jpeg"
 
-__shared__ int * histogram[256];
-
 using namespace std;
 
 // input - input image one dimensional array
@@ -41,21 +39,20 @@ __global__ void bgr_to_gray_kernel(unsigned char* input, unsigned char* output, 
 
 __global__ void equalize_image_kernel(unsigned char* output, int* histo,int width, int height, int grayWidthStep){
 
+  _shared__ int n_histogram[256];
+  for (int i = 0; i < 256; i++)
+    n_histogram[i] = 0;
+  __syncthreads();
+
 	// 2D Index of current thread
 	const int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
 	const int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
 
-  for (int i = 0; i < 256; i++)
-    histogram[i] = 0;
-  __syncthreads();
-
 	if ((xIndex < width) && (yIndex < height)){
     const int tid = yIndex * grayWidthStep + xIndex;
-    atomicAdd(histogram[(int)output[tid] % 256], 1);
+    atomicAdd(histo[(int)output[tid]], 1);
     __syncthreads();
 	}
-
-
 }
 
 void convert_to_gray(const cv::Mat& input, cv::Mat& output, string imageName){
@@ -65,6 +62,10 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, string imageName){
 	size_t grayBytes = output.step * output.rows;
 
 	unsigned char *d_input, *d_output;
+  int * histogram;
+  histogram = (int *)malloc(256 * sizeof(int));
+  for (int i = 0; i < 256; i++)
+    histogram[i] = 0;
 
 	// Allocate device memory
 	SAFE_CALL(cudaMalloc<unsigned char>(&d_input, colorBytes), "CUDA Malloc Failed");
@@ -78,6 +79,12 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, string imageName){
 
 	// Launch the color conversion kernel
 	bgr_to_gray_kernel <<<grid, block >>>(d_input, d_output, input.cols, input.rows, static_cast<int>(input.step), static_cast<int>(output.step));
+  equalize_image_kernel <<<grid, block>>>(d_input, histogram, output.cols, output.rows, static_cast<int>(output.step));
+  int sum = 0;
+  for (int i = 0; i < 256; i++) {
+    sum += histogram[i];
+  }
+  printf("%d : %d\n", output.rows * output.cols, );
 
 	// Synchronize to check for any kernel launch errors
 	SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
@@ -118,7 +125,8 @@ void equalizer_cpu(const cv::Mat &input, cv::Mat &output, string imageName){
   for (int i = 0; i < size_; i++)
     output.ptr()[i] = n_histo[input.ptr()[i]];
 
-  cv::imwrite("Images/eq" + imageName , output);
+  cv::imwrite("Images/eq_" + imageName , output);
+
 }
 
 int main(int argc, char *argv[]){
@@ -146,7 +154,7 @@ int main(int argc, char *argv[]){
 
 	//Convert image to gray
 	convert_to_gray(input, output, inputImage);
-  equalizer_cpu(output, eq_output, inputImage);
+  //equalizer_cpu(output, eq_output, inputImage);
 
 	//Allow the windows to resize
   /*
