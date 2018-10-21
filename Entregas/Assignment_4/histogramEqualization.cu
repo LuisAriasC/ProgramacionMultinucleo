@@ -103,9 +103,17 @@ void histog(const cv::Mat &input, const cv::Mat &output){
   int nBytes = 256 * sizeof(int);
   int *histo;
   histo = (int *)malloc(nBytes);
+  for (int i = 0; i < y; i++){
+      for (int j = 0; j < x; j++){
+          unsigned int index = (int)input.at<uchar>(i,j);
+          histo[index]++;
+      }
+  }
+  /*
   for (int i = 0; i < size_; i++)
     histo[input.ptr()[i]]++;
 
+    */
   int sum = 0;
   for (int i = 0; i < 256; i++)
     sum += histo[i];
