@@ -66,9 +66,9 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, string imageName){
 	size_t grayBytes = output.step * output.rows;
 
 	unsigned char *d_input, *d_output;
-  int * histogram = (int *)malloc(C_SIZE * sizeof(int));
+  int * histogram = (int *)malloc(C_SIZE * sizeof(int *));
   for (int i = 0; i < C_SIZE; i++)
-    histogram[i] = (int)malloc(1 * sizeof(int));
+    histogram[i] = (int *)malloc(sizeof(int));
     for (int i = 0; i < C_SIZE; i++)
       histogram[i] = 0;
 
