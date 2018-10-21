@@ -13,7 +13,10 @@
 #define img_dest "Images/"
 #define default_image "dog1.jpeg"
 
+__shared__ int * histogram[256];
+
 using namespace std;
+
 // input - input image one dimensional array
 // ouput - output image one dimensional array
 // width, height - width and height of the images
@@ -36,34 +39,23 @@ __global__ void bgr_to_gray_kernel(unsigned char* input, unsigned char* output, 
 }
 
 
-__global__ void equalize_image_kernel(unsigned char* output, int * histo, int width, int height, int grayWidthStep){
-
-  __shared__ int n_histogram[256];
-
-  for (int i = 0; i < 256; i++){
-    n_histogram[i] = 0;
-  }
-  __syncthreads();
+__global__ void equalize_image_kernel(unsigned char* output, int* histo,int width, int height, int grayWidthStep){
 
 	// 2D Index of current thread
 	const int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
 	const int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
 
+  for (int i = 0; i < 256; i++)
+    histogram[i] = 0;
+  __syncthreads();
+
 	if ((xIndex < width) && (yIndex < height)){
     const int tid = yIndex * grayWidthStep + xIndex;
-    atomicAdd((int)histo[(int)output[tid]], 1);
+    atomicAdd(histogram[(int)output[tid] % 256], 1);
     __syncthreads();
 	}
 
 
-    const int tid = yIndex * grayWidthStep + xIndex;
-  if (tid == 0) {
-    int sum = 0;
-    for (int i = 0; i < 256; i++) {
-      sum += (int)histo[i];
-    }
-    printf("%d : %d\n", width * height, sum);
-  }
 }
 
 void convert_to_gray(const cv::Mat& input, cv::Mat& output, string imageName){
@@ -73,14 +65,10 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, string imageName){
 	size_t grayBytes = output.step * output.rows;
 
 	unsigned char *d_input, *d_output;
-  //int histogram[256]{};
-  int * d_histogram;
 
 	// Allocate device memory
 	SAFE_CALL(cudaMalloc<unsigned char>(&d_input, colorBytes), "CUDA Malloc Failed");
 	SAFE_CALL(cudaMalloc<unsigned char>(&d_output, grayBytes), "CUDA Malloc Failed");
-  SAFE_CALL(cudaMalloc<int>(&d_histogram, 256 * sizeof(int)), "CUDA Malloc Failed");
-  SAFE_CALL(cudaMemset(d_histogram, 0, 256 * sizeof(int)), "Error setting device count");
 
 	// Copy data from OpenCV input image to device memory
 	SAFE_CALL(cudaMemcpy(d_input, input.ptr(), colorBytes, cudaMemcpyHostToDevice), "CUDA Memcpy Host To Device Failed");
@@ -90,7 +78,6 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, string imageName){
 
 	// Launch the color conversion kernel
 	bgr_to_gray_kernel <<<grid, block >>>(d_input, d_output, input.cols, input.rows, static_cast<int>(input.step), static_cast<int>(output.step));
-  //equalize_image_kernel <<<grid, block>>>(d_input, d_histogram, output.cols, output.rows, static_cast<int>(output.step));
 
 	// Synchronize to check for any kernel launch errors
 	SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
@@ -132,7 +119,6 @@ void equalizer_cpu(const cv::Mat &input, cv::Mat &output, string imageName){
     output.ptr()[i] = n_histo[input.ptr()[i]];
 
   cv::imwrite("Images/eq_" + imageName , output);
-
 }
 
 int main(int argc, char *argv[]){
