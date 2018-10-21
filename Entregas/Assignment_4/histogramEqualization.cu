@@ -97,6 +97,8 @@ void equalize_image_cpu(const cv::Mat &input, const cv::Mat &output, int * histo
 
   unsigned char *g_output;
   int size_ = input.rows * input.cols;
+  const int grayBytes = input.step * input.rows;
+
   g_output = (unsigned char *)malloc(size_ * sizeof(char));
   for (int i = 0; i < size_; i++) {
     histo[input.ptr()[i]]++;
@@ -116,7 +118,10 @@ void equalize_image_cpu(const cv::Mat &input, const cv::Mat &output, int * histo
     g_output[i] = transfer_function[input.ptr()[i]];
   }
 
+  memcpy(output.ptr(), g_output, grayBytes);
+
   cv::imwrite("Images/eq_outputImage.jpg" , output);
+  free(g_output);
   free(transfer_function);
 }
 
