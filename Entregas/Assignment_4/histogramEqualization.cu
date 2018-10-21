@@ -77,6 +77,52 @@ void equalizer_cpu(const cv::Mat &input, cv::Mat &output, string imageName){
   cv::imwrite("Images/eq_cpu_" + imageName , output);
 }
 
+__global__ void equalizer_kernel(unsigned char* input, unsigned char* output, int width, int height, int grayWidthStep, long totalSize){
+
+    //2D Index of current thread
+	unsigned int ix = threadIdx.x + blockIdx.x * blockDim.x;
+  unsigned int iy = threadIdx.y + blockIdx.y * blockDim.y;
+
+  unsigned int nxy = threadIdx.x + threadIdx.y * blockDim.x;
+
+  //Location of gray pixel in output
+  const int gray_tid  = iy * grayWidthStep + ix;
+
+  __shared__ int hist[256];
+  __shared__ int hist_s[256];
+
+  hist[nxy] = 0;
+
+  __syncthreads();
+
+  //Only valid threads perform memory I/O
+  if((ix<width) && (iy<height)){
+      atomicAdd(&hist[input[gray_tid]], 1);
+  }
+  __syncthreads();
+
+
+  if(nxy < 256 && blockIdx.x == 0 && blockIdx.y == 0){
+	   __syncthreads();
+		for(int i = 0; i <= nxy; i++){
+           hist_s[nxy] += hist[i];
+           printf("%d\n", hist[i]);
+        }
+  }
+  __syncthreads();
+
+  if(nxy < 256 && blockIdx.x == 0 && blockIdx.y==0){
+      int aux = (hist_s[nxy]*255)/totalSize;
+      hist_s[nxy] = aux;
+	}
+  __syncthreads();
+
+    if((ix < width) && (iy < height)){
+      int Index = input[gray_tid];
+		    output[gray_tid] = hist_s[Index];
+    }
+}
+
 __global__ void get_histogram_kernel(unsigned char* output, int* histo,int width, int height, int grayWidthStep){
 
 	// 2D Index of current thread
@@ -145,6 +191,11 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_output, 
   equalizer_cpu(output, eq_output, imageName);
   printf("END CPU\n");
 
+  equalizer_kernel<<<grid, block >>>(d_output, de_output, input.cols, input.rows, static_cast<int>(output.step), imSize);
+  SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
+  SAFE_CALL(cudaMemcpy(eq_output.ptr(), de_output, grayBytes, cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
+
+  /*
   get_histogram_kernel<<<grid, block >>>(d_output, d_histogram, input.cols, input.rows, static_cast<int>(output.step));
   // Synchronize to check for any kernel launch errors
 	SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
@@ -164,6 +215,7 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_output, 
   // Synchronize to check for any kernel launch errors
   SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
   SAFE_CALL(cudaMemcpy(eq_output.ptr(), de_output, grayBytes, cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
+  */
   //Write the black & white image
   cv::imwrite("Images/eq_gpu_" + imageName , eq_output);
 
