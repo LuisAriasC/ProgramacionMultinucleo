@@ -14,9 +14,6 @@
 #define default_image "dog1.jpeg"
 
 using namespace std;
-
-
-__shared__ int * histo_[256];
 // input - input image one dimensional array
 // ouput - output image one dimensional array
 // width, height - width and height of the images
@@ -39,12 +36,11 @@ __global__ void bgr_to_gray_kernel(unsigned char* input, unsigned char* output, 
 }
 
 
-__global__ void equalize_image_kernel(unsigned char* output, int* histo, int width, int height, int grayWidthStep){
+__global__ void equalize_image_kernel(unsigned char* output, int * histo, int width, int height, int grayWidthStep){
 
   __shared__ int n_histogram[256];
 
   for (int i = 0; i < 256; i++){
-    histo_[i] = 0;
     n_histogram[i] = 0;
   }
   __syncthreads();
@@ -94,7 +90,7 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, string imageName){
 
 	// Launch the color conversion kernel
 	bgr_to_gray_kernel <<<grid, block >>>(d_input, d_output, input.cols, input.rows, static_cast<int>(input.step), static_cast<int>(output.step));
-  equalize_image_kernel <<<grid, block>>>(d_input, histogram, output.cols, output.rows, static_cast<int>(output.step));
+  equalize_image_kernel <<<grid, block>>>(d_input, d_histogram, output.cols, output.rows, static_cast<int>(output.step));
 
 	// Synchronize to check for any kernel launch errors
 	SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
