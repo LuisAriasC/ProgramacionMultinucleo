@@ -93,20 +93,30 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output){
 	SAFE_CALL(cudaFree(d_output), "CUDA Free Failed");
 }
 
-void equalize_image_cpu(const cv::Mat &input, int * histo){
-
-  int nBytes = 256 * sizeof(int);
-  int *aux_histo;
-  aux_histo = (int *)malloc(nBytes);
-  for (int i = 0; i < 256; i++)
-    aux_histo[i] = 0;
+void equalize_image_cpu(const cv::Mat &input, const cv::Mat &output, int * histo){
 
   int size_ = input.rows * input.cols;
   for (int i = 0; i < size_; i++) {
     histo[input.ptr()[i]]++;
   }
 
+  float * transfer_function = (float *)malloc(256 * sizeof(float));
+
+  for (int i = 0; i < 256; i++) {
+    float sum = 0.0;
+    for (int j = 0; j < i + 1; j++) {
+      sum += (float)histo[i];
+    }
+    transfer_function[i] += 256*((float)sum)/(size_);
+  }
+
+  for (int i = 0; i < size_; i++) {
+    output.ptr()[i] = transfer_function[input.ptr()[i]];
+  }
+
+  cv::imwrite("Images/eq_outputImage.jpg" , output);
   free(aux_histo);
+  free(transfer_function);
 }
 
 int main(int argc, char *argv[]){
@@ -136,12 +146,14 @@ int main(int argc, char *argv[]){
 
 	//Create output image
 	cv::Mat output(input.rows, input.cols, CV_8UC1);
+  //Create equalized output image
+  cv::Mat eq_output(input.rows, input.cols, CV_8UC1);
 
 	//Call the wrapper function
 	convert_to_gray(input, output);
-  equalize_image_cpu(output, histo);
-  for (int i = 0; i < 256; i++)
-    printf("%d : %d\n", i, histo[i]);
+  equalize_image_cpu(output, eq_output, histo);
+  //for (int i = 0; i < 256; i++)
+    //printf("%d : %d\n", i, histo[i]);
 
 	//Allow the windows to resize
   /*
