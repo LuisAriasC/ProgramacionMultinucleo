@@ -63,11 +63,11 @@ __global__ void get_histogram_kernel(unsigned char* output, int* histo,int width
 	}
 }
 
-__global__ void set_image_kernel(unsigned char* output, int* histo,int width, int height, int grayWidthStep){
+__global__ void set_image_kernel(unsigned char* input, unsigned char* output, int* histo,int width, int height, int grayWidthStep){
 
   __shared__ int s_histo[C_SIZE];
   for(int i = 0; i < C_SIZE; i++)
-      s_isto[i] = histo[i];
+      s_histo[i] = histo[i];
   __syncthreads();
 
   const int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
@@ -75,7 +75,7 @@ __global__ void set_image_kernel(unsigned char* output, int* histo,int width, in
 
   if ((xIndex < width) && (yIndex < height)){
       const int tid = yIndex * grayWidthStep + xIndex;
-      output[tid] =static_cast<unsigned char>(shHistogram[input[tid]]);
+      output[tid] =static_cast<unsigned char>(s_histo[input[tid]]);
   }
 }
 
@@ -86,7 +86,7 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_output, 
 	size_t grayBytes = output.step * output.rows;
   int imSize = input.cols * input.rows;
 
-	unsigned char *d_input, *d_output;
+	unsigned char *d_input, *d_output, *de_output;
   int * d_histogram;
   int * histogram = (int *)malloc(C_SIZE * sizeof(int));
   for (int i = 0; i < C_SIZE; i++)
@@ -95,6 +95,7 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_output, 
 	// Allocate device memory
 	SAFE_CALL(cudaMalloc<unsigned char>(&d_input, colorBytes), "CUDA Malloc Failed");
 	SAFE_CALL(cudaMalloc<unsigned char>(&d_output, grayBytes), "CUDA Malloc Failed");
+  SAFE_CALL(cudaMalloc<unsigned char>(&de_output, grayBytes), "CUDA Malloc Failed");
   SAFE_CALL(cudaMalloc<int>(&d_histogram, C_SIZE * sizeof(int)), "CUDA Malloc Failed");
 
 	// Copy data from OpenCV input image to device memory
@@ -119,12 +120,12 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_output, 
 
   int * f_histogram = gpu_equalize(histogram, imSize);
 
-  set_image_kernel<<<grid, block>>>(d_output, f_histo, output.cols, output.rows, static_cast<int>(output.step)){
+  set_image_kernel<<<grid, block>>>(d_output, de_output, f_histo, output.cols, output.rows, static_cast<int>(output.step)){
   // Synchronize to check for any kernel launch errors
   SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
-  SAFE_CALL(cudaMemcpy(output.ptr(), d_output, grayBytes, cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
+  SAFE_CALL(cudaMemcpy(eq_output.ptr(), de_output, grayBytes, cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
   //Write the black & white image
-  cv::imwrite("Images/eq_gpu_" + imageName , output);
+  cv::imwrite("Images/eq_gpu_" + imageName , eq_output);
   /*
   int sum = 0;
   for (int i = 0; i < C_SIZE; i++)
