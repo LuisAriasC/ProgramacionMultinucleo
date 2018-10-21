@@ -38,8 +38,7 @@ __global__ void bgr_to_gray_kernel(unsigned char* input, unsigned char* output, 
 }
 
 
-__global__ void equalize_image_kernel(unsigned char* output, int* histo,int width, int height, int grayWidthStep){
-
+__global__ void get_histogram_kernel(unsigned char* output, int* histo,int width, int height, int grayWidthStep){
   //__shared__ int n_histo[C_SIZE];
 
 	// 2D Index of current thread
@@ -53,20 +52,9 @@ __global__ void equalize_image_kernel(unsigned char* output, int* histo,int widt
 
 	if ((xIndex < width) && (yIndex < height)){
 
-    int o_index = (yIndex * grayWidthStep) + xIndex;
     const int tid = yIndex * grayWidthStep + xIndex;
     atomicAdd(&histo[(int)output[tid]], 1);
     __syncthreads();
-
-    if (o_index == 0) {
-      int sum = 0;
-      for (int i = 0; i < C_SIZE; i++) {
-        sum+=histo[i];
-        printf("%d\n", histo[i]);
-      }
-      printf("%d - %d\n", width*height, sum );
-    }
-
 	}
 }
 
@@ -104,20 +92,20 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, string imageName){
   //Write the black & white image
   cv::imwrite("Images/bw_" + imageName , output);
 
-  equalize_image_kernel<<<grid, block >>>(d_output, d_histogram, input.cols, input.rows, static_cast<int>(output.step));
+  get_histogram_kernel<<<grid, block >>>(d_output, d_histogram, input.cols, input.rows, static_cast<int>(output.step));
   // Synchronize to check for any kernel launch errors
 	SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
   SAFE_CALL(cudaMemcpy(histogram, d_histogram, C_SIZE * sizeof(int), cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
-  //Write the black & white image
-  cv::imwrite("Images/eq_gpu_" + imageName , output);
 
-  /*
   int sum = 0;
   for (int i = 0; i < C_SIZE; i++)
     sum += histogram[i];
     //printf("%d : %d\n", i, histogram[i]);
   printf("%d : %d\n", imSize, sum);
-*/
+
+  //Write the black & white image
+  cv::imwrite("Images/eq_gpu_" + imageName , output);
+  
 	// Free the device memory
 	SAFE_CALL(cudaFree(d_input), "CUDA Free Failed");
 	SAFE_CALL(cudaFree(d_output), "CUDA Free Failed");
