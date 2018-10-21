@@ -100,67 +100,29 @@ void histog(const cv::Mat &input, const cv::Mat &output){
   int size_ = width * height;
 
   //Histogram
-  //int nBytes = 256 * sizeof(int);
   int histo[256]{};
-  /*
-  histo = (int *)malloc(nBytes);
-  for (int i = 0; i < 256; i++)
-    histo[i] = 0;
-  */
+
   //Fill histogram
   for (int i = 0; i < size_; i++)
     histo[input.ptr()[i]]++;
 
-  int sum = 0;
-  for (int i = 0; i < 256; i++)
-    sum += histo[i];
+  // Normalizando
+  long n_histo[256]{};
+  for (int i = 0; i < 256; i++){
+      for(int j = 0; j <= i; j++)
+          n_histo[i] += histo[j];
+      unsigned int aux  = (n_histo[i]*255) / size_;
+      n_histo[i] = aux;
+  }
 
-  printf("%d %d\n", size_, sum);
-  /*
-  int *aux_histo;
-  histo = (int *)malloc(nBytes);
-  for (int i = 0; i < 256; i++)
-    histo[i] = 0;
-  */
-    /*
-    int x = image.cols;
-    int y = image.rows;
+  for (int i = 0; i < height; i++){
+      for(int j = 0; j < width; j++){
+          unsigned int index = (int)image.at<uchar>(i,j);
+          output.at<uchar>(i,j) = n_histo[index];
+      }
+  }
 
-    long totalSize = x*y;
-
-    cout << totalSize << endl;
-
-    long hist[256] ={};
-
-    cout << "Calculando histograma" << endl;
-    // Calculando histograma
-    for (int i = 0; i < y; i++){
-        for (int j = 0; j < x; j++){
-            unsigned int index = (int)image.at<uchar>(i,j);
-            hist[index]++;
-        }
-    }
-
-    cout << "Normalizando" << endl;
-    // Normalizando
-    long hist_s[256]= {};
-    for (int i = 0; i < 256; i++){
-        for(int j = 0; j <= i; j++){
-            hist_s[i] += hist[j];
-        }
-        unsigned int aux  = (hist_s[i]*255) /totalSize;
-        hist_s[i] = aux;
-    }
-
-    cout << "Imagen final" << endl;
-    // Rellenando la imagen final
-    for (int i = 0; i < y; i++){
-        for(int j = 0; j < x; j++){
-            unsigned int index = (int)image.at<uchar>(i,j);
-            output.at<uchar>(i,j) = hist_s[index];
-        }
-    }
-    */
+  cv::imwrite("Images/eq_outputImage.jpg" , output);
 }
 
 void equalize_image_cpu(const cv::Mat &input, const cv::Mat &output, int * histo){
