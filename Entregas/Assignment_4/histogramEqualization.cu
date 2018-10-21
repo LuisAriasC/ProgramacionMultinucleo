@@ -39,7 +39,7 @@ __global__ void bgr_to_gray_kernel(unsigned char* input, unsigned char* output, 
 
 __global__ void equalize_image_kernel(unsigned char* output, int* histo, int width, int height, int grayWidthStep){
 
-  _shared__ int n_histogram[256];
+  __shared__ int n_histogram[256];
 
   for (int i = 0; i < 256; i++){
     n_histogram[i] = 0;
