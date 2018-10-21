@@ -68,11 +68,18 @@ __global__ void equalize_image_kernel(unsigned char* output, int* histo,int widt
       n_histo[h_index] += histo[i];
     __syncthreads();
 
+    /*
     unsigned int aux = (n_histo[h_index] * C_SIZE) / sizeImage;
     n_histo[h_index] = aux;
     __syncthreads();
 
     output[o_index] = n_histo[h_index];
+    */
+    if (o_index == 0) {
+      for (int i = 0; i < C_SIZE; i++) {
+        cout << n_histo[i]  << " "; 
+      }
+    }
 	}
 }
 
