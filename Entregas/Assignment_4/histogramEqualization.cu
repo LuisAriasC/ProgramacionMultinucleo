@@ -59,11 +59,12 @@ __global__ void equalize_image_kernel(unsigned char* output, int* histo, int wid
     __syncthreads();
 	}
 
-  if (tid == 0) {
+
     const int tid = yIndex * grayWidthStep + xIndex;
+  if (tid == 0) {
     int sum = 0;
     for (int i = 0; i < 256; i++) {
-      sum += histo_[i];
+      sum += (int)histo_[i];
     }
     printf("%d : %d\n", width * height, sum);
   }
