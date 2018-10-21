@@ -16,7 +16,7 @@
 
 using namespace std;
 
-int * gpu_equalize(int * histogram, int size){
+int * equalize(int * histogram, int size){
     int step = size / C_SIZE;
     int sum = 0;
     int * n_histogram = (int * )calloc(C_SIZE,sizeof(int));
@@ -62,13 +62,13 @@ void equalizer_cpu(const cv::Mat &input, cv::Mat &output, string imageName){
   for (int i = 0; i < size_; i++)
     histo[input.ptr()[i]]++;
 
-  //Normalized histogram
+  //Normalize
+  int step = size_ / C_SIZE;
+  int sum = 0;
   int n_histo[C_SIZE]{};
-  for (int i = 0; i < C_SIZE; i++){
-      for(int j = 0; j <= i; j++)
-          n_histo[i] += histo[j];
-      unsigned int aux  = (n_histo[i]*C_SIZE) / size_;
-      n_histo[i] = aux;
+  for(int i=0; i < C_SIZE; i++){
+      sum += histogram[i];
+      n_histo[i] = sum / step;
   }
 
   for (int i = 0; i < C_SIZE; i++)
@@ -152,7 +152,7 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_output, 
 	SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
   SAFE_CALL(cudaMemcpy(histogram, d_histogram, C_SIZE * sizeof(int), cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
 
-  int * f_histogram = gpu_equalize(histogram, imSize);
+  int * f_histogram = equalize(histogram, imSize);
 
   int sum = 0;
   for (int i = 0; i < C_SIZE; i++)
