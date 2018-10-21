@@ -63,29 +63,23 @@ __global__ void get_histogram_kernel(unsigned char* output, int* histo,int width
 	}
 }
 
-/*
-__global__ void get_histogram_kernel(unsigned char* output, int* histo,int width, int height, int grayWidthStep){
-  __shared__ int n_histo[C_SIZE];
+__global__ void set_image_kernel(unsigned char* output, int* histo,int width, int height, int grayWidthStep){
 
-	// 2D Index of current thread
-	const int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
-	const int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
-  const int x = threadIdx.x;
-  const int y = threadIdx.y;
-  const int step_x = blockDim.x;
+  __shared__ int s_histo[C_SIZE];
+  for(int i = 0; i < C_SIZE; i++)
+      s_isto[i] = histo[i];
+  __syncthreads();
 
-  int sizeImage = width * height;
+  const int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
+  const int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
 
-	if ((xIndex < width) && (yIndex < height)){
-
-    const int tid = yIndex * grayWidthStep + xIndex;
-    atomicAdd(&histo[(int)output[tid]], 1);
-    __syncthreads();
-	}
+  if ((xIndex < width) && (yIndex < height)){
+      const int tid = yIndex * grayWidthStep + xIndex;
+      output[tid] =static_cast<unsigned char>(shHistogram[input[tid]]);
+  }
 }
-*/
 
-void convert_to_gray(const cv::Mat& input, cv::Mat& output, string imageName){
+void convert_to_gray(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_output, string imageName){
 
 
 	size_t colorBytes = input.step * input.rows;
@@ -125,6 +119,13 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, string imageName){
 
   int * f_histogram = gpu_equalize(histogram, imSize);
 
+  set_image_kernel<<<grid, block>>>(d_output, f_histo, output.cols, output.rows, static_cast<int>(output.step)){
+  // Synchronize to check for any kernel launch errors
+  SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
+  SAFE_CALL(cudaMemcpy(output.ptr(), d_output, grayBytes, cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
+  //Write the black & white image
+  cv::imwrite("Images/eq_gpu_" + imageName , output);
+  /*
   int sum = 0;
   for (int i = 0; i < C_SIZE; i++)
     sum += histogram[i];
@@ -132,9 +133,10 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, string imageName){
 
   for (int i = 0; i < C_SIZE; i++)
     printf("%d : %d\n", i, f_histogram[i]);
+  */
 
   //Write the black & white image
-  cv::imwrite("Images/eq_gpu_" + imageName , output);
+  //cv::imwrite("Images/eq_gpu_" + imageName , output);
 
 	// Free the device memory
 	SAFE_CALL(cudaFree(d_input), "CUDA Free Failed");
@@ -166,7 +168,7 @@ void equalizer_cpu(const cv::Mat &input, cv::Mat &output, string imageName){
   for (int i = 0; i < size_; i++)
     output.ptr()[i] = n_histo[input.ptr()[i]];
 
-  cv::imwrite("Images/eq_" + imageName , output);
+  cv::imwrite("Images/eq_cpu_" + imageName , output);
 }
 
 int main(int argc, char *argv[]){
@@ -193,7 +195,7 @@ int main(int argc, char *argv[]){
   cv::Mat eq_output(input.rows, input.cols, CV_8UC1);
 
 	//Convert image to gray
-	convert_to_gray(input, output, inputImage);
+	convert_to_gray(input, output, eq_output, inputImage);
   //equalizer_cpu(output, eq_output, inputImage);
 
 	//Allow the windows to resize
