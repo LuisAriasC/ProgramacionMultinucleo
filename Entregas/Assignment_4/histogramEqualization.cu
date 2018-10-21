@@ -58,7 +58,7 @@ __global__ void equalize_image_kernel(unsigned char* output, int* histo,int widt
 
 }
 
-void convert_to_gray(const cv::Mat& input, cv::Mat& output, , string imageName){
+void convert_to_gray(const cv::Mat& input, cv::Mat& output , string imageName){
 
 
 	size_t colorBytes = input.step * input.rows;
