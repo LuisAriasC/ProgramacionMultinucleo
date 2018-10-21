@@ -16,6 +16,19 @@
 
 using namespace std;
 
+int * equalize(int * histogram, int size,int length){
+
+    //Normalized histogram
+    int * n_histogram = (int * )calloc(C_SIZE,sizeof(int))
+    for (int i = 0; i < C_SIZE; i++){
+        for(int j = 0; j <= i; j++)
+            n_histogram[i] += histogram[j];
+        unsigned int aux  = (n_histogram[i]*C_SIZE) / size;
+        n_histogram[i] = aux;
+    }
+    return n_histogram;
+}
+
 // input - input image one dimensional array
 // ouput - output image one dimensional array
 // width, height - width and height of the images
@@ -37,18 +50,30 @@ __global__ void bgr_to_gray_kernel(unsigned char* input, unsigned char* output, 
 	}
 }
 
-
 __global__ void get_histogram_kernel(unsigned char* output, int* histo,int width, int height, int grayWidthStep){
-  //__shared__ int n_histo[C_SIZE];
 
 	// 2D Index of current thread
 	const int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
 	const int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
-  //const int x = threadIdx.x;
-  //const int y = threadIdx.y;
-  //const int step_x = blockDim.x;
 
-  //int sizeImage = width * height;
+	if ((xIndex < width) && (yIndex < height)){
+    const int tid = yIndex * grayWidthStep + xIndex;
+    atomicAdd(&histo[(int)output[tid]], 1);
+    __syncthreads();
+	}
+}
+
+__global__ void get_histogram_kernel(unsigned char* output, int* histo,int width, int height, int grayWidthStep){
+  __shared__ int n_histo[C_SIZE];
+
+	// 2D Index of current thread
+	const int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
+	const int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
+  const int x = threadIdx.x;
+  const int y = threadIdx.y;
+  const int step_x = blockDim.x;
+
+  int sizeImage = width * height;
 
 	if ((xIndex < width) && (yIndex < height)){
 
@@ -68,7 +93,6 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, string imageName){
 	unsigned char *d_input, *d_output;
   int * d_histogram;
   int * histogram = (int *)malloc(C_SIZE * sizeof(int));
-
   for (int i = 0; i < C_SIZE; i++)
     histogram[i] = 0;
 
@@ -97,10 +121,11 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, string imageName){
 	SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
   SAFE_CALL(cudaMemcpy(histogram, d_histogram, C_SIZE * sizeof(int), cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
 
+  int * f_histogram = equalize(histogram, imSize, C_SIZE);
+
   int sum = 0;
   for (int i = 0; i < C_SIZE; i++)
     sum += histogram[i];
-    //printf("%d : %d\n", i, histogram[i]);
   printf("%d : %d\n", imSize, sum);
 
   //Write the black & white image
