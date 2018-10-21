@@ -98,6 +98,10 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, string imageName){
 
 	// Copy back data from destination device meory to OpenCV output image
 	SAFE_CALL(cudaMemcpy(output.ptr(), d_output, grayBytes, cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
+  SAFE_CALL(cudaMemcpy(histogram, d_histogram, C_SIZE * sizeof(int), cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
+
+  for (int i = 0; i < count; i++)
+    printf("%d : %d\n", i, histogram[i]);
 
   //Write the black & white image
   cv::imwrite("Images/bw_" + imageName , output);
@@ -160,7 +164,7 @@ int main(int argc, char *argv[]){
 
 	//Convert image to gray
 	convert_to_gray(input, output, inputImage);
-  equalizer_cpu(output, eq_output, inputImage);
+  //equalizer_cpu(output, eq_output, inputImage);
 
 	//Allow the windows to resize
   /*
