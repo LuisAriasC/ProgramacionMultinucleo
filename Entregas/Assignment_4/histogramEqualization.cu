@@ -49,6 +49,37 @@ __global__ void bgr_to_gray_kernel(unsigned char* input, unsigned char* output, 
 	}
 }
 
+void equalizer_cpu(const cv::Mat &input, cv::Mat &output, string imageName){
+
+  int width = input.cols;
+  int height = input.rows;
+  int size_ = width * height;
+
+  //Histogram
+  int histo[C_SIZE]{};
+
+  //Fill histogram
+  for (int i = 0; i < size_; i++)
+    histo[input.ptr()[i]]++;
+
+  //Normalized histogram
+  int n_histo[C_SIZE]{};
+  for (int i = 0; i < C_SIZE; i++){
+      for(int j = 0; j <= i; j++)
+          n_histo[i] += histo[j];
+      unsigned int aux  = (n_histo[i]*C_SIZE) / size_;
+      n_histo[i] = aux;
+  }
+
+  for (int i = 0; i < C_SIZE; i++)
+    printf("%d\n", n_histo[i]);
+
+  for (int i = 0; i < size_; i++)
+    output.ptr()[i] = n_histo[input.ptr()[i]];
+
+  cv::imwrite("Images/eq_cpu_" + imageName , output);
+}
+
 __global__ void get_histogram_kernel(unsigned char* output, int* histo,int width, int height, int grayWidthStep){
 
 	// 2D Index of current thread
@@ -115,7 +146,7 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_output, 
   printf("In CPU\n");
   equalizer_cpu(output, eq_output, imageName);
   printf("END CPU\n");
-  
+
   get_histogram_kernel<<<grid, block >>>(d_output, d_histogram, input.cols, input.rows, static_cast<int>(output.step));
   // Synchronize to check for any kernel launch errors
 	SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
@@ -144,37 +175,6 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_output, 
 	// Free the device memory
 	SAFE_CALL(cudaFree(d_input), "CUDA Free Failed");
 	SAFE_CALL(cudaFree(d_output), "CUDA Free Failed");
-}
-
-void equalizer_cpu(const cv::Mat &input, cv::Mat &output, string imageName){
-
-  int width = input.cols;
-  int height = input.rows;
-  int size_ = width * height;
-
-  //Histogram
-  int histo[C_SIZE]{};
-
-  //Fill histogram
-  for (int i = 0; i < size_; i++)
-    histo[input.ptr()[i]]++;
-
-  //Normalized histogram
-  int n_histo[C_SIZE]{};
-  for (int i = 0; i < C_SIZE; i++){
-      for(int j = 0; j <= i; j++)
-          n_histo[i] += histo[j];
-      unsigned int aux  = (n_histo[i]*C_SIZE) / size_;
-      n_histo[i] = aux;
-  }
-
-  for (int i = 0; i < C_SIZE; i++)
-    printf("%d\n", n_histo[i]);
-
-  for (int i = 0; i < size_; i++)
-    output.ptr()[i] = n_histo[input.ptr()[i]];
-
-  cv::imwrite("Images/eq_cpu_" + imageName , output);
 }
 
 int main(int argc, char *argv[]){
