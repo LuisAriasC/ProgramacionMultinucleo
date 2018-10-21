@@ -84,11 +84,9 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, string imageName){
 
 	// Copy back data from destination device meory to OpenCV output image
 	SAFE_CALL(cudaMemcpy(output.ptr(), d_output, grayBytes, cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
-  //SAFE_CALL(cudaMemcpy(histo, histogram, (256 * sizeof(int)), cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
-
-  string image_n = img_dest + "bw_" + imageName;
+  
   //Write the black & white image
-  cv::imwrite(image_n , output);
+  cv::imwrite(to_string(img_dest) + "bw_" + to_string(imageName) , output);
 
 	// Free the device memory
 	SAFE_CALL(cudaFree(d_input), "CUDA Free Failed");
