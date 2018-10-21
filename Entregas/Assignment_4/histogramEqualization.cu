@@ -10,7 +10,8 @@
 #include "common.h"
 #include <cuda_runtime.h>
 
-#define default_image "Images/dog1.jpeg"
+#define img_dest "Images/"
+#define default_image "dog1.jpeg"
 
 __shared__ int * histogram[256];
 
@@ -57,7 +58,7 @@ __global__ void equalize_image_kernel(unsigned char* output, int* histo,int widt
 
 }
 
-void convert_to_gray(const cv::Mat& input, cv::Mat& output){
+void convert_to_gray(const cv::Mat& input, cv::Mat& output, , string imageName){
 
 
 	size_t colorBytes = input.step * input.rows;
@@ -86,14 +87,14 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output){
   //SAFE_CALL(cudaMemcpy(histo, histogram, (256 * sizeof(int)), cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
 
   //Write the black & white image
-  cv::imwrite("Images/bw_outputImage.jpg" , output);
+  cv::imwrite(img_dest + "bw_" + imageName , output);
 
 	// Free the device memory
 	SAFE_CALL(cudaFree(d_input), "CUDA Free Failed");
 	SAFE_CALL(cudaFree(d_output), "CUDA Free Failed");
 }
 
-void histog(const cv::Mat &input, cv::Mat &output){
+void equalizer_cpu(const cv::Mat &input, cv::Mat &output, string imageName){
 
   int width = input.cols;
   int height = input.rows;
@@ -106,7 +107,7 @@ void histog(const cv::Mat &input, cv::Mat &output){
   for (int i = 0; i < size_; i++)
     histo[input.ptr()[i]]++;
 
-  // Normalizando
+  //Normalized histogram
   long n_histo[256]{};
   for (int i = 0; i < 256; i++){
       for(int j = 0; j <= i; j++)
@@ -118,47 +119,7 @@ void histog(const cv::Mat &input, cv::Mat &output){
   for (int i = 0; i < size_; i++)
     output.ptr()[i] = n_histo[input.ptr()[i]];
 
-  /*
-  for (int i = 0; i < height; i++){
-      for(int j = 0; j < width; j++){
-          int index = (int)input.at<uchar>(i,j);
-          output.at<uchar>(i,j) = n_histo[index];
-      }
-  }
-  */
-  cv::imwrite("Images/eq_outputImage.jpg" , output);
-}
-
-void equalize_image_cpu(const cv::Mat &input, const cv::Mat &output, int * histo){
-
-  int *g_output;
-  int size_ = input.rows * input.cols;
-  const int grayBytes = input.step * input.rows;
-
-  g_output = (int *)malloc(size_ * sizeof(int));
-  for (int i = 0; i < size_; i++) {
-    histo[input.ptr()[i]]++;
-  }
-
-  float * transfer_function = (float *)malloc(256 * sizeof(float));
-
-  for (int i = 0; i < 256; i++) {
-    float sum = 0.0;
-    for (int j = 0; j < i + 1; j++) {
-      sum += (float)histo[i];
-    }
-    transfer_function[i] += 256*((float)sum)/(size_);
-  }
-
-  for (int i = 0; i < size_; i++) {
-    g_output[i] = transfer_function[input.ptr()[i]];
-  }
-
-  memcpy((void *)output.ptr(), g_output, grayBytes);
-
-  cv::imwrite("Images/eq_outputImage.jpg" , output);
-  free(g_output);
-  free(transfer_function);
+  cv::imwrite(img_dest + "eq_" + imageName , output);
 }
 
 int main(int argc, char *argv[]){
@@ -171,14 +132,7 @@ int main(int argc, char *argv[]){
   	inputImage = argv[1];
 
 	// Read input image from the disk
-	cv::Mat input = cv::imread(inputImage, CV_LOAD_IMAGE_COLOR);
-
-  //Histogram
-  int nBytes = 256 * sizeof(int);
-  int *histo;
-  histo = (int *)malloc(nBytes);
-  for (int i = 0; i < 256; i++)
-    histo[i] = 0;
+	cv::Mat input = cv::imread(ing_dest + inputImage, CV_LOAD_IMAGE_COLOR);
 
 	if (input.empty()){
 		cout << "Image Not Found!" << std::endl;
@@ -191,12 +145,9 @@ int main(int argc, char *argv[]){
   //Create equalized output image
   cv::Mat eq_output(input.rows, input.cols, CV_8UC1);
 
-	//Call the wrapper function
-	convert_to_gray(input, output);
-  //equalize_image_cpu(output, eq_output, histo);
-  histog(output, eq_output);
-  //for (int i = 0; i < 256; i++)
-    //printf("%d : %d\n", i, histo[i]);
+	//Convert image to gray
+	convert_to_gray(input, output, inputImage);
+  equalizer_cpu(output, eq_output, inputImage);
 
 	//Allow the windows to resize
   /*
