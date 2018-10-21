@@ -12,6 +12,8 @@
 
 #define default_image "Images/dog1.jpeg"
 
+__shared__ histogram[256]{};
+
 using namespace std;
 
 // input - input image one dimensional array
@@ -25,25 +27,42 @@ __global__ void bgr_to_gray_kernel(unsigned char* input, unsigned char* output, 
 	const int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
 	const int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
 
-	// Only valid threads perform memory I/O
-	if ((xIndex < width) && (yIndex < height))
-	{
-		//Location of colored pixel in input
+	if ((xIndex < width) && (yIndex < height)){
 		const int color_tid = yIndex * colorWidthStep + (3 * xIndex);
-
-		//Location of gray pixel in output
 		const int gray_tid = yIndex * grayWidthStep + xIndex;
-
 		const unsigned char blue = input[color_tid];
 		const unsigned char green = input[color_tid + 1];
 		const unsigned char red = input[color_tid + 2];
-
-		// The standard NTSC conversion formula that is used for calculating the effective luminance of a pixel (https://en.wikipedia.org/wiki/Grayscale#Luma_coding_in_video_systems)
 		const float gray = red * 0.3f + green * 0.59f + blue * 0.11f;
+		output[gray_tid] = static_cast<unsigned char>(gray);
+	}
+}
 
-		// Alternatively, use an average
-		//const float gray = (red + green + blue) / 3.f;
 
+__global__ void equalize_image_kernel(unsigned char* output, int* histo,int width, int height, int grayWidthStep){
+
+  __shared__ int s[256];
+
+  if (threadIdx.x == 0)
+    for (int i = 0; i < 256; i++)
+        s[i] = 0;
+  __syncthreads();
+
+	// 2D Index of current thread
+	const int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
+	const int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
+
+	if ((xIndex < width) && (yIndex < height)){
+    const int tid = yIndex * grayWidthStep + xIndex;
+
+    atomicAdd(s[tid & 256], 1);
+
+		const int color_tid = yIndex * colorWidthStep + (3 * xIndex);
+		const int gray_tid = yIndex * grayWidthStep + xIndex;
+		const unsigned char blue = input[color_tid];
+		const unsigned char green = input[color_tid + 1];
+		const unsigned char red = input[color_tid + 2];
+		const float gray = red * 0.3f + green * 0.59f + blue * 0.11f;
 		output[gray_tid] = static_cast<unsigned char>(gray);
 	}
 }
@@ -56,6 +75,12 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output){
 
 	unsigned char *d_input, *d_output;
 
+  int nBytes = 256 * sizeof(int);
+  int *histo;
+  histo = (int *)malloc(nBytes);
+  for (int i = 0; i < 256; i++)
+    histo[i] = 0;
+
 	// Allocate device memory
 	SAFE_CALL(cudaMalloc<unsigned char>(&d_input, colorBytes), "CUDA Malloc Failed");
 	SAFE_CALL(cudaMalloc<unsigned char>(&d_output, grayBytes), "CUDA Malloc Failed");
@@ -63,10 +88,7 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output){
 	// Copy data from OpenCV input image to device memory
 	SAFE_CALL(cudaMemcpy(d_input, input.ptr(), colorBytes, cudaMemcpyHostToDevice), "CUDA Memcpy Host To Device Failed");
 
-	// Specify a reasonable block size
 	const dim3 block(16, 16);
-
-	// Calculate grid size to cover the whole image
 	const dim3 grid((int)ceil((float)input.cols / block.x), (int)ceil((float)input.rows/ block.y));
 
 	// Launch the color conversion kernel
@@ -74,6 +96,8 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output){
 
 	// Synchronize to check for any kernel launch errors
 	SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
+
+
 
 	// Copy back data from destination device meory to OpenCV output image
 	SAFE_CALL(cudaMemcpy(output.ptr(), d_output, grayBytes, cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
