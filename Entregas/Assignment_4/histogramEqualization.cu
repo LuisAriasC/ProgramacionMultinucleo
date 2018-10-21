@@ -97,7 +97,7 @@ void equalize_image_cpu(const cv::Mat &input, const cv::Mat &output, int * histo
 
   unsigned char *g_output;
   int size_ = input.rows * input.cols;
-  g_output = (char *)malloc(size_ * sizeof(char));
+  g_output = (unsigned char *)malloc(size_ * sizeof(char));
   for (int i = 0; i < size_; i++) {
     histo[input.ptr()[i]]++;
   }
