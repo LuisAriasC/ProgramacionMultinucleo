@@ -77,14 +77,14 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, string imageName){
 	size_t grayBytes = output.step * output.rows;
 
 	unsigned char *d_input, *d_output;
-  int * histogram;
-  histogram = (int *)malloc(256 * sizeof(int));
-  for (int i = 0; i < 256; i++)
-    histogram[i] = 0;
+  int histogram[256]{};
+  int * d_histogram;
 
 	// Allocate device memory
 	SAFE_CALL(cudaMalloc<unsigned char>(&d_input, colorBytes), "CUDA Malloc Failed");
 	SAFE_CALL(cudaMalloc<unsigned char>(&d_output, grayBytes), "CUDA Malloc Failed");
+  SAFE_CALL(cudaMalloc(&d_histogram,256 * sizeof(int)), "CUDA Malloc Failed");
+  SAFE_CALL(cudaMemset(d_histogram, 0, 256 * sizeof(int)), "Error setting device count");
 
 	// Copy data from OpenCV input image to device memory
 	SAFE_CALL(cudaMemcpy(d_input, input.ptr(), colorBytes, cudaMemcpyHostToDevice), "CUDA Memcpy Host To Device Failed");
