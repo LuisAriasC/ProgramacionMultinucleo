@@ -34,7 +34,7 @@ int * equalize(int * histogram, int total,int length){
     for (int i = 0; i < C_SIZE; i++){
         for(int j = 0; j <= i; j++)
             n_histo[i] += histogram[j];
-        unsigned int aux  = (n_histo[i]*C_SIZE) / size_;
+        unsigned int aux  = (n_histo[i]*C_SIZE) / total;
         n_histo[i] = aux;
     }
     return n_histo;
