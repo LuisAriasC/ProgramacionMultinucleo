@@ -41,29 +41,13 @@ __global__ void bgr_to_gray_kernel(unsigned char* input, unsigned char* output, 
 
 __global__ void equalize_image_kernel(unsigned char* output, int* histo,int width, int height, int grayWidthStep){
 
-  __shared__ int s[256];
-
-  if (threadIdx.x == 0)
-    for (int i = 0; i < 256; i++)
-        s[i] = 0;
-  __syncthreads();
-
 	// 2D Index of current thread
 	const int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
 	const int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
 
 	if ((xIndex < width) && (yIndex < height)){
     const int tid = yIndex * grayWidthStep + xIndex;
-
-    atomicAdd(s[tid & 256], 1);
-
-		const int color_tid = yIndex * colorWidthStep + (3 * xIndex);
-		const int gray_tid = yIndex * grayWidthStep + xIndex;
-		const unsigned char blue = input[color_tid];
-		const unsigned char green = input[color_tid + 1];
-		const unsigned char red = input[color_tid + 2];
-		const float gray = red * 0.3f + green * 0.59f + blue * 0.11f;
-		output[gray_tid] = static_cast<unsigned char>(gray);
+    atomicAdd(histogram[output[tid] % 256], 1);
 	}
 }
 
@@ -133,6 +117,9 @@ int main(int argc, char *argv[]){
 
 	//Call the wrapper function
 	convert_to_gray(input, output);
+
+  for (int i = 0; i < 256; i++)
+    histogram[i] = 0;
 
 	//Allow the windows to resize
   /*
