@@ -49,7 +49,7 @@ __global__ void equalize_image_kernel(unsigned char* output, int* histo,int widt
   const int y = threadIdx.y;
   const int step_x = blockDim.x;
 
-  int sizeImage = width * height;
+  //int sizeImage = width * height;
 
 	if ((xIndex < width) && (yIndex < height)){
     int h_index = (y * step_x) + x;
@@ -63,61 +63,28 @@ __global__ void equalize_image_kernel(unsigned char* output, int* histo,int widt
     __syncthreads();
 
     //Normalized histogram
-    /*
     int i;
     for (i = 0; i <= h_index; i++)
       atomicAdd(&n_histo[h_index], histo[i]);
       //n_histo[h_index] += histo[i];
     __syncthreads();
-    */
 
+    /*
     unsigned int aux = (n_histo[h_index] * C_SIZE) / sizeImage;
     n_histo[h_index] = aux;
     __syncthreads();
 
-    //output[o_index] = n_histo[h_index];
+    output[o_index] = n_histo[h_index];
+    */
     if (o_index == 0) {
-      int sum = 0;
-      for (int i = 0; i < C_SIZE; i++) {
-        sum += histo[i];
-        printf("%d : %d\n", i, histo[i]);
-        //printf("%d\n", histo[i]);
+      for (i = 0; i < C_SIZE; i++) {
+        printf("%d\n", n_histo[i]);
       }
-      printf("%d - %d\n", sizeImage, sum);
     }
 	}
 }
 
-
-void equalizer_cpu(const cv::Mat &input, cv::Mat &output, string imageName){
-
-  int width = input.cols;
-  int height = input.rows;
-  int size_ = width * height;
-
-  //Histogram
-  int histo[C_SIZE]{};
-
-  //Fill histogram
-  for (int i = 0; i < size_; i++)
-    histo[input.ptr()[i]]++;
-
-  //Normalized histogram
-  long n_histo[C_SIZE]{};
-  for (int i = 0; i < C_SIZE; i++){
-      for(int j = 0; j <= i; j++)
-          n_histo[i] += histo[j];
-      unsigned int aux  = (n_histo[i]*C_SIZE) / size_;
-      n_histo[i] = aux;
-  }
-
-  for (int i = 0; i < size_; i++)
-    output.ptr()[i] = n_histo[input.ptr()[i]];
-
-  cv::imwrite("Images/eq_" + imageName , output);
-}
-
-void convert_to_gray(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_output, string imageName){
+void convert_to_gray(const cv::Mat& input, cv::Mat& output, string imageName){
 
 
 	size_t colorBytes = input.step * input.rows;
@@ -151,8 +118,6 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_output, 
   //Write the black & white image
   cv::imwrite("Images/bw_" + imageName , output);
 
-  equalizer_cpu(output, eq_output, imageName);
-
   equalize_image_kernel<<<grid, block >>>(d_output, d_histogram, input.cols, input.rows, static_cast<int>(output.step));
   // Synchronize to check for any kernel launch errors
 	SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
@@ -170,6 +135,34 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_output, 
 	// Free the device memory
 	SAFE_CALL(cudaFree(d_input), "CUDA Free Failed");
 	SAFE_CALL(cudaFree(d_output), "CUDA Free Failed");
+}
+
+void equalizer_cpu(const cv::Mat &input, cv::Mat &output, string imageName){
+
+  int width = input.cols;
+  int height = input.rows;
+  int size_ = width * height;
+
+  //Histogram
+  int histo[C_SIZE]{};
+
+  //Fill histogram
+  for (int i = 0; i < size_; i++)
+    histo[input.ptr()[i]]++;
+
+  //Normalized histogram
+  long n_histo[C_SIZE]{};
+  for (int i = 0; i < C_SIZE; i++){
+      for(int j = 0; j <= i; j++)
+          n_histo[i] += histo[j];
+      unsigned int aux  = (n_histo[i]*C_SIZE) / size_;
+      n_histo[i] = aux;
+  }
+
+  for (int i = 0; i < size_; i++)
+    output.ptr()[i] = n_histo[input.ptr()[i]];
+
+  cv::imwrite("Images/eq_" + imageName , output);
 }
 
 int main(int argc, char *argv[]){
@@ -196,7 +189,7 @@ int main(int argc, char *argv[]){
   cv::Mat eq_output(input.rows, input.cols, CV_8UC1);
 
 	//Convert image to gray
-	convert_to_gray(input, output, eq_output, inputImage);
+	convert_to_gray(input, output, inputImage);
   //equalizer_cpu(output, eq_output, inputImage);
 
 	//Allow the windows to resize
