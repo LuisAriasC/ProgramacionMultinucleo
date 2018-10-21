@@ -71,9 +71,6 @@ void equalizer_cpu(const cv::Mat &input, cv::Mat &output, string imageName){
       n_histo[i] = sum / step;
   }
 
-  for (int i = 0; i < C_SIZE; i++)
-    printf("%d\n", n_histo[i]);
-
   for (int i = 0; i < size_; i++)
     output.ptr()[i] = n_histo[input.ptr()[i]];
 
@@ -95,15 +92,19 @@ __global__ void get_histogram_kernel(unsigned char* output, int* histo,int width
 
 __global__ void set_image_kernel(unsigned char* input, unsigned char* output, int* histo,int width, int height, int grayWidthStep){
 
-  __shared__ int * s_histo;
-  for(int i = 0; i < C_SIZE; i++)
-      s_histo[i] = histo[i];
-  __syncthreads();
+  __shared__ int s_histo[256];
 
   const int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
   const int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
+  const int x = threadIdx.x;
+  const int y = threadIdx.y;
+  const int step_x = blockDim.x;
 
   if ((xIndex < width) && (yIndex < height)){
+      int i = y * step_x + x;
+      s_histo[i] = histo[i];
+      __syncthreads()
+
       const int tid = yIndex * grayWidthStep + xIndex;
       output[tid] =static_cast<unsigned char>(s_histo[input[tid]]);
   }
