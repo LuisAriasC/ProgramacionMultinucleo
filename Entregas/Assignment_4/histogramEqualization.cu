@@ -100,7 +100,7 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, string imageName){
 	SAFE_CALL(cudaMemcpy(output.ptr(), d_output, grayBytes, cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
   SAFE_CALL(cudaMemcpy(histogram, d_histogram, C_SIZE * sizeof(int), cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
 
-  for (int i = 0; i < count; i++)
+  for (int i = 0; i < C_SIZE; i++)
     printf("%d : %d\n", i, histogram[i]);
 
   //Write the black & white image
