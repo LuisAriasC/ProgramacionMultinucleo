@@ -63,6 +63,7 @@ __global__ void get_histogram_kernel(unsigned char* output, int* histo,int width
 	}
 }
 
+/*
 __global__ void get_histogram_kernel(unsigned char* output, int* histo,int width, int height, int grayWidthStep){
   __shared__ int n_histo[C_SIZE];
 
@@ -82,6 +83,7 @@ __global__ void get_histogram_kernel(unsigned char* output, int* histo,int width
     __syncthreads();
 	}
 }
+*/
 
 void convert_to_gray(const cv::Mat& input, cv::Mat& output, string imageName){
 
