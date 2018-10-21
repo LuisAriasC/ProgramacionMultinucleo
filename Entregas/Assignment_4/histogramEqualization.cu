@@ -47,7 +47,7 @@ __global__ void equalize_image_kernel(unsigned char* output, int* histo,int widt
 
 	if ((xIndex < width) && (yIndex < height)){
     const int tid = yIndex * grayWidthStep + xIndex;
-    atomicAdd(histogram[output[tid] % 256], 1);
+    atomicAdd(histogram[(int)output[tid] % 256], 1);
 	}
 }
 
