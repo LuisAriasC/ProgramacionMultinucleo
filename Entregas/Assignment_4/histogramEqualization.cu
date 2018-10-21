@@ -51,7 +51,14 @@ __global__ void equalize_image_kernel(unsigned char* output, int* histo,int widt
 	if ((xIndex < width) && (yIndex < height)){
     const int tid = yIndex * grayWidthStep + xIndex;
     atomicAdd(histogram[(int)output[tid] % 256], 1);
+    __syncthreads();
+
+    for ( i = 0; i < count; i++) {
+      /* code */
+    }
 	}
+
+
 }
 
 void convert_to_gray(const cv::Mat& input, cv::Mat& output){
@@ -61,12 +68,6 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output){
 	size_t grayBytes = output.step * output.rows;
 
 	unsigned char *d_input, *d_output;
-
-  int nBytes = 256 * sizeof(int);
-  int *histo;
-  histo = (int *)malloc(nBytes);
-  for (int i = 0; i < 256; i++)
-    histo[i] = 0;
 
 	// Allocate device memory
 	SAFE_CALL(cudaMalloc<unsigned char>(&d_input, colorBytes), "CUDA Malloc Failed");
@@ -84,8 +85,6 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output){
 	// Synchronize to check for any kernel launch errors
 	SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
 
-
-
 	// Copy back data from destination device meory to OpenCV output image
 	SAFE_CALL(cudaMemcpy(output.ptr(), d_output, grayBytes, cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
   SAFE_CALL(cudaMemcpy(histo, histogram, (256 * sizeof(int)), cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
@@ -96,6 +95,23 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output){
 	// Free the device memory
 	SAFE_CALL(cudaFree(d_input), "CUDA Free Failed");
 	SAFE_CALL(cudaFree(d_output), "CUDA Free Failed");
+}
+
+void equalize_image_cpu(const cv::Mat &input, int * histo){
+
+  int nBytes = 256 * sizeof(int);
+  int *aux_histo;
+  aux_histo = (int *)malloc(nBytes);
+  for (int i = 0; i < 256; i++)
+    aux_histo[i] = 0;
+
+  int size_ = input.rows * input.colums;
+  for (int i = 0; i < size_; i++) {
+    printf("%s\n", input[i]);
+  }
+
+
+    free(aux_histo);
 }
 
 int main(int argc, char *argv[]){
@@ -109,6 +125,8 @@ int main(int argc, char *argv[]){
 
 	// Read input image from the disk
 	cv::Mat input = cv::imread(inputImage, CV_LOAD_IMAGE_COLOR);
+  //Histogram
+  int * histo[256]{};
 
 	if (input.empty()){
 		cout << "Image Not Found!" << std::endl;
@@ -121,6 +139,7 @@ int main(int argc, char *argv[]){
 
 	//Call the wrapper function
 	convert_to_gray(input, output);
+  void equalize_image_cpu(output, histo){
 
 	//Allow the windows to resize
   /*
