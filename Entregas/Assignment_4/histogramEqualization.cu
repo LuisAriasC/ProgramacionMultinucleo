@@ -93,6 +93,61 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output){
 	SAFE_CALL(cudaFree(d_output), "CUDA Free Failed");
 }
 
+void histog(const cv::Mat &input, const cv::Mat &output){
+
+    int width = input.cols;
+    int height = input.rows;
+    long size_ = width * height;
+    long histogram[256]{};
+    for (int i = 0; i < size_; i++)
+      histogram[input.ptr(i)];
+
+    long sum = 0;
+    for (int i = 0; i < 256; i++)
+      sum += histogram[i]
+
+    printf("%li %li\n",size_, sum );
+    /*
+    int x = image.cols;
+    int y = image.rows;
+
+    long totalSize = x*y;
+
+    cout << totalSize << endl;
+
+    long hist[256] ={};
+
+    cout << "Calculando histograma" << endl;
+    // Calculando histograma
+    for (int i = 0; i < y; i++){
+        for (int j = 0; j < x; j++){
+            unsigned int index = (int)image.at<uchar>(i,j);
+            hist[index]++;
+        }
+    }
+
+    cout << "Normalizando" << endl;
+    // Normalizando
+    long hist_s[256]= {};
+    for (int i = 0; i < 256; i++){
+        for(int j = 0; j <= i; j++){
+            hist_s[i] += hist[j];
+        }
+        unsigned int aux  = (hist_s[i]*255) /totalSize;
+        hist_s[i] = aux;
+    }
+
+    cout << "Imagen final" << endl;
+    // Rellenando la imagen final
+    for (int i = 0; i < y; i++){
+        for(int j = 0; j < x; j++){
+            unsigned int index = (int)image.at<uchar>(i,j);
+            output.at<uchar>(i,j) = hist_s[index];
+        }
+    }
+    */
+}
+
 void equalize_image_cpu(const cv::Mat &input, const cv::Mat &output, int * histo){
 
   int *g_output;
@@ -157,7 +212,8 @@ int main(int argc, char *argv[]){
 
 	//Call the wrapper function
 	convert_to_gray(input, output);
-  equalize_image_cpu(output, eq_output, histo);
+  //equalize_image_cpu(output, eq_output, histo);
+  histog(output, eq_output);
   //for (int i = 0; i < 256; i++)
     //printf("%d : %d\n", i, histo[i]);
 
