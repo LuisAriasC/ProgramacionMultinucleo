@@ -120,7 +120,7 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_output, 
 
   int * f_histogram = gpu_equalize(histogram, imSize);
 
-  set_image_kernel<<<grid, block>>>(d_output, de_output, f_histo, output.cols, output.rows, static_cast<int>(output.step)){
+  set_image_kernel<<<grid, block>>>(d_output, de_output, f_histogram, output.cols, output.rows, static_cast<int>(output.step));
   // Synchronize to check for any kernel launch errors
   SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
   SAFE_CALL(cudaMemcpy(eq_output.ptr(), de_output, grayBytes, cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
