@@ -12,7 +12,7 @@
 
 #define default_image "Images/dog1.jpeg"
 
-__shared__ histogram[256]{};
+__shared__ int histogram[256];
 
 using namespace std;
 
