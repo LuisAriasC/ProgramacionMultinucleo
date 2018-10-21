@@ -110,7 +110,7 @@ void histog(const cv::Mat &input, const cv::Mat &output){
   for (int i = 0; i < 256; i++)
     sum += histo[i];
 
-  printf("%li %li\n",size_, sum );
+  printf("%d %d\n",size_, sum );
     /*
     int x = image.cols;
     int y = image.rows;
