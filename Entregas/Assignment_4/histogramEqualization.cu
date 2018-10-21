@@ -95,12 +95,18 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output){
 
 void histog(const cv::Mat &input, const cv::Mat &output){
 
+    //Histogram
+    int nBytes = 256 * sizeof(int);
+    int *histo;
+    histo = (int *)malloc(nBytes);
+    for (int i = 0; i < size_; i++)
+      histo[input.ptr()[i]]++;
+
     int width = input.cols;
     int height = input.rows;
     long size_ = width * height;
-    int histogram[256]{};
     for (int i = 0; i < size_; i++)
-      histogram[input.ptr(i)]++;
+      histo[input.ptr()[i]]++;
 
     int sum = 0;
     for (int i = 0; i < 256; i++)
