@@ -40,17 +40,40 @@ __global__ void bgr_to_gray_kernel(unsigned char* input, unsigned char* output, 
 
 __global__ void equalize_image_kernel(unsigned char* output, int* histo,int width, int height, int grayWidthStep){
 
+  __shared__ int n_histo[C_SIZE];
+
 	// 2D Index of current thread
 	const int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
 	const int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
+  const int x = threadIdx.x;
+  const int y = threadIdx.y;
+  const int step_x = blockDim.x;
+  const int step_y = blockDim.y;
+
+  int sizeImage = width * height;
 
 	if ((xIndex < width) && (yIndex < height)){
+    int h_index = (y * step_x) + x;
+    int o_index = (yIndex * grayWidthStep) + xIndex;
+
+    n_histo[h_index] = 0;
+    __syncthreads();
+
     const int tid = yIndex * grayWidthStep + xIndex;
     atomicAdd(&histo[(int)output[tid]], 1);
     __syncthreads();
+
+    //Normalized histogram
+    for (int i = 0; i <= (y * step_x) + x); i++)
+      n_histo[h_index] += histo[i];
+    __syncthreads();
+
+    unsigned int aux = (n_histo[h_index] * C_SIZE) / sizeImage;
+    n_histo[h_index] = aux;
+    __syncthreads();
+
+    output[o_index] = n_histo[h_index];
 	}
-
-
 }
 
 void convert_to_gray(const cv::Mat& input, cv::Mat& output, string imageName){
@@ -82,26 +105,25 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, string imageName){
 	// Launch the color conversion kernel
 	bgr_to_gray_kernel <<<grid, block >>>(d_input, d_output, input.cols, input.rows, static_cast<int>(input.step), static_cast<int>(output.step));
   // Synchronize to check for any kernel launch errors
-	//SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
+	SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
+  SAFE_CALL(cudaMemcpy(output.ptr(), d_output, grayBytes, cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
+  //Write the black & white image
+  cv::imwrite("Images/bw_" + imageName , output);
 
   equalize_image_kernel<<<grid, block >>>(d_output, d_histogram, input.cols, input.rows, static_cast<int>(output.step));
   // Synchronize to check for any kernel launch errors
 	SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
-
-
-	// Copy back data from destination device meory to OpenCV output image
-	SAFE_CALL(cudaMemcpy(output.ptr(), d_output, grayBytes, cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
   SAFE_CALL(cudaMemcpy(histogram, d_histogram, C_SIZE * sizeof(int), cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
+  //Write the black & white image
+  cv::imwrite("Images/eq_gpu_" + imageName , output);
 
+  /*
   int sum = 0;
   for (int i = 0; i < C_SIZE; i++)
     sum += histogram[i];
     //printf("%d : %d\n", i, histogram[i]);
   printf("%d : %d\n", imSize, sum);
-
-  //Write the black & white image
-  cv::imwrite("Images/bw_" + imageName , output);
-
+*/
 	// Free the device memory
 	SAFE_CALL(cudaFree(d_input), "CUDA Free Failed");
 	SAFE_CALL(cudaFree(d_output), "CUDA Free Failed");
