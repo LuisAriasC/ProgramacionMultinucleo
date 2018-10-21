@@ -90,24 +90,21 @@ __global__ void get_histogram_kernel(unsigned char* output, int* histo,int width
 	}
 }
 
-__global__ void set_image_kernel(unsigned char* input, unsigned char* output, int* histo,int width, int height, int grayWidthStep){
+__global__ void set_image_kernel(unsigned char* input,unsigned char* output, int * histogram, int width, int height, int step){
 
-  __shared__ int s_histo[256];
+    __shared__ int * shHistogram;
+    for(int i = 0;i<256;i++){
+        shHistogram[i] = histogram[i];
+    }
+    __syncthreads();
 
-  const int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
-  const int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
-  const int x = threadIdx.x;
-  const int y = threadIdx.y;
-  const int step_x = blockDim.x;
+    const int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
+    const int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
 
-  if ((xIndex < width) && (yIndex < height)){
-      int i = y * step_x + x;
-      s_histo[i] = histo[i];
-      __syncthreads();
-
-      const int tid = yIndex * grayWidthStep + xIndex;
-      output[tid] =static_cast<unsigned char>(s_histo[input[tid]]);
-  }
+    if ((xIndex < width) && (yIndex < height)){
+        const int tid = yIndex * step + xIndex;
+        output[tid] =static_cast<unsigned char>(shHistogram[input[tid]]);
+    }
 }
 
 void convert_to_gray(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_output, string imageName){
