@@ -100,7 +100,7 @@ void histog(const cv::Mat &input, const cv::Mat &output){
     long size_ = width * height;
     int histogram[256]{};
     for (int i = 0; i < size_; i++)
-      histogram[input.ptr(i)];
+      histogram[input.ptr(i)]++;
 
     int sum = 0;
     for (int i = 0; i < 256; i++)
