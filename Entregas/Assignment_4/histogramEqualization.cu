@@ -16,43 +16,18 @@
 
 using namespace std;
 
-int * equalize(int * histogram, int total,int length){
-  /*
-    int step = total/length;
-    int currentCumulative = 0;
-    int * nhistogram = (int * )calloc(256,sizeof(int));
+int * gpu_equalize(int * histogram, int size, int len){
+    int step = size/len;
+    int sum = 0;
+    int * n_histogram = (int * )calloc(256,sizeof(int));
 
-    for(int i=0;i<length;i++){
-        currentCumulative += histogram[i];
-        nhistogram[i] = currentCumulative/step;
+    for(int i=0; i<len; i++){
+        sum += histogram[i];
+        n_histogram[i] = sum / step;
     }
+
     return nhistogram;
-*/
-
-    //Normalized histogram
-    int * n_histo = (int *)calloc(256, sizeof(int));
-    for (int i = 0; i < C_SIZE; i++){
-        for(int j = 0; j <= i; j++)
-            n_histo[i] += histogram[j];
-        unsigned int aux  = (n_histo[i]*C_SIZE) / total;
-        n_histo[i] = aux;
-    }
-    return n_histo;
 }
-/*
-int * equalize(int * histogram, int size,int length){
-
-    //Normalized histogram
-    int * n_histogram = (int * )calloc(C_SIZE,sizeof(int));
-    for (int i = 0; i < C_SIZE; i++){
-        for(int j = 0; j <= i; j++)
-            n_histogram[i] += histogram[j];
-        unsigned int aux  = (n_histogram[i]*C_SIZE) / size;
-        n_histogram[i] = aux;
-    }
-    return n_histogram;
-}
-*/
 
 // input - input image one dimensional array
 // ouput - output image one dimensional array
@@ -148,7 +123,7 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, string imageName){
 	SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
   SAFE_CALL(cudaMemcpy(histogram, d_histogram, C_SIZE * sizeof(int), cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
 
-  int * f_histogram = equalize(histogram, imSize, C_SIZE);
+  int * f_histogram = gpu_equalize(histogram, imSize, C_SIZE);
 
   int sum = 0;
   for (int i = 0; i < C_SIZE; i++)
