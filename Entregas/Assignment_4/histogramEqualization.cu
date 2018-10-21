@@ -58,7 +58,7 @@ __global__ void equalize_image_kernel(unsigned char* output, int* histo,int widt
 
 }
 
-void convert_to_gray(const cv::Mat& input, cv::Mat& output , string imageName){
+void convert_to_gray(const cv::Mat& input, cv::Mat& output, string imageName){
 
 
 	size_t colorBytes = input.step * input.rows;
@@ -86,8 +86,9 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output , string imageName){
 	SAFE_CALL(cudaMemcpy(output.ptr(), d_output, grayBytes, cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
   //SAFE_CALL(cudaMemcpy(histo, histogram, (256 * sizeof(int)), cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
 
+  string image_n = img_dest + "bw_" + imageName;
   //Write the black & white image
-  cv::imwrite(img_dest + "bw_" + imageName , output);
+  cv::imwrite(image_n , output);
 
 	// Free the device memory
 	SAFE_CALL(cudaFree(d_input), "CUDA Free Failed");
@@ -132,7 +133,7 @@ int main(int argc, char *argv[]){
   	inputImage = argv[1];
 
 	// Read input image from the disk
-	cv::Mat input = cv::imread(ing_dest + inputImage, CV_LOAD_IMAGE_COLOR);
+	cv::Mat input = cv::imread(img_dest + inputImage, CV_LOAD_IMAGE_COLOR);
 
 	if (input.empty()){
 		cout << "Image Not Found!" << std::endl;
