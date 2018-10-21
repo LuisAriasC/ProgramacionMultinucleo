@@ -16,6 +16,18 @@
 
 using namespace std;
 
+int * equalize(int * histogram, int total,int length){
+    int step = total/length;
+    int currentCumulative = 0;
+    int * nhistogram = (int * )calloc(256,sizeof(int));
+
+    for(int i=0;i<length;i++){
+        currentCumulative += histogram[i];
+        nhistogram[i] = currentCumulative/step;
+    }
+    return nhistogram;
+}
+/*
 int * equalize(int * histogram, int size,int length){
 
     //Normalized histogram
@@ -28,6 +40,7 @@ int * equalize(int * histogram, int size,int length){
     }
     return n_histogram;
 }
+*/
 
 // input - input image one dimensional array
 // ouput - output image one dimensional array
@@ -129,6 +142,7 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, string imageName){
   for (int i = 0; i < C_SIZE; i++)
     sum += histogram[i];
   printf("%d : %d\n", imSize, sum);
+
   for (int i = 0; i < C_SIZE; i++)
     printf("%d : %d\n", i, f_histogram[i]);
 
