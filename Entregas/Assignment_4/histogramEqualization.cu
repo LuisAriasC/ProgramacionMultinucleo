@@ -67,7 +67,7 @@ void equalizer_cpu(const cv::Mat &input, cv::Mat &output, string imageName){
   int sum = 0;
   int n_histo[C_SIZE]{};
   for(int i=0; i < C_SIZE; i++){
-      sum += histogram[i];
+      sum += histo[i];
       n_histo[i] = sum / step;
   }
 
