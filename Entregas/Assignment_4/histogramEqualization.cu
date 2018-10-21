@@ -129,6 +129,8 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, string imageName){
   for (int i = 0; i < C_SIZE; i++)
     sum += histogram[i];
   printf("%d : %d\n", imSize, sum);
+  for (int i = 0; i < C_SIZE; i++)
+    printf("%d : %d\n", i, f_histogram[i]);
 
   //Write the black & white image
   cv::imwrite("Images/eq_gpu_" + imageName , output);
