@@ -40,14 +40,14 @@ __global__ void bgr_to_gray_kernel(unsigned char* input, unsigned char* output, 
 
 __global__ void equalize_image_kernel(unsigned char* output, int* histo,int width, int height, int grayWidthStep){
 
-  __shared__ int n_histo[C_SIZE];
+  //__shared__ int n_histo[C_SIZE];
 
 	// 2D Index of current thread
 	const int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
 	const int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
-  const int x = threadIdx.x;
-  const int y = threadIdx.y;
-  const int step_x = blockDim.x;
+  //const int x = threadIdx.x;
+  //const int y = threadIdx.y;
+  //const int step_x = blockDim.x;
 
   //int sizeImage = width * height;
 
@@ -59,11 +59,11 @@ __global__ void equalize_image_kernel(unsigned char* output, int* histo,int widt
     __syncthreads();
 
     if (o_index == 0) {
-      for (i = 0; i < C_SIZE; i++) {
+      for (int i = 0; i < C_SIZE; i++) {
         printf("%d\n", histo[i]);
       }
     }
-    
+
 	}
 }
 
