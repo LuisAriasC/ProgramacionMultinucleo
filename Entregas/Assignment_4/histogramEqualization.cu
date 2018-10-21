@@ -65,7 +65,8 @@ __global__ void equalize_image_kernel(unsigned char* output, int* histo,int widt
     //Normalized histogram
     int i;
     for (i = 0; i <= h_index; i++)
-      n_histo[h_index] += histo[i];
+      atomicAdd(&n_histo[h_index], histo[i]);
+      //n_histo[h_index] += histo[i];
     __syncthreads();
 
     /*
