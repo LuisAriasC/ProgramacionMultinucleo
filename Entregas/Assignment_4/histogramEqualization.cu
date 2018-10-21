@@ -16,12 +16,12 @@
 
 using namespace std;
 
-int * gpu_equalize(int * histogram, int size, int len){
-    int step = size/len;
+int * gpu_equalize(int * histogram, int size){
+    int step = size / C_SIZE;
     int sum = 0;
-    int * n_histogram = (int * )calloc(256,sizeof(int));
+    int * n_histogram = (int * )calloc(C_SIZE,sizeof(int));
 
-    for(int i=0; i<len; i++){
+    for(int i=0; i < C_SIZE; i++){
         sum += histogram[i];
         n_histogram[i] = sum / step;
     }
@@ -123,7 +123,7 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, string imageName){
 	SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
   SAFE_CALL(cudaMemcpy(histogram, d_histogram, C_SIZE * sizeof(int), cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
 
-  int * f_histogram = gpu_equalize(histogram, imSize, C_SIZE);
+  int * f_histogram = gpu_equalize(histogram, imSize);
 
   int sum = 0;
   for (int i = 0; i < C_SIZE; i++)
