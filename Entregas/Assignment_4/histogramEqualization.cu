@@ -98,13 +98,13 @@ void histog(const cv::Mat &input, const cv::Mat &output){
     int width = input.cols;
     int height = input.rows;
     long size_ = width * height;
-    long histogram[256]{};
+    int histogram[256]{};
     for (int i = 0; i < size_; i++)
       histogram[input.ptr(i)];
 
     long sum = 0;
     for (int i = 0; i < 256; i++)
-      sum += histogram[i]
+      sum += histogram[i];
 
     printf("%li %li\n",size_, sum );
     /*
