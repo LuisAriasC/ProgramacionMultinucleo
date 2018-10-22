@@ -62,12 +62,14 @@ void equalizer_cpu(const cv::Mat &input, cv::Mat &output, string imageName){
       n_histo[i] = (int)floor(sum / step);
   }
 
+  for(int i = 0; i < C_SIZE; i++)
+    printf("%d : %d\n", i, n_histo[i]);
   //Write image with normalized histogram on output
-  for (int i = 0; i < size_; i++)
-    output.ptr()[i] = n_histo[input.ptr()[i]];
+  //for (int i = 0; i < size_; i++)
+    //output.ptr()[i] = n_histo[input.ptr()[i]];
 
   //Save the image
-  cv::imwrite("Images/eq_cpu_" + imageName , output);
+  //cv::imwrite("Images/eq_cpu_" + imageName , output);
 }
 
 
