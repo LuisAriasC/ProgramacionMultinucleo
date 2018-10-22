@@ -60,7 +60,7 @@ void equalizer_cpu(const cv::Mat &input, cv::Mat &output, string imageName){
   //Fill histogram
   for (int i = 0; i < size_; i++)
     histo[input.ptr()[i]]++;
-
+  printf("Hace histo\n");
   //Normalize histogram
   normalize(histo, aux_histo, size_);
 
