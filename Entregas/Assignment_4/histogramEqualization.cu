@@ -155,7 +155,7 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_output, 
   int imSize = input.cols * input.rows;
 
 	unsigned char *d_input, *d_output, *de_output;
-  int * d_histogram;
+  int * d_histogram, * df_histogram;
   int * histogram = (int *)malloc(C_SIZE * sizeof(int));
   for (int i = 0; i < C_SIZE; i++)
     histogram[i] = 0;
@@ -165,6 +165,7 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_output, 
 	SAFE_CALL(cudaMalloc<unsigned char>(&d_output, grayBytes), "CUDA Malloc Failed");
   SAFE_CALL(cudaMalloc<unsigned char>(&de_output, grayBytes), "CUDA Malloc Failed");
   SAFE_CALL(cudaMalloc<int>(&d_histogram, C_SIZE * sizeof(int)), "CUDA Malloc Failed");
+  SAFE_CALL(cudaMalloc<int>(&df_histogram, C_SIZE * sizeof(int)), "CUDA Malloc Failed");
 
 	// Copy data from OpenCV input image to device memory
 	SAFE_CALL(cudaMemcpy(d_input, input.ptr(), colorBytes, cudaMemcpyHostToDevice), "CUDA Memcpy Host To Device Failed");
@@ -194,6 +195,7 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_output, 
 
   int * f_histogram = equalize(histogram, imSize);
 
+  /*
   int sum = 0;
   for (int i = 0; i < C_SIZE; i++)
     sum += histogram[i];
@@ -201,8 +203,9 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_output, 
 
   for (int i = 0; i < C_SIZE; i++)
     printf("%d : %d\n", i, f_histogram[i]);
-
-  equalizer_kernel<<<grid, block >>>(d_output, de_output, d_histogram, input.cols, input.rows, static_cast<int>(output.step), imSize);
+*/
+  SAFE_CALL(cudaMemcpy(df_histogram, f_histogram, C_SIZE * sizeof(int), cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
+  equalizer_kernel<<<grid, block >>>(d_output, de_output, df_histogram, input.cols, input.rows, static_cast<int>(output.step), imSize);
   /*
   int * f_histogram = equalize(histogram, imSize);
 
