@@ -310,7 +310,7 @@ int main(int argc, char *argv[]){
   SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
   SAFE_CALL(cudaMemcpy(output.ptr(), d_output, grayBytes, cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
   //Write the black & white image
-  cv::imwrite("Images/bw_" + imageName , output);
+  cv::imwrite("Images/bw_" + inputImage , output);
 
   // Launch equalization on cpu
   printf("Equalization on cpu.\n");
@@ -373,7 +373,7 @@ int main(int argc, char *argv[]){
 
   // Reset device
   SAFE_CALL(cudaDeviceReset(), "Error reseting");
-  
+
   /*
 	//Allow the windows to resize
 	namedWindow("Input", cv::WINDOW_NORMAL);
