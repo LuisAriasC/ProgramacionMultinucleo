@@ -50,6 +50,7 @@ void equalizer_cpu(const cv::Mat &input, cv::Mat &output, string imageName){
   //Histogram
   int * histo = (int *)malloc(C_SIZE * sizeof(int));
   int * aux_histo = (int *)malloc(C_SIZE * sizeof(int));
+  printf("Sale Malloc\n");
   for (int i = 0; i < C_SIZE; i++){
       histo[i] = 0;
       aux_histo = 0;
