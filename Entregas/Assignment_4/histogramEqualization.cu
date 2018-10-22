@@ -92,7 +92,7 @@ void equalizer_cpu(const cv::Mat &input, cv::Mat &output, string imageName){
   //Print normalized histogram
   print_histogram(n_histo);
   //Write image with normalized histogram on output
-  write_image(input, output, n_histo, size_){
+  write_image(input, output, n_histo, size_);
 
   //Save the image
   cv::imwrite("Images/eq_cpu_" + imageName , output);
