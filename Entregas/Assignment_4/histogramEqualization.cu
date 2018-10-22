@@ -271,6 +271,7 @@ void histogram_equalization(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_o
   printf("Speedup: %f\n", cpuTime / gpuTime );
 
 	// Free the device memory
+  
 	SAFE_CALL(cudaFree(d_input), "CUDA Free Failed");
 	SAFE_CALL(cudaFree(d_output), "CUDA Free Failed");
   SAFE_CALL(cudaFree(de_output), "CUDA Free Failed");
@@ -309,8 +310,8 @@ int main(int argc, char *argv[]){
   cv::Mat eq_output(input.rows, input.cols, CV_8UC1);
 
 	//Convert image to gray and equalize
-	//histogram_equalization(input, output, eq_output, inputImage);
-  equalizer_cpu(input, output, inputImage);
+	histogram_equalization(input, output, eq_output, inputImage);
+  //equalizer_cpu(input, output, inputImage);
 
 	//Allow the windows to resize
 	//namedWindow("Input", cv::WINDOW_NORMAL);
