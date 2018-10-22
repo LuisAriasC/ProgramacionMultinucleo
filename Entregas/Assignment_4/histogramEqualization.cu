@@ -137,7 +137,7 @@ __global__ void equalizer_kernel(unsigned char* input, unsigned char* output, in
   __syncthreads();
 
   //Fill in shared memory histogram
-  if (nxy < 256)
+  if (sxy < 256)
     hist_s[sxy] = hist[sxy];
   __syncthreads();
 
@@ -234,6 +234,9 @@ void histogram_equalization(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_o
   //Write the black & white equalized image
   SAFE_CALL(cudaMemcpy(eq_output.ptr(), de_output, grayBytes, cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
   cv::imwrite("Images/eq_gpu_" + imageName , eq_output);
+
+  printf("Time in CPU: %f\n", cpuTime);
+  printf("Time in GPU: %f\n", cpuTime);
 
 	// Free the device memory
 	SAFE_CALL(cudaFree(d_input), "CUDA Free Failed");
