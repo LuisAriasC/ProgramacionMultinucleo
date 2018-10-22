@@ -248,6 +248,9 @@ void histogram_equalization(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_o
   free(histogram);
   free(f_histogram);
   printf("Deallocated cpu\n");
+
+  // Reset device
+  SAFE_CALL(cudaDeviceReset(), "Error reseting");
 }
 
 int main(int argc, char *argv[]){
