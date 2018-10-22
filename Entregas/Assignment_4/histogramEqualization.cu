@@ -16,16 +16,14 @@
 
 using namespace std;
 
-int * equalize(int * histogram, int size){
+void equalize(int * histogram, int * n_histogram, int size){
     int step = size / C_SIZE;
     int sum = 0;
-    int * n_histogram = (int * )calloc(C_SIZE,sizeof(int));
 
     for(int i=0; i < C_SIZE; i++){
         sum += histogram[i];
         n_histogram[i] = sum / step;
     }
-    return n_histogram;
 }
 
 // input - input image one dimensional array
@@ -157,8 +155,10 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_output, 
 	unsigned char *d_input, *d_output, *de_output;
   int * d_histogram, * df_histogram;
   int * histogram = (int *)malloc(C_SIZE * sizeof(int));
-  for (int i = 0; i < C_SIZE; i++)
+  int * f_histogram = (int *)malloc(C_SIZE * sizeof(int));
+  for (int i = 0; i < C_SIZE; i++){
     histogram[i] = 0;
+  }
 
 	// Allocate device memory
 	SAFE_CALL(cudaMalloc<unsigned char>(&d_input, colorBytes), "CUDA Malloc Failed");
@@ -193,9 +193,9 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_output, 
 	SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
   SAFE_CALL(cudaMemcpy(histogram, d_histogram, C_SIZE * sizeof(int), cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
 
-  int * f_histogram = equalize(histogram, imSize);
-  SAFE_CALL(cudaMemset(d_histogram, 0, C_SIZE * sizeof(int)), "Error setting d_MatC to 0");
-  SAFE_CALL(cudaMemcpy(d_histogram, f_histogram, C_SIZE * sizeof(int), cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
+  equalize(histogram, f_histogram, imSize);
+  //SAFE_CALL(cudaMemset(d_histogram, 0, C_SIZE * sizeof(int)), "Error setting d_MatC to 0");
+  //SAFE_CALL(cudaMemcpy(df_histogram, f_histogram, C_SIZE * sizeof(int), cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
 
   int sum = 0;
   for (int i = 0; i < C_SIZE; i++)
