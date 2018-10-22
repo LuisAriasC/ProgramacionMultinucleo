@@ -11,18 +11,28 @@
 #include <cuda_runtime.h>
 
 #define img_dest "Images/"
-#define default_image "dog2.jpeg"
+#define default_image "dog3.jpeg"
 #define C_SIZE 256
 
 using namespace std;
 
-void equalize(int * histogram, int * n_histogram, int size){
+/***
+
+//This function is used to equalize an histogram
+
+  //src_histogram - imput histogram as a one dimentional array of ints
+
+***/
+void equalize(int * src_histogram, int * eq_histogram, int size){
     int step = size / C_SIZE;
     int sum = 0;
 
     for(int i=0; i < C_SIZE; i++){
-        sum += histogram[i];
-        n_histogram[i] = sum / step;
+        sum += src_histogram[i];
+        if (sum / step <= C_SIZE)
+          eq_histogram[i] = sum / step;
+        else
+          eq_histogram[i] = C_SIZE - 1;
     }
 }
 
