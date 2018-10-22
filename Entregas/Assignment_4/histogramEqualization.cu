@@ -32,7 +32,8 @@ void normalize(int * src_histogram, int * eq_histogram, int size){
         printf("Hace suma parcial?\n");
         sum += src_histogram[i];
         printf("Si hace suma parcial\n");
-        &eq_histogram[i] = sum / step;
+        eq_histogram[i] = sum / step;
+        printf("Si hace suma parcial\n");
     }
     printf("Sale de normalize\n");
 }
