@@ -35,7 +35,7 @@ void normalize(int * src_histogram, int * eq_histogram, int size){
 }
 
 //Create input histogram
-void create_input_histogram(int * histo, int size){
+void create_input_histogram(const cv::Mat &input, int * histo, int size){
   for (int i = 0; i < size; i++)
     histo[input.ptr()[i]]++;
 }
@@ -47,7 +47,6 @@ void create_input_histogram(int * histo, int size){
 void normalize_histogram(int * histo, int * n_histo, int size){
   float step = size / (C_SIZE - 1);
   float sum = 0;
-  int n_histo[C_SIZE]{};
   for(int i=0; i < C_SIZE; i++){
       sum += (float)histo[i];
       n_histo[i] = (int)floor(sum / step);
@@ -77,7 +76,7 @@ void equalizer_cpu(const cv::Mat &input, cv::Mat &output, string imageName){
   memset(n_histo, 0, hisBytes);
 
   //Create the histogram for the input image
-  create_input_histogram(histo, size_);
+  create_input_histogram(input, histo, size_);
   //Create normalized histogram
   normalize_histogram(histo, n_histo, size_);
   //Print normalized histogram
