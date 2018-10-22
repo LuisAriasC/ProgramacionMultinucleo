@@ -53,7 +53,7 @@ void normalize_histogram(int * histo, int * n_histo, int size){
   }
 }
 
-print_histogram(int * histo){
+void print_histogram(int * histo){
   for(int i = 0; i < C_SIZE; i++)
     printf("%d : %d\n", i, histo[i]);
 }
