@@ -259,8 +259,8 @@ int main(int argc, char *argv[]){
 
 	if(argc < 2)
 		inputImage = default_image;
-  else
-  	inputImage = argv[1];
+  	else
+  		inputImage = argv[1];
 
 	// Read input image from the disk
 	cv::Mat input = cv::imread(img_dest + inputImage, CV_LOAD_IMAGE_COLOR);
@@ -273,14 +273,13 @@ int main(int argc, char *argv[]){
 
 	//Create output image
 	cv::Mat output(input.rows, input.cols, CV_8UC1);
-  //Create equalized output image
-  cv::Mat eq_output(input.rows, input.cols, CV_8UC1);
+  	//Create equalized output image
+  	cv::Mat eq_output(input.rows, input.cols, CV_8UC1);
 
 	//Convert image to gray and equalize
 	histogram_equalization(input, output, eq_output, inputImage);
 
 	//Allow the windows to resize
-  /*
 	namedWindow("Input", cv::WINDOW_NORMAL);
 	namedWindow("Blac&WhiteInput", cv::WINDOW_NORMAL);
 	namedWindow("Output", cv::WINDOW_NORMAL);
@@ -288,8 +287,7 @@ int main(int argc, char *argv[]){
 	//Show the input and output
 	imshow("Input", input);
 	imshow("Blac&WhiteInput", output);
-  imshow("Output", eq_output);
-*/
+  	imshow("Output", eq_output);
 	//Wait for key press
 	cv::waitKey();
 	return 0;
