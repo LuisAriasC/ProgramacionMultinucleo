@@ -24,6 +24,7 @@ using namespace std;
   // eq_histogram - output normalized histogram as a one dimentional array of ints
   // size - size of the histograms
 void normalize(int * src_histogram, int * eq_histogram, int size){
+    printf("Entra a normalize\n");
     int step = size / C_SIZE;
     int sum = 0;
 
@@ -31,6 +32,7 @@ void normalize(int * src_histogram, int * eq_histogram, int size){
         sum += src_histogram[i];
         eq_histogram[i] = sum / step;
     }
+    printf("Sale de normalize\n");
 }
 
 
@@ -61,6 +63,7 @@ void equalizer_cpu(const cv::Mat &input, cv::Mat &output, string imageName){
   for (int i = 0; i < size_; i++)
     histo[input.ptr()[i]]++;
   printf("Hace histo\n");
+
   //Normalize histogram
   normalize(histo, aux_histo, size_);
   printf("Hace histo normalize\n");
