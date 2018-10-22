@@ -176,11 +176,23 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_output, 
   printf("END CPU\n");
 
 
-  equalizer_kernel<<<grid, block >>>(d_output, de_output, d_histogram, input.cols, input.rows, static_cast<int>(output.step), imSize);
-  //get_histogram_kernel<<<grid, block >>>(d_output, d_histogram, input.cols, input.rows, static_cast<int>(output.step));
+  //equalizer_kernel<<<grid, block >>>(d_output, de_output, d_histogram, input.cols, input.rows, static_cast<int>(output.step), imSize);
+  get_histogram_kernel<<<grid, block >>>(d_output, d_histogram, input.cols, input.rows, static_cast<int>(output.step));
   // Synchronize to check for any kernel launch errors
 	SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
   SAFE_CALL(cudaMemcpy(histogram, d_histogram, C_SIZE * sizeof(int), cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
+
+  int * f_histogram = equalize(histogram, imSize);
+
+  int sum = 0;
+  for (int i = 0; i < C_SIZE; i++)
+    sum += histogram[i];
+  printf("%d : %d\n", imSize, sum);
+
+  for (int i = 0; i < C_SIZE; i++)
+    printf("%d : %d\n", i, f_histogram[i]);
+
+  equalizer_kernel<<<grid, block >>>(d_output, de_output, d_histogram, input.cols, input.rows, static_cast<int>(output.step), imSize);
 
   /*
   int * f_histogram = equalize(histogram, imSize);
