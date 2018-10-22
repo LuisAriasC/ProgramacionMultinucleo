@@ -194,8 +194,8 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_output, 
   SAFE_CALL(cudaMemcpy(histogram, d_histogram, C_SIZE * sizeof(int), cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
 
   int * f_histogram = equalize(histogram, imSize);
+  SAFE_CALL(cudaMemcpy(d_histogram, f_histogram, C_SIZE * sizeof(int), cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
 
-  /*
   int sum = 0;
   for (int i = 0; i < C_SIZE; i++)
     sum += histogram[i];
@@ -203,9 +203,8 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_output, 
 
   for (int i = 0; i < C_SIZE; i++)
     printf("%d : %d\n", i, f_histogram[i]);
-*/
 
-  equalizer_kernel<<<grid, block >>>(d_output, de_output, f_histogram, input.cols, input.rows, static_cast<int>(output.step), imSize);
+  equalizer_kernel<<<grid, block >>>(d_output, de_output, d_histogram, input.cols, input.rows, static_cast<int>(output.step), imSize);
   /*
   int * f_histogram = equalize(histogram, imSize);
 
