@@ -11,7 +11,7 @@
 #include <cuda_runtime.h>
 
 #define img_dest "Images/"
-#define default_image "dog1.jpeg"
+#define default_image "dog2.jpeg"
 #define C_SIZE 256
 
 using namespace std;
@@ -90,31 +90,16 @@ __global__ void get_histogram_kernel(unsigned char* output, int* histo,int width
 	}
 }
 
-__global__ void set_image_kernel(unsigned char* input,unsigned char* output, int * histogram, int width, int height, int step){
 
-    __shared__ int * shHistogram;
-    for(int i = 0;i<256;i++){
-        shHistogram[i] = histogram[i];
-    }
-    __syncthreads();
-
-    const int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
-    const int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
-
-    if ((xIndex < width) && (yIndex < height)){
-        const int tid = yIndex * step + xIndex;
-        output[tid] =static_cast<unsigned char>(shHistogram[input[tid]]);
-    }
-}
 
 __global__ void equalizer_kernel(unsigned char* input, unsigned char* output, int * hist, int width, int height, int grayWidthStep, long totalSize){
 
     //2D Index of current thread
-	unsigned int ix = threadIdx.x + blockIdx.x * blockDim.x;
-  unsigned int iy = threadIdx.y + blockIdx.y * blockDim.y;
+	unsigned int xIndex = threadIdx.x + blockIdx.x * blockDim.x;
+  unsigned int yIndex = threadIdx.y + blockIdx.y * blockDim.y;
   unsigned int nxy = threadIdx.y * blockDim.x + threadIdx.x;
   //Location of gray pixel in output
-  const int tid  = iy * grayWidthStep + ix;
+  const int tid  = yIndex * grayWidthStep + xIndex;
 
   __shared__ int hist_s[256];
   hist_s[nxy] = 0;
@@ -124,29 +109,13 @@ __global__ void equalizer_kernel(unsigned char* input, unsigned char* output, in
     hist_s[nxy] = hist[nxy];
   __syncthreads();
 
-  if (tid == 0) {
-    for (int i = 0; i < C_SIZE; i++)
-      printf("%d : %d\n", i, hist_s[i]);
-  }
-  __syncthreads();
-
-
-  /*
-  if(nxy < 256 && blockIdx.x == 0 && blockIdx.y==0){
-      int aux = (hist_s[nxy]*255)/totalSize;
-      hist_s[nxy] = aux;
-	}
-  __syncthreads();
-
-    if((ix < width) && (iy < height)){
-      int Index = input[gray_tid];
-		    output[gray_tid] = hist_s[Index];
-    }
-  */
+  if((xIndex < width) && (yIndex < height))
+      output[gray_tid] = hist_s[input[tid]];
 }
 
-void convert_to_gray(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_output, string imageName){
 
+
+void convert_to_gray(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_output, string imageName){
 
 	size_t colorBytes = input.step * input.rows;
 	size_t grayBytes = output.step * output.rows;
@@ -182,51 +151,25 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_output, 
   //Write the black & white image
   cv::imwrite("Images/bw_" + imageName , output);
 
-  printf("In CPU\n");
+  //printf("In CPU\n");
   equalizer_cpu(output, eq_output, imageName);
-  printf("END CPU\n");
+  memset(eq_output.ptr(), 0, colorBytes);
+  //printf("END CPU\n");
 
-
-  //equalizer_kernel<<<grid, block >>>(d_output, de_output, d_histogram, input.cols, input.rows, static_cast<int>(output.step), imSize);
   get_histogram_kernel<<<grid, block >>>(d_output, d_histogram, input.cols, input.rows, static_cast<int>(output.step));
   // Synchronize to check for any kernel launch errors
 	SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
   SAFE_CALL(cudaMemcpy(histogram, d_histogram, C_SIZE * sizeof(int), cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
 
+  //Equalize histogram
   equalize(histogram, f_histogram, imSize);
-  //SAFE_CALL(cudaMemset(d_histogram, 0, C_SIZE * sizeof(int)), "Error setting d_MatC to 0");
+  //Copy normalized histogram to gpu
   SAFE_CALL(cudaMemcpy(df_histogram, f_histogram, C_SIZE * sizeof(int), cudaMemcpyHostToDevice), "CUDA Memcpy Host To Device Failed");
-
-  int sum = 0;
-  for (int i = 0; i < C_SIZE; i++)
-    sum += histogram[i];
-  printf("%d : %d\n", imSize, sum);
-
-  for (int i = 0; i < C_SIZE; i++)
-    printf("%d : %d\n", i, f_histogram[i]);
-
   equalizer_kernel<<<grid, block >>>(d_output, de_output, df_histogram, input.cols, input.rows, static_cast<int>(output.step), imSize);
-  /*
-  int * f_histogram = equalize(histogram, imSize);
-
-  int sum = 0;
-  for (int i = 0; i < C_SIZE; i++)
-    sum += histogram[i];
-  printf("%d : %d\n", imSize, sum);
-
-  for (int i = 0; i < C_SIZE; i++)
-    printf("%d : %d\n", i, f_histogram[i]);
-
-  set_image_kernel<<<grid, block>>>(d_output, de_output, f_histogram, output.cols, output.rows, static_cast<int>(output.step));
-  // Synchronize to check for any kernel launch errors
   SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
   SAFE_CALL(cudaMemcpy(eq_output.ptr(), de_output, grayBytes, cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
-*/
   //Write the black & white image
   cv::imwrite("Images/eq_gpu_" + imageName , eq_output);
-
-  //Write the black & white image
-  //cv::imwrite("Images/eq_gpu_" + imageName , output);
 
 	// Free the device memory
 	SAFE_CALL(cudaFree(d_input), "CUDA Free Failed");
@@ -258,7 +201,6 @@ int main(int argc, char *argv[]){
 
 	//Convert image to gray
 	convert_to_gray(input, output, eq_output, inputImage);
-  //equalizer_cpu(output, eq_output, inputImage);
 
 	//Allow the windows to resize
   /*
