@@ -110,7 +110,7 @@ __global__ void equalizer_kernel(unsigned char* input, unsigned char* output, in
   __syncthreads();
 
   if((xIndex < width) && (yIndex < height))
-      output[gray_tid] = hist_s[input[tid]];
+      output[tid] = hist_s[input[tid]];
 }
 
 
