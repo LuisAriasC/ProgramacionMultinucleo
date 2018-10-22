@@ -15,7 +15,7 @@
 #include <math.h>
 
 #define img_dest "Images/"
-#define default_image "dog.jpeg"
+#define default_image "dog1.jpeg"
 #define C_SIZE 256
 
 using namespace std;
