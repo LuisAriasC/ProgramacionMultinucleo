@@ -12,6 +12,7 @@
 #include "common.h"
 #include <cuda_runtime.h>
 #include <chrono>
+#include <math.h>
 
 #define img_dest "Images/"
 #define default_image "dog.jpeg"
@@ -69,7 +70,32 @@ void equalizer_cpu(const cv::Mat &input, cv::Mat &output, string imageName){
   cv::imwrite("Images/eq_cpu_" + imageName , output);
 }
 
+void histogram_equalization_cpu(const cv::Mat &input, cv::Mat &output){
 
+  int width = input.cols;
+  int height = input.rows;
+  int size_ = width * height;
+
+  //Histogram
+  float histogram[C_SIZE]{};
+
+  //Fill histogram
+  for (int i = 0; i < size_; i++)
+    histogram[input.ptr()[i]]++;
+
+  for (int i = 0; i < size_; i++)
+      histogram[i] /= size_ ;
+
+  int n_histo[C_SIZE]{};
+  float sum = 0;
+  for (int i = 0; i < count; i++){
+      sum += histogram[i];
+      n_histo[i] = (int)floor((C_SIZE) * sum);
+  }
+
+  for (int i = 0; i < C_SIZE; i++)
+    printf("%d : %d\n", i, n_histo[i]);
+}
 
 //This function converts a colored imege to a grayscale image
   // input - input image one dimensional array
@@ -253,6 +279,8 @@ void histogram_equalization(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_o
   SAFE_CALL(cudaDeviceReset(), "Error reseting");
 }
 
+
+
 int main(int argc, char *argv[]){
 
 	string inputImage;
@@ -273,11 +301,12 @@ int main(int argc, char *argv[]){
 
 	//Create output image
 	cv::Mat output(input.rows, input.cols, CV_8UC1);
-  	//Create equalized output image
-  	cv::Mat eq_output(input.rows, input.cols, CV_8UC1);
+  //Create equalized output image
+  cv::Mat eq_output(input.rows, input.cols, CV_8UC1);
 
 	//Convert image to gray and equalize
-	histogram_equalization(input, output, eq_output, inputImage);
+	//histogram_equalization(input, output, eq_output, inputImage);
+  histogram_equalization_cpu(input, output);
 
 	//Allow the windows to resize
 	namedWindow("Input", cv::WINDOW_NORMAL);
@@ -287,7 +316,7 @@ int main(int argc, char *argv[]){
 	//Show the input and output
 	imshow("Input", input);
 	imshow("Blac&WhiteInput", output);
-  	imshow("Output", eq_output);
+  imshow("Output", eq_output);
 	//Wait for key press
 	cv::waitKey();
 	return 0;
