@@ -236,7 +236,7 @@ void histogram_equalization(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_o
   cv::imwrite("Images/eq_gpu_" + imageName , eq_output);
 
   printf("Time in CPU: %f\n", cpuTime);
-  printf("Time in GPU: %f\n", cpuTime);
+  printf("Time in GPU: %f\n", gpuTime);
 
 	// Free the device memory
 	SAFE_CALL(cudaFree(d_input), "CUDA Free Failed");
