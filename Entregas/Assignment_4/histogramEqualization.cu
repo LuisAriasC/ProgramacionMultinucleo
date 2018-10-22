@@ -14,7 +14,7 @@
 #include <chrono>
 
 #define img_dest "Images/"
-#define default_image "woman3.jpg"
+#define default_image "dog.jpeg"
 #define C_SIZE 256
 
 using namespace std;
