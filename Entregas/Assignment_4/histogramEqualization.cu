@@ -234,7 +234,7 @@ void histogram_equalization(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_o
   printf("Time in CPU: %f\n", cpuTime);
   printf("Time in GPU: %f\n", gpuTime);
 
-  printf("Start dealloc\n");
+  printf("Start gpu dealloc\n");
 	// Free the device memory
 	SAFE_CALL(cudaFree(d_input), "CUDA Free Failed");
 	SAFE_CALL(cudaFree(d_output), "CUDA Free Failed");
@@ -243,9 +243,11 @@ void histogram_equalization(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_o
   SAFE_CALL(cudaFree(df_histogram), "CUDA Free Failed");
   printf("Deallocated device\n");
 
+  printf("Start cpu dealloc\n");
   //Free the host memory
   free(histogram);
   free(f_histogram);
+  printf("Deallocated cpu\n");
 }
 
 int main(int argc, char *argv[]){
