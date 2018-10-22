@@ -63,6 +63,7 @@ void equalizer_cpu(const cv::Mat &input, cv::Mat &output, string imageName){
   printf("Hace histo\n");
   //Normalize histogram
   normalize(histo, aux_histo, size_);
+  printf("Hace histo normalize\n");
 
   //Write image with normalized histogram on output
   for (int i = 0; i < size_; i++)
