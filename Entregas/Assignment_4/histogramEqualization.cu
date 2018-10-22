@@ -122,13 +122,6 @@ __global__ void equalizer_kernel(unsigned char* input, unsigned char* output, in
   hist_s[nxy] = 0;
   __syncthreads();
 
-  if(nxy < 256 && blockIdx.x == 0 && blockIdx.y == 0 && gray_tid == 0){
-		for(int i = 0; i <= nxy; i++){
-           hist_s[nxy] += hist[i];
-           printf("%d - %d\n", hist[i]);
-        }
-  }
-  __syncthreads();
 
   /*
   if(nxy < 256 && blockIdx.x == 0 && blockIdx.y==0){
