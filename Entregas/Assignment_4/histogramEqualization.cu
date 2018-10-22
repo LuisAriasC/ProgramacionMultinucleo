@@ -214,11 +214,7 @@ void histogram_equalization(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_o
   // Copy device histogram to host histogram
   SAFE_CALL(cudaMemcpy(histogram, d_histogram, C_SIZE * sizeof(int), cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
   //Normalize histogram
-  start_gpu =  chrono::high_resolution_clock::now();
   normalize(histogram, f_histogram, imSize);
-  end_gpu =  chrono::high_resolution_clock::now();
-  gpu_duration_ms = end_gpu - start_gpu;
-  gpuTime += gpu_duration_ms.count();
 
   //Copy normalized histogram to device normalized histogram
   SAFE_CALL(cudaMemcpy(df_histogram, f_histogram, C_SIZE * sizeof(int), cudaMemcpyHostToDevice), "CUDA Memcpy Host To Device Failed");
