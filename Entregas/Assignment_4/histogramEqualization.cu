@@ -32,7 +32,7 @@ void normalize(int * src_histogram, int * eq_histogram, int size){
         printf("Hace suma parcial?\n");
         sum += src_histogram[i];
         printf("Si hace suma parcial\n");
-        eq_histogram[i] = sum / step;
+        &eq_histogram[i] = sum / step;
     }
     printf("Sale de normalize\n");
 }
@@ -56,8 +56,8 @@ void equalizer_cpu(const cv::Mat &input, cv::Mat &output, string imageName){
   int * aux_histo = (int *)malloc(C_SIZE * sizeof(int));
   printf("Sale Malloc\n");
   for (int i = 0; i < C_SIZE; i++){
-      histo[i] = 0;
-      aux_histo = 0;
+    aux_histo = 0;
+    histo[i] = 0;
   }
   printf("Sale Sub Malloc\n");
 
