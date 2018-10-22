@@ -278,8 +278,9 @@ int main(int argc, char *argv[]){
 
 	//Convert image to gray and equalize
 	histogram_equalization(input, output, eq_output, inputImage);
-  /*
+
 	//Allow the windows to resize
+  /*
 	namedWindow("Input", cv::WINDOW_NORMAL);
 	namedWindow("Blac&WhiteInput", cv::WINDOW_NORMAL);
 	namedWindow("Output", cv::WINDOW_NORMAL);
@@ -288,7 +289,7 @@ int main(int argc, char *argv[]){
 	imshow("Input", input);
 	imshow("Blac&WhiteInput", output);
   imshow("Output", eq_output);
-  */
+*/
 	//Wait for key press
 	cv::waitKey();
 	return 0;
