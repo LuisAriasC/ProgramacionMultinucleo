@@ -41,6 +41,8 @@ void normalize(int * src_histogram, int * eq_histogram, int size){
   //imageName - path to achieve the image
 void equalizer_cpu(const cv::Mat &input, cv::Mat &output, string imageName){
 
+  printf("Entra\n");
+
   int width = input.cols;
   int height = input.rows;
   int size_ = width * height;
@@ -70,6 +72,9 @@ void equalizer_cpu(const cv::Mat &input, cv::Mat &output, string imageName){
   //Free host memory
   free(histo);
   free(aux_histo);
+
+  printf("Sale\n");
+
 }
 
 
