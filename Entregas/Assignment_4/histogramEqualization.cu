@@ -54,48 +54,25 @@ void equalizer_cpu(const cv::Mat &input, cv::Mat &output, string imageName){
     histo[input.ptr()[i]]++;
 
   //Normalize histogram
-  int step = size_ / C_SIZE;
-  int sum = 0;
+  float norm_const = (C_SIZE - 1) / size_;
+  float sum = 0;
   int n_histo[C_SIZE]{};
   for(int i=0; i < C_SIZE; i++){
       sum += histo[i];
-      n_histo[i] = sum / step;
-  }
-
-  //Write image with normalized histogram on output
-  for (int i = 0; i < size_; i++)
-    output.ptr()[i] = n_histo[input.ptr()[i]];
-
-  //Save the image
-  cv::imwrite("Images/eq_cpu_" + imageName , output);
-}
-
-void histogram_equalization_cpu(const cv::Mat &input, cv::Mat &output){
-
-  int width = input.cols;
-  int height = input.rows;
-  int size_ = width * height;
-
-  //Histogram
-  float histogram[C_SIZE]{};
-
-  //Fill histogram
-  for (int i = 0; i < size_; i++)
-    histogram[input.ptr()[i]]++;
-
-  for (int i = 0; i < size_; i++)
-      histogram[i] /= size_ ;
-
-  int n_histo[C_SIZE]{};
-  float sum = 0;
-  for (int i = 0; i < C_SIZE; i++){
-      sum += histogram[i];
-      n_histo[i] = (int)floor((C_SIZE) * sum);
+      n_histo[i] = static_cast<int>(floor(norm_const * sum));
   }
 
   for (int i = 0; i < C_SIZE; i++)
     printf("%d : %d\n", i, n_histo[i]);
+
+  //Write image with normalized histogram on output
+  //for (int i = 0; i < size_; i++)
+    //output.ptr()[i] = n_histo[input.ptr()[i]];
+
+  //Save the image
+  //cv::imwrite("Images/eq_cpu_" + imageName , output);
 }
+
 
 //This function converts a colored imege to a grayscale image
   // input - input image one dimensional array
@@ -304,19 +281,21 @@ int main(int argc, char *argv[]){
   //Create equalized output image
   cv::Mat eq_output(input.rows, input.cols, CV_8UC1);
 
+  equalizer_cpu(input, output, inputImage);
+
 	//Convert image to gray and equalize
 	//histogram_equalization(input, output, eq_output, inputImage);
-  histogram_equalization_cpu(input, output);
+
 
 	//Allow the windows to resize
-	namedWindow("Input", cv::WINDOW_NORMAL);
-	namedWindow("Blac&WhiteInput", cv::WINDOW_NORMAL);
-	namedWindow("Output", cv::WINDOW_NORMAL);
+	//namedWindow("Input", cv::WINDOW_NORMAL);
+	//namedWindow("Blac&WhiteInput", cv::WINDOW_NORMAL);
+	//namedWindow("Output", cv::WINDOW_NORMAL);
 
 	//Show the input and output
-	imshow("Input", input);
-	imshow("Blac&WhiteInput", output);
-  imshow("Output", eq_output);
+	//imshow("Input", input);
+	//imshow("Blac&WhiteInput", output);
+  //imshow("Output", eq_output);
 	//Wait for key press
 	cv::waitKey();
 	return 0;
