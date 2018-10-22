@@ -278,7 +278,7 @@ int main(int argc, char *argv[]){
 
 	//Convert image to gray and equalize
 	histogram_equalization(input, output, eq_output, inputImage);
-
+  printf("Sale");
   /*
 	//Allow the windows to resize
 	namedWindow("Input", cv::WINDOW_NORMAL);
