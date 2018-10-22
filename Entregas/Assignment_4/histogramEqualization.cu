@@ -182,6 +182,7 @@ void histogram_equalization(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_o
 	const dim3 grid((int)ceil((float)input.cols / block.x), (int)ceil((float)input.rows/ block.y));
 
 	// Launch the color conversion kernel
+  printf("Converting image to black & white\n");
 	bgr_to_gray_kernel <<<grid, block >>>(d_input, d_output, input.cols, input.rows, static_cast<int>(input.step), static_cast<int>(output.step));
   // Synchronize to check for any kernel launch errors
 	SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
@@ -190,6 +191,7 @@ void histogram_equalization(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_o
   cv::imwrite("Images/bw_" + imageName , output);
 
   // Launch equalization on cpu
+  printf("Equalization on cpu.\n");
   float cpuTime = 0.0;
   auto start_cpu =  chrono::high_resolution_clock::now();
   equalizer_cpu(output, eq_output, imageName);
@@ -201,6 +203,7 @@ void histogram_equalization(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_o
   memset(eq_output.ptr(), 0, colorBytes);
 
   //Launch histogram calculation on cpu
+  printf("Equalization on gpu.\n");
   float gpuTime = 0.0;
   auto start_gpu =  chrono::high_resolution_clock::now();
   get_histogram_kernel<<<grid, block >>>(d_output, d_histogram, input.cols, input.rows, static_cast<int>(output.step));
@@ -233,21 +236,18 @@ void histogram_equalization(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_o
 
   printf("Time in CPU: %f\n", cpuTime);
   printf("Time in GPU: %f\n", gpuTime);
+  printf("Speedup: %f\n", gpuTime / cpuTime );
 
-  printf("Start gpu dealloc\n");
 	// Free the device memory
 	SAFE_CALL(cudaFree(d_input), "CUDA Free Failed");
 	SAFE_CALL(cudaFree(d_output), "CUDA Free Failed");
   SAFE_CALL(cudaFree(de_output), "CUDA Free Failed");
   SAFE_CALL(cudaFree(d_histogram), "CUDA Free Failed");
   SAFE_CALL(cudaFree(df_histogram), "CUDA Free Failed");
-  printf("Deallocated device\n");
 
-  printf("Start cpu dealloc\n");
   //Free the host memory
   free(histogram);
   free(f_histogram);
-  printf("Deallocated cpu\n");
 
   // Reset device
   SAFE_CALL(cudaDeviceReset(), "Error reseting");
@@ -279,7 +279,6 @@ int main(int argc, char *argv[]){
 	//Convert image to gray and equalize
 	histogram_equalization(input, output, eq_output, inputImage);
 
-  printf("End\n");
 	//Allow the windows to resize
   /*
 	namedWindow("Input", cv::WINDOW_NORMAL);
