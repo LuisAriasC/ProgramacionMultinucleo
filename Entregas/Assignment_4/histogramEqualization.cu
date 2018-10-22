@@ -88,7 +88,7 @@ void histogram_equalization_cpu(const cv::Mat &input, cv::Mat &output){
 
   int n_histo[C_SIZE]{};
   float sum = 0;
-  for (int i = 0; i < count; i++){
+  for (int i = 0; i < C_SIZE; i++){
       sum += histogram[i];
       n_histo[i] = (int)floor((C_SIZE) * sum);
   }
