@@ -46,30 +46,27 @@ void equalizer_cpu(const cv::Mat &input, cv::Mat &output, string imageName){
   int size_ = width * height;
 
   //Histogram
-  int * histo = (int *)malloc(C_SIZE * sizeof(int));
-  int * aux_histo = (int *)malloc(C_SIZE * sizeof(int));
-  for (int i = 0; i < C_SIZE; i++){
-      histo[i] = 0;
-      aux_histo = 0;
-  }
+  int histo[C_SIZE]{};
 
   //Fill histogram
   for (int i = 0; i < size_; i++)
     histo[input.ptr()[i]]++;
 
   //Normalize histogram
-  normalize(histo, aux_histo, size_);
+  int step = size_ / C_SIZE;
+  int sum = 0;
+  int n_histo[C_SIZE]{};
+  for(int i=0; i < C_SIZE; i++){
+      sum += histo[i];
+      n_histo[i] = sum / step;
+  }
 
   //Write image with normalized histogram on output
   for (int i = 0; i < size_; i++)
-    output.ptr()[i] = aux_histo[input.ptr()[i]];
+    output.ptr()[i] = n_histo[input.ptr()[i]];
 
   //Save the image
   cv::imwrite("Images/eq_cpu_" + imageName , output);
-
-  //Free host memory
-  free(histo);
-  free(aux_histo);
 }
 
 
@@ -167,10 +164,8 @@ void histogram_equalization(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_o
   int * d_histogram, * df_histogram;
   int * histogram = (int *)malloc(C_SIZE * sizeof(int));
   int * f_histogram = (int *)malloc(C_SIZE * sizeof(int));
-  for (int i = 0; i < C_SIZE; i++){
-    f_histogram[i] = 0;
-    histogram[i] = 0;
-  }
+  for (int i = 0; i < C_SIZE; i++)
+    f_histogram[i] = histogram[i] = 0;
 
 	// Allocate device memory
 	SAFE_CALL(cudaMalloc<unsigned char>(&d_input, colorBytes), "CUDA Malloc Failed");
