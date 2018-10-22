@@ -69,11 +69,10 @@ void equalizer_cpu(const cv::Mat &input, cv::Mat &output, string imageName){
   //Save the image
   cv::imwrite("Images/eq_cpu_" + imageName , output);
 
+  printf("Sale\n");
   //Free host memory
   free(histo);
   free(aux_histo);
-
-  printf("Sale\n");
 
 }
 
