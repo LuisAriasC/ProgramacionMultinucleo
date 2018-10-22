@@ -46,27 +46,30 @@ void equalizer_cpu(const cv::Mat &input, cv::Mat &output, string imageName){
   int size_ = width * height;
 
   //Histogram
-  int histo[C_SIZE]{};
+  int * histo = (int *)malloc(C_SIZE * sizeof(int));
+  int * aux_histo = (int *)malloc(C_SIZE * sizeof(int));
+  for (int i = 0; i < C_SIZE; i++){
+      histo[i] = 0;
+      aux_histo = 0;
+  }
 
   //Fill histogram
   for (int i = 0; i < size_; i++)
     histo[input.ptr()[i]]++;
 
   //Normalize histogram
-  int step = size_ / C_SIZE;
-  int sum = 0;
-  int n_histo[C_SIZE]{};
-  for(int i=0; i < C_SIZE; i++){
-      sum += histo[i];
-      n_histo[i] = sum / step;
-  }
+  normalize(histo, aux_histo, size_);
 
   //Write image with normalized histogram on output
   for (int i = 0; i < size_; i++)
-    output.ptr()[i] = n_histo[input.ptr()[i]];
+    output.ptr()[i] = aux_histo[input.ptr()[i]];
 
   //Save the image
   cv::imwrite("Images/eq_cpu_" + imageName , output);
+
+  //Free host memory
+  free(histo);
+  free(aux_histo);
 }
 
 
@@ -122,6 +125,9 @@ __global__ void get_histogram_kernel(unsigned char* output, int* histo,int width
   // grayWidthStep - number of gray bytes
 __global__ void equalizer_kernel(unsigned char* input, unsigned char* output, int * hist, int width, int height, int grayWidthStep){
 
+  //Initialize shared memory for block
+  __shared__ int hist_s[256];
+
     //2D Index of current thread
 	unsigned int xIndex = threadIdx.x + blockIdx.x * blockDim.x;
   unsigned int yIndex = threadIdx.y + blockIdx.y * blockDim.y;
@@ -131,14 +137,11 @@ __global__ void equalizer_kernel(unsigned char* input, unsigned char* output, in
   //Thread ID
   const int tid  = yIndex * grayWidthStep + xIndex;
 
-  //Initialize shared memory for block
-  __shared__ int hist_s[256];
-  hist_s[sxy] = 0;
-  __syncthreads();
-
   //Fill in shared memory histogram
-  if (sxy < 256)
+  if (sxy < 256){
+    hist_s[sxy] = 0;
     hist_s[sxy] = hist[sxy];
+  }
   __syncthreads();
 
   //Generate output image
@@ -164,8 +167,10 @@ void histogram_equalization(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_o
   int * d_histogram, * df_histogram;
   int * histogram = (int *)malloc(C_SIZE * sizeof(int));
   int * f_histogram = (int *)malloc(C_SIZE * sizeof(int));
-  for (int i = 0; i < C_SIZE; i++)
-    f_histogram[i] = histogram[i] = 0;
+  for (int i = 0; i < C_SIZE; i++){
+    f_histogram[i] = 0;
+    histogram[i] = 0;
+  }
 
 	// Allocate device memory
 	SAFE_CALL(cudaMalloc<unsigned char>(&d_input, colorBytes), "CUDA Malloc Failed");
