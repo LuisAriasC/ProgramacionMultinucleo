@@ -316,7 +316,7 @@ int main(int argc, char *argv[]){
   printf("Equalization on cpu.\n");
   float cpuTime = 0.0;
   auto start_cpu =  chrono::high_resolution_clock::now();
-  equalizer_cpu(output, eq_output, imageName);
+  equalizer_cpu(output, eq_output, inputImage);
   auto end_cpu =  chrono::high_resolution_clock::now();
   chrono::duration<float, std::milli> duration_ms = end_cpu - start_cpu;
   cpuTime = duration_ms.count();
@@ -354,7 +354,7 @@ int main(int argc, char *argv[]){
 
   //Write the black & white equalized image
   SAFE_CALL(cudaMemcpy(eq_output.ptr(), de_output, grayBytes, cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
-  cv::imwrite("Images/eq_gpu_" + imageName , eq_output);
+  cv::imwrite("Images/eq_gpu_" + inputImage , eq_output);
 
   printf("Time in CPU: %f\n", cpuTime);
   printf("Time in GPU: %f\n", gpuTime);
