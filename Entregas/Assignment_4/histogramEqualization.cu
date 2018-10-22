@@ -55,6 +55,7 @@ void equalizer_cpu(const cv::Mat &input, cv::Mat &output, string imageName){
       histo[i] = 0;
       aux_histo = 0;
   }
+  printf("Sale Sub Malloc\n");
 
   //Fill histogram
   for (int i = 0; i < size_; i++)
