@@ -24,18 +24,13 @@ using namespace std;
   // eq_histogram - output normalized histogram as a one dimentional array of ints
   // size - size of the histograms
 void normalize(int * src_histogram, int * eq_histogram, int size){
-    printf("Entra a normalize\n");
     int step = size / C_SIZE;
     int sum = 0;
 
     for(int i=0; i < C_SIZE; i++){
-        printf("Hace suma parcial?\n");
         sum += src_histogram[i];
-        printf("Si hace suma parcial\n");
         eq_histogram[i] = sum / step;
-        printf("Si hace suma parcial\n");
     }
-    printf("Sale de normalize\n");
 }
 
 
@@ -46,8 +41,6 @@ void normalize(int * src_histogram, int * eq_histogram, int size){
   //imageName - path to achieve the image
 void equalizer_cpu(const cv::Mat &input, cv::Mat &output, string imageName){
 
-  printf("Entra\n");
-
   int width = input.cols;
   int height = input.rows;
   int size_ = width * height;
@@ -55,21 +48,17 @@ void equalizer_cpu(const cv::Mat &input, cv::Mat &output, string imageName){
   //Histogram
   int * histo = (int *)malloc(C_SIZE * sizeof(int));
   int * aux_histo = (int *)malloc(C_SIZE * sizeof(int));
-  printf("Sale Malloc\n");
   for (int i = 0; i < C_SIZE; i++){
-    aux_histo = 0;
-    histo[i] = 0;
+      histo[i] = 0;
+      aux_histo = 0;
   }
-  printf("Sale Sub Malloc\n");
 
   //Fill histogram
   for (int i = 0; i < size_; i++)
     histo[input.ptr()[i]]++;
-  printf("Hace histo\n");
 
   //Normalize histogram
   normalize(histo, aux_histo, size_);
-  printf("Hace histo normalize\n");
 
   //Write image with normalized histogram on output
   for (int i = 0; i < size_; i++)
@@ -78,11 +67,9 @@ void equalizer_cpu(const cv::Mat &input, cv::Mat &output, string imageName){
   //Save the image
   cv::imwrite("Images/eq_cpu_" + imageName , output);
 
-  printf("Sale\n");
   //Free host memory
   free(histo);
   free(aux_histo);
-
 }
 
 
