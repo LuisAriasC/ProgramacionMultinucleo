@@ -34,7 +34,30 @@ void normalize(int * src_histogram, int * eq_histogram, int size){
     }
 }
 
+//Create input histogram
+void create_input_histogram(int * histo, int size){
+  for (int i = 0; i < size; i++)
+    histo[input.ptr()[i]]++;
+}
 
+//This function is used to normalize an histogram
+  // histo - imput histogram as a one dimentional array of ints
+  // n_histo - output normalized histogram as a one dimentional array of ints
+  // size_ - size of the histograms
+void normalize_histogram(int * histo, int * n_histo, int size){
+  float step = size / (C_SIZE - 1);
+  float sum = 0;
+  int n_histo[C_SIZE]{};
+  for(int i=0; i < C_SIZE; i++){
+      sum += (float)histo[i];
+      n_histo[i] = (int)floor(sum / step);
+  }
+}
+
+print_histogram(int * histo){
+  for(int i = 0; i < C_SIZE; i++)
+    printf("%d : %d\n", i, histo[i]);
+}
 
 // Histogram equalization on cpu
   // imput - input image
@@ -45,25 +68,23 @@ void equalizer_cpu(const cv::Mat &input, cv::Mat &output, string imageName){
   int width = input.cols;
   int height = input.rows;
   int size_ = width * height;
+  int hisBytes = C_SIZE * sizeof(int);
 
   //Histogram
-  int histo[C_SIZE]{};
+  int * histo = (int *)malloc(hisBytes);
+  int * n_histo = (int *)malloc(hisBytes);
+  memset(histo, 0, hisBytes);
+  memset(n_histo, 0, hisBytes);
 
-  //Fill histogram
-  for (int i = 0; i < size_; i++)
-    histo[input.ptr()[i]]++;
+  //Create the histogram for the input image
+  create_input_histogram(histo, size_);
+  //Create normalized histogram
+  normalize_histogram(histo, n_histo, size_);
+  //Print normalized histogram
+  print_histogram(n_histo);
 
-  //Normalize histogram
-  float step = size_ / (C_SIZE - 1);
-  float sum = 0;
-  int n_histo[C_SIZE]{};
-  for(int i=0; i < C_SIZE; i++){
-      sum += (float)histo[i];
-      n_histo[i] = (int)floor(sum / step);
-  }
-
-  for(int i = 0; i < C_SIZE; i++)
-    printf("%d : %d\n", i, n_histo[i]);
+  free(histo);
+  free(n_histo);
   //Write image with normalized histogram on output
   //for (int i = 0; i < size_; i++)
     //output.ptr()[i] = n_histo[input.ptr()[i]];
