@@ -54,24 +54,22 @@ void equalizer_cpu(const cv::Mat &input, cv::Mat &output, string imageName){
     histo[input.ptr()[i]]++;
 
   //Normalize histogram
-  float norm_const = (C_SIZE - 1) / size_;
+  float step = size_ / (C_SIZE - 1);
   float sum = 0;
   int n_histo[C_SIZE]{};
   for(int i=0; i < C_SIZE; i++){
-      sum += histo[i];
-      n_histo[i] = static_cast<int>(floor(norm_const * sum));
+      sum += (float)histo[i];
+      n_histo[i] = (int)floor(sum / step);
   }
 
-  for (int i = 0; i < C_SIZE; i++)
-    printf("%d : %d\n", i, n_histo[i]);
-
   //Write image with normalized histogram on output
-  //for (int i = 0; i < size_; i++)
-    //output.ptr()[i] = n_histo[input.ptr()[i]];
+  for (int i = 0; i < size_; i++)
+    output.ptr()[i] = n_histo[input.ptr()[i]];
 
   //Save the image
-  //cv::imwrite("Images/eq_cpu_" + imageName , output);
+  cv::imwrite("Images/eq_cpu_" + imageName , output);
 }
+
 
 
 //This function converts a colored imege to a grayscale image
@@ -256,8 +254,6 @@ void histogram_equalization(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_o
   SAFE_CALL(cudaDeviceReset(), "Error reseting");
 }
 
-
-
 int main(int argc, char *argv[]){
 
 	string inputImage;
@@ -281,11 +277,9 @@ int main(int argc, char *argv[]){
   //Create equalized output image
   cv::Mat eq_output(input.rows, input.cols, CV_8UC1);
 
-  equalizer_cpu(input, output, inputImage);
-
 	//Convert image to gray and equalize
 	//histogram_equalization(input, output, eq_output, inputImage);
-
+  equalizer_cpu(input, output, inputImage);
 
 	//Allow the windows to resize
 	//namedWindow("Input", cv::WINDOW_NORMAL);
