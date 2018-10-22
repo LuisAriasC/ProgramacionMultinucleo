@@ -112,11 +112,11 @@ __global__ void set_image_kernel(unsigned char* input,unsigned char* output, int
 __global__ void equalizer_kernel(unsigned char* input, unsigned char* output, int * hist, int width, int height, int grayWidthStep, long totalSize){
 
     //2D Index of current thread
-	unsigned int ix = threadIdx.x + blockIdx.x * blockDim.x;
-  unsigned int iy = threadIdx.y + blockIdx.y * blockDim.y;
+	//unsigned int ix = threadIdx.x + blockIdx.x * blockDim.x;
+  //unsigned int iy = threadIdx.y + blockIdx.y * blockDim.y;
   unsigned int nxy = threadIdx.y * blockDim.x + threadIdx.x;
   //Location of gray pixel in output
-  const int gray_tid  = iy * grayWidthStep + ix;
+  //const int gray_tid  = iy * grayWidthStep + ix;
 
   __shared__ int hist_s[256];
   hist_s[nxy] = 0;
