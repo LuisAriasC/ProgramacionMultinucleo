@@ -122,6 +122,10 @@ __global__ void equalizer_kernel(unsigned char* input, unsigned char* output, in
   hist_s[nxy] = 0;
   __syncthreads();
 
+  if (nxy < 256)
+    hist_s[nxy] = hist[nxy];
+  __syncthreads();
+
 
   /*
   if(nxy < 256 && blockIdx.x == 0 && blockIdx.y==0){
@@ -193,7 +197,6 @@ void convert_to_gray(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_output, 
     printf("%d : %d\n", i, f_histogram[i]);
 
   equalizer_kernel<<<grid, block >>>(d_output, de_output, d_histogram, input.cols, input.rows, static_cast<int>(output.step), imSize);
-
   /*
   int * f_histogram = equalize(histogram, imSize);
 
