@@ -35,6 +35,9 @@ void normalize(int * src_histogram, int * eq_histogram, int size){
 }
 
 //Create input histogram
+    // input - input images
+    // histo - histogram
+    // size - width * height of the image
 void create_input_histogram(const cv::Mat &input, int * histo, int size){
   for (int i = 0; i < size; i++)
     histo[input.ptr()[i]]++;
@@ -43,7 +46,7 @@ void create_input_histogram(const cv::Mat &input, int * histo, int size){
 //This function is used to normalize an histogram
   // histo - imput histogram as a one dimentional array of ints
   // n_histo - output normalized histogram as a one dimentional array of ints
-  // size_ - size of the histograms
+  // size - size of the histograms
 void normalize_histogram(int * histo, int * n_histo, int size){
   float step = size / (C_SIZE - 1);
   float sum = 0;
@@ -53,9 +56,16 @@ void normalize_histogram(int * histo, int * n_histo, int size){
   }
 }
 
+//Print the histogram
 void print_histogram(int * histo){
   for(int i = 0; i < C_SIZE; i++)
     printf("%d : %d\n", i, histo[i]);
+}
+
+// Write image in cpu
+void write_image(const cv::Mat &input, cv::Mat &output, int * n_histo, int size){
+  for (int i = 0; i < size; i++)
+    output.ptr()[i] = n_histo[input.ptr()[i]];
 }
 
 // Histogram equalization on cpu
@@ -81,15 +91,14 @@ void equalizer_cpu(const cv::Mat &input, cv::Mat &output, string imageName){
   normalize_histogram(histo, n_histo, size_);
   //Print normalized histogram
   print_histogram(n_histo);
+  //Write image with normalized histogram on output
+  write_image(input, output, n_histo, size_){
+
+  //Save the image
+  cv::imwrite("Images/eq_cpu_" + imageName , output);
 
   free(histo);
   free(n_histo);
-  //Write image with normalized histogram on output
-  //for (int i = 0; i < size_; i++)
-    //output.ptr()[i] = n_histo[input.ptr()[i]];
-
-  //Save the image
-  //cv::imwrite("Images/eq_cpu_" + imageName , output);
 }
 
 
