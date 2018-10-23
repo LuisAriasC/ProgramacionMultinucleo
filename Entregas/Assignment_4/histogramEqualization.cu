@@ -156,13 +156,18 @@ __global__ void get_histogram_kernel(unsigned char* output, int* histo,int width
 }
 
 //Calculate normalized histogram in kernel
+  // histogram - original histogram of the image
+  // n_histogram - normalized histogram
+  // size - size of the image in pixels
 __global__ void get_normalizedHistogram_kernel(int * histogram, int * n_histogram, int size){
 
   //Get histogram index from kernel
   int hIndex = threadIdx.y * blockDim.x + threadIdx.x;
 
+  //Share the histogram with shared memory
   __shared__ int aux[C_SIZE];
 
+  // Normalize in GPU
   if (hIndex < 256 && blockIdx.x == 0 && blockIdx.y == 0){
       aux[hIndex] = 0;
       aux[hIndex] = histogram[hIndex];
@@ -173,7 +178,6 @@ __global__ void get_normalizedHistogram_kernel(int * histogram, int * n_histogra
       for(int i = 0; i <= hIndex; i++)
         sum += aux[i];
       n_histogram[hIndex] = (int)floor(sum / step);
-      __syncthreads();
   }
 }
 
