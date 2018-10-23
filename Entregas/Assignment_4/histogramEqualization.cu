@@ -221,7 +221,7 @@ void histogram_equalization(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_o
   //Get size of the image
 	size_t colorBytes = input.step * input.rows;
 	size_t grayBytes = output.step * output.rows;
-  //int imSize = input.cols * input.rows;
+  int imSize = input.cols * input.rows;
 
   //Set device and cpu image arrays and histograms
 	unsigned char *d_input, *d_output;//, *de_output;
@@ -239,7 +239,7 @@ void histogram_equalization(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_o
 	SAFE_CALL(cudaMalloc<unsigned char>(&d_output, grayBytes), "CUDA Malloc Failed");
   //SAFE_CALL(cudaMalloc<unsigned char>(&de_output, grayBytes), "CUDA Malloc Failed");
   SAFE_CALL(cudaMalloc<int>(&d_histogram, hisBytes), "CUDA Malloc Failed");
-  //SAFE_CALL(cudaMalloc<int>(&df_histogram, hisBytes), "CUDA Malloc Failed");
+  SAFE_CALL(cudaMalloc<int>(&df_histogram, hisBytes), "CUDA Malloc Failed");
 
 	// Copy data from OpenCV input image to device memory
 	SAFE_CALL(cudaMemcpy(d_input, input.ptr(), colorBytes, cudaMemcpyHostToDevice), "CUDA Memcpy Host To Device Failed");
@@ -257,7 +257,7 @@ void histogram_equalization(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_o
   //Write the black & white image
   cv::imwrite("Images/bw_" + imageName , output);
 
-  // Launch equalization on cpu
+  // Launch equalization on CPU
   printf("Equalization on cpu.\n");
   float cpuTime = 0.0;
   auto start_cpu =  chrono::high_resolution_clock::now();
@@ -272,11 +272,12 @@ void histogram_equalization(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_o
   memset(f_histogram, 0, hisBytes);
   printf("\n\n");
 
-  //Launch histogram calculation on cpu
+  //Launch equalization on GPU
   printf("Equalization on gpu.\n");
   float gpuTime = 0.0;
   auto start_gpu =  chrono::high_resolution_clock::now();
   get_histogram_kernel<<<grid, block >>>(d_output, d_histogram, input.cols, input.rows, static_cast<int>(output.step));
+  get_normalizedHistogram_kernel<<<grid, block>>>(d_histogram, df_histogram, imSize);
   SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
   auto end_gpu =  chrono::high_resolution_clock::now();
   chrono::duration<float, std::milli> gpu_duration_ms = end_gpu - start_gpu;
@@ -284,14 +285,14 @@ void histogram_equalization(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_o
   // SAFE_CALL kernel error
   SAFE_CALL(cudaGetLastError(), "Error with last error");
 
-  // Copy device histogram to host histogram
-  SAFE_CALL(cudaMemcpy(histogram, d_histogram, C_SIZE * sizeof(int), cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
+  // Copy device histograms to host histograms
+  SAFE_CALL(cudaMemcpy(histogram, d_histogram, hisBytes, cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
+  SAFE_CALL(cudaMemcpy(f_histogram, df_histogram, hisBytes, cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
 
   printf("Histogram on GPU\n");
   print_histogram(histogram);
-
-  //Normalize histogram
-  //normalize(histogram, f_histogram, imSize);
+  printf("\n\nNormalized histogram on GPU\n");
+  print_histogram(f_histogram);
 
   //Copy normalized histogram to device normalized histogram
   //SAFE_CALL(cudaMemcpy(df_histogram, f_histogram, C_SIZE * sizeof(int), cudaMemcpyHostToDevice), "CUDA Memcpy Host To Device Failed");
