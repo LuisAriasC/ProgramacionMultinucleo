@@ -267,10 +267,10 @@ void histogram_equalization(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_o
   float gpuTime = 0.0;
   auto start_gpu =  chrono::high_resolution_clock::now();
   get_histogram_kernel<<<grid, block >>>(d_output, d_histogram, input.cols, input.rows, static_cast<int>(output.step));
+  get_normalizedHistogram_kernel<<<grid, block>>>(d_histogram, df_histogram, imSize);
   auto end_gpu =  chrono::high_resolution_clock::now();
   chrono::duration<float, std::milli> gpu_duration_ms = end_gpu - start_gpu;
   gpuTime += gpu_duration_ms.count();
-  get_normalizedHistogram_kernel<<<grid, block>>>(d_histogram, df_histogram, imSize);
   equalizer_kernel<<<grid, block>>>(d_output, de_output, df_histogram, output.cols, output.rows, static_cast<int>(output.step));
   SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
   // SAFE_CALL kernel error
