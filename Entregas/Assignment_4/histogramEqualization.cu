@@ -156,7 +156,7 @@ __global__ void get_histogram_kernel(unsigned char* output, int* histo,int width
 }
 
 //Calculate normalized histogram in kernel
-__global__ void get_normalizedHistogram_kernel(int * histogram, int n_histogram, int size){
+__global__ void get_normalizedHistogram_kernel(int * histogram, int * n_histogram, int size){
 
   //Get histogram index from kernel
   int hIndex = threadIdx.y * blockDim.x + threadIdx.x;
@@ -172,7 +172,7 @@ __global__ void get_normalizedHistogram_kernel(int * histogram, int n_histogram,
       float sum = 0;
       for(int i = 0; i <= hIndex; i++)
         sum += aux[i];
-      n_histogram[hIndex] = (int *)floor(sum / step);
+      n_histogram[hIndex] = (int)floor(sum / step);
       __syncthreads();
   }
 }
