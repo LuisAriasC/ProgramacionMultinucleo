@@ -172,7 +172,7 @@ __global__ void get_normalizedHistogram_kernel(int * histogram, int n_histogram,
       float sum = 0;
       for(int i = 0; i <= hIndex; i++)
         sum += aux[i];
-      n_histogram[hIndex] = (int)floor(sum / step);
+      n_histogram[hIndex] = (int *)floor(sum / step);
       __syncthreads();
   }
 }
