@@ -136,8 +136,12 @@ __global__ void get_histogram_kernel(unsigned char* output, int* histo,int width
   int s_x = threadIdx.x+threadIdx.y*blockDim.x;
 
   //Initialize shared histogram to 0
-  if (s_x < C_SIZE && (xIndex < width) && (yIndex < height))
+  if (s_x < C_SIZE)
     s_histo[s_x] = 0;
+  __syncthreads();
+
+  //Fill shared histogram with the image info
+	if ((xIndex < width) && (yIndex < height))
     atomicAdd(&s_histo[(int)output[tid]], 1);
   __syncthreads();
 
@@ -279,17 +283,16 @@ void histogram_equalization(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_o
 
   //Save the image
   cv::imwrite("Images/eq_gpu_" + imageName , eq_output);
-
-
-  printf("Time in CPU: %f\n", cpuTime);
-  printf("Time in GPU: %f\n", gpuTime);
-  printf("Speedup: %f\n", cpuTime / gpuTime );
-
+  
   // Print result histograms in gpu
   printf("Histogram on GPU\n");
   print_histogram(histogram);
   printf("\n\nNormalized histogram on GPU\n");
   print_histogram(f_histogram);
+
+  printf("Time in CPU: %f\n", cpuTime);
+  printf("Time in GPU: %f\n", gpuTime);
+  printf("Speedup: %f\n", cpuTime / gpuTime );
 
 	// Free the device memory
 	SAFE_CALL(cudaFree(d_input), "CUDA Free Failed");
