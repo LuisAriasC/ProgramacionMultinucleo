@@ -78,11 +78,6 @@ void equalizer_cpu(const cv::Mat &input, cv::Mat &output, int * histo, int * n_h
   create_input_histogram(input, histo, size_);
   //Create normalized histogram
   normalize_histogram(histo, n_histo, size_);
-  //Print normalized histogram
-  printf("Histogram on cpu\n");
-  print_histogram(histo);
-  printf("\nNormalized histogram on cpu\n");
-  print_histogram(n_histo);
   //Write image with normalized histogram on output
   write_image(input, output, n_histo, size_);
 
@@ -271,10 +266,10 @@ void histogram_equalization(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_o
   get_histogram_kernel<<<grid, block >>>(d_output, d_histogram, input.cols, input.rows, static_cast<int>(output.step));
   get_normalizedHistogram_kernel<<<grid, block>>>(d_histogram, df_histogram, imSize);
   equalizer_kernel<<<grid, block>>>(d_output, de_output, df_histogram, output.cols, output.rows, static_cast<int>(output.step));
-  SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
   auto end_gpu =  chrono::high_resolution_clock::now();
   chrono::duration<float, std::milli> gpu_duration_ms = end_gpu - start_gpu;
   gpuTime += gpu_duration_ms.count();
+  SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
   // SAFE_CALL kernel error
   SAFE_CALL(cudaGetLastError(), "Error with last error");
 
@@ -285,12 +280,6 @@ void histogram_equalization(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_o
 
   //Save the image
   cv::imwrite("Images/eq_gpu_" + imageName , eq_output);
-
-  // Print result histograms in gpu
-  printf("Histogram on GPU\n");
-  print_histogram(histogram);
-  printf("\n\nNormalized histogram on GPU\n");
-  print_histogram(f_histogram);
 
   printf("Time in CPU: %f\n", cpuTime);
   printf("Time in GPU: %f\n", gpuTime);
