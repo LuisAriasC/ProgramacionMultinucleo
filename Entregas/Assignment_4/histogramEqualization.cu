@@ -136,15 +136,18 @@ __global__ void get_histogram_kernel(unsigned char* output, int* histo,int width
   int s_x = threadIdx.x+threadIdx.y*blockDim.x;
 
   //Initialize shared histogram to 0
-  if (s_x < C_SIZE)
+  if (s_x < C_SIZE && (xIndex < width) && (yIndex < height))
     s_histo[s_x] = 0;
+    atomicAdd(&s_histo[(int)output[tid]], 1);
   __syncthreads();
 
+  /*
   //Fill shared histogram with the image info
 	if ((xIndex < width) && (yIndex < height))
     atomicAdd(&s_histo[(int)output[tid]], 1);
   __syncthreads();
-
+ */
+ 
   // Copy infro from shared memory to global memory
   if (s_x < C_SIZE)
     atomicAdd(&histo[s_x], s_histo[s_x]);
@@ -283,7 +286,7 @@ void histogram_equalization(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_o
 
   //Save the image
   cv::imwrite("Images/eq_gpu_" + imageName , eq_output);
-  
+
   // Print result histograms in gpu
   printf("Histogram on GPU\n");
   print_histogram(histogram);
