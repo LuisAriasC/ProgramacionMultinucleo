@@ -24,3 +24,9 @@ Rubric:
 5. For the GPU version, used shared memory where necessary.
 6. Both images are displayed at the end.
 7. Calculation times and speedup obtained are incuded in the Readme.
+
+# Results:
+
+1. Time on CPU: 325.519379 ms.
+2. Time on GPU: 0.052174 ms.
+3. Speedup: 6239.111328 times faster.
