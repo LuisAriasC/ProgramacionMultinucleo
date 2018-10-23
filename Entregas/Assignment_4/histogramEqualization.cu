@@ -188,10 +188,8 @@ __global__ void equalizer_kernel(unsigned char* input, unsigned char* output, in
   const int tid  = yIndex * grayWidthStep + xIndex;
 
   //Generate output image
-  if((xIndex < width) && (yIndex < height)){
-    int index = input[tid];
-    output[tid] = hist[index];
-  }
+  if((xIndex < width) && (yIndex < height))
+    output[tid] = hist[input[tid]];
 }
 
 
@@ -327,15 +325,16 @@ int main(int argc, char *argv[]){
 	histogram_equalization(input, output, eq_output, inputImage);
 
 	//Allow the windows to resize
-	//namedWindow("Input", cv::WINDOW_NORMAL);
-	//namedWindow("Blac&WhiteInput", cv::WINDOW_NORMAL);
-	//namedWindow("Output", cv::WINDOW_NORMAL);
+	namedWindow("Input", cv::WINDOW_NORMAL);
+	namedWindow("Blac&WhiteInput", cv::WINDOW_NORMAL);
+	namedWindow("Output", cv::WINDOW_NORMAL);
 
 	//Show the input and output
-	//imshow("Input", input);
-	//imshow("Blac&WhiteInput", output);
-  //imshow("Output", eq_output);
-	//Wait for key press
+	imshow("Input", input);
+	imshow("Blac&WhiteInput", output);
+  imshow("Output", eq_output);
+
+  //Wait for key press
 	cv::waitKey();
 	return 0;
 }
