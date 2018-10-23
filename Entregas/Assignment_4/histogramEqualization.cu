@@ -136,18 +136,15 @@ __global__ void get_histogram_kernel(unsigned char* output, int* histo,int width
   int s_x = threadIdx.x+threadIdx.y*blockDim.x;
 
   //Initialize shared histogram to 0
-  if (s_x < C_SIZE && (xIndex < width) && (yIndex < height))
+  if (s_x < C_SIZE)
     s_histo[s_x] = 0;
-    atomicAdd(&s_histo[(int)output[tid]], 1);
   __syncthreads();
 
-  /*
   //Fill shared histogram with the image info
 	if ((xIndex < width) && (yIndex < height))
     atomicAdd(&s_histo[(int)output[tid]], 1);
   __syncthreads();
- */
- 
+
   // Copy infro from shared memory to global memory
   if (s_x < C_SIZE)
     atomicAdd(&histo[s_x], s_histo[s_x]);
@@ -270,12 +267,12 @@ void histogram_equalization(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_o
   float gpuTime = 0.0;
   auto start_gpu =  chrono::high_resolution_clock::now();
   get_histogram_kernel<<<grid, block >>>(d_output, d_histogram, input.cols, input.rows, static_cast<int>(output.step));
-  get_normalizedHistogram_kernel<<<grid, block>>>(d_histogram, df_histogram, imSize);
-  equalizer_kernel<<<grid, block>>>(d_output, de_output, df_histogram, output.cols, output.rows, static_cast<int>(output.step));
-  SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
   auto end_gpu =  chrono::high_resolution_clock::now();
   chrono::duration<float, std::milli> gpu_duration_ms = end_gpu - start_gpu;
   gpuTime += gpu_duration_ms.count();
+  get_normalizedHistogram_kernel<<<grid, block>>>(d_histogram, df_histogram, imSize);
+  equalizer_kernel<<<grid, block>>>(d_output, de_output, df_histogram, output.cols, output.rows, static_cast<int>(output.step));
+  SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
   // SAFE_CALL kernel error
   SAFE_CALL(cudaGetLastError(), "Error with last error");
 
