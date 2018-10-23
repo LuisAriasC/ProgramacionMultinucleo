@@ -279,17 +279,17 @@ void histogram_equalization(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_o
 
   //Save the image
   cv::imwrite("Images/eq_gpu_" + imageName , eq_output);
-  /*
+
+
+  printf("Time in CPU: %f\n", cpuTime);
+  printf("Time in GPU: %f\n", gpuTime);
+  printf("Speedup: %f\n", cpuTime / gpuTime );
+
   // Print result histograms in gpu
   printf("Histogram on GPU\n");
   print_histogram(histogram);
   printf("\n\nNormalized histogram on GPU\n");
   print_histogram(f_histogram);
-  */
-
-  printf("Time in CPU: %f\n", cpuTime);
-  printf("Time in GPU: %f\n", gpuTime);
-  printf("Speedup: %f\n", cpuTime / gpuTime );
 
 	// Free the device memory
 	SAFE_CALL(cudaFree(d_input), "CUDA Free Failed");
