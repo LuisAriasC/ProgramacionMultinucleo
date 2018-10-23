@@ -279,7 +279,7 @@ void histogram_equalization(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_o
   // Copy device histograms to host histograms
   SAFE_CALL(cudaMemcpy(histogram, d_histogram, hisBytes, cudaMemcpyDeviceToHost), "CUDA Memcpy Device To Device Failed");
   SAFE_CALL(cudaMemcpy(f_histogram, df_histogram, hisBytes, cudaMemcpyDeviceToHost), "CUDA Memcpy Device To Device Failed");
-  SAFE_CALL(cudaMemcpy(de_output.ptr(), de_output, grayBytes, cudaMemcpyDeviceToHost), "CUDA Memcpy Device To Device Failed");
+  SAFE_CALL(cudaMemcpy(eq_output.ptr(), de_output, grayBytes, cudaMemcpyDeviceToHost), "CUDA Memcpy Device To Device Failed");
 
   /*
   // Print result histograms in gpu
