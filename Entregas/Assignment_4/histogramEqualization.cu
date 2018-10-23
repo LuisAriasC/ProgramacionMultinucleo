@@ -319,7 +319,7 @@ void histogram_equalization(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_o
 	SAFE_CALL(cudaFree(d_output), "CUDA Free Failed");
   //SAFE_CALL(cudaFree(de_output), "CUDA Free Failed");
   SAFE_CALL(cudaFree(d_histogram), "CUDA Free Failed");
-  //SAFE_CALL(cudaFree(df_histogram), "CUDA Free Failed");
+  SAFE_CALL(cudaFree(df_histogram), "CUDA Free Failed");
 
   //Free the host memory
   free(histogram);
