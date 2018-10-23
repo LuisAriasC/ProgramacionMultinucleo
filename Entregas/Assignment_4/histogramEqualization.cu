@@ -225,7 +225,7 @@ void histogram_equalization(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_o
 
   //Set device and cpu image arrays and histograms
 	unsigned char *d_input, *d_output;//, *de_output;
-  int * d_histogram;//, * df_histogram;
+  int * d_histogram, * df_histogram;
 
   //Initialize histograms
   int hisBytes = C_SIZE * sizeof(int);
