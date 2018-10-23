@@ -136,12 +136,8 @@ __global__ void get_histogram_kernel(unsigned char* output, int* histo,int width
   int s_x = threadIdx.x+threadIdx.y*blockDim.x;
 
   //Initialize shared histogram to 0
-  if (s_x < C_SIZE)
+  if (s_x < C_SIZE && (xIndex < width) && (yIndex < height))
     s_histo[s_x] = 0;
-  __syncthreads();
-
-  //Fill shared histogram with the image info
-	if ((xIndex < width) && (yIndex < height))
     atomicAdd(&s_histo[(int)output[tid]], 1);
   __syncthreads();
 
