@@ -194,7 +194,7 @@ __global__ void equalizer_kernel(unsigned char* input, unsigned char* output, in
 
   //Generate output image
   if((xIndex < width) && (yIndex < height))
-      output[tid] = hist_s[input[tid]];
+      output[tid] = hist[input[tid]];
 }
 
 
@@ -231,7 +231,7 @@ void histogram_equalization(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_o
 	// Copy data from OpenCV input image to device memory
 	SAFE_CALL(cudaMemcpy(d_input, input.ptr(), colorBytes, cudaMemcpyHostToDevice), "CUDA Memcpy Host To Device Failed");
   SAFE_CALL(cudaMemset(d_output, 0, grayBytes), "Error setting d_output to 0");
-  SAFE_CALL(cudaMemset(def_output, 0, grayBytes), "Error setting de_output to 0");
+  SAFE_CALL(cudaMemset(de_output, 0, grayBytes), "Error setting de_output to 0");
   SAFE_CALL(cudaMemset(d_histogram, 0, hisBytes), "Error setting d_histogram to 0");
   SAFE_CALL(cudaMemset(df_histogram, 0, hisBytes), "Error setting df_histogram to 0");
 
@@ -268,7 +268,7 @@ void histogram_equalization(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_o
   auto start_gpu =  chrono::high_resolution_clock::now();
   get_histogram_kernel<<<grid, block >>>(d_output, d_histogram, input.cols, input.rows, static_cast<int>(output.step));
   get_normalizedHistogram_kernel<<<grid, block>>>(d_histogram, df_histogram, imSize);
-  equalizer_kernel<<<grid, block>>>(d_output, de_output, df_histogram, output.cols, output.rows, static_cast<int>(output.step))
+  equalizer_kernel<<<grid, block>>>(d_output, de_output, df_histogram, output.cols, output.rows, static_cast<int>(output.step));
   SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
   auto end_gpu =  chrono::high_resolution_clock::now();
   chrono::duration<float, std::milli> gpu_duration_ms = end_gpu - start_gpu;
@@ -334,7 +334,6 @@ int main(int argc, char *argv[]){
 
 	//Convert image to gray and equalize
 	histogram_equalization(input, output, eq_output, inputImage);
-  //equalizer_cpu(input, output, inputImage);
 
 	//Allow the windows to resize
 	//namedWindow("Input", cv::WINDOW_NORMAL);
