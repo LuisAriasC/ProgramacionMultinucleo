@@ -151,7 +151,7 @@ __global__ void get_histogram_kernel(unsigned char* output, int* histo,int width
 
   // Copy infro from shared memory to global memory
   if (s_x < C_SIZE)
-    atomicAdd(&histo[s_h], s_histo[s_x]);
+    atomicAdd(&histo[s_x], s_histo[s_x]);
 
 }
 
@@ -199,7 +199,7 @@ void histogram_equalization(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_o
   //Get size of the image
 	size_t colorBytes = input.step * input.rows;
 	size_t grayBytes = output.step * output.rows;
-  int imSize = input.cols * input.rows;
+  //int imSize = input.cols * input.rows;
 
   //Set device and cpu image arrays and histograms
 	unsigned char *d_input, *d_output;//, *de_output;
