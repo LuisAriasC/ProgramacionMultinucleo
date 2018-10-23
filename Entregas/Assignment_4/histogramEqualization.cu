@@ -155,6 +155,28 @@ __global__ void get_histogram_kernel(unsigned char* output, int* histo,int width
 
 }
 
+//Calculate normalized histogram in kernel
+__global__ get_normalizedHistogram_kernel(int * histogram, int n_histogram, int size){
+
+  //Get histogram index from kernel
+  int hIndex = threadIdx.y * blockDim.x + threadIdx.x;
+
+  __shared__ int aux[C_SIZE];
+
+  if (hIndex < 256 && blockIdx.x == 0 && blockIdx.y == 0){
+      aux[hIndex] = 0;
+      aux[hIndex] = histogram[hIndex];
+      __syncthreads();
+
+      float step = size / (C_SIZE -1);
+      float sum = 0;
+      for(int i = 0; i <= hIndex; i++)
+        sum += aux[x];
+      n_histogram[hIndex] = (int)floor(sum / step);
+      __syncthreads();
+  }
+}
+
 
 // Histogram equalization on gpu
   // imput - input image
