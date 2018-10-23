@@ -193,8 +193,10 @@ __global__ void equalizer_kernel(unsigned char* input, unsigned char* output, in
   const int tid  = yIndex * grayWidthStep + xIndex;
 
   //Generate output image
-  if((xIndex < width) && (yIndex < height))
-      output[tid] = hist[input[tid]];
+  if((xIndex < width) && (yIndex < height)){
+    int index = input[tid];
+    output[tid] = hist[index];
+  }
 }
 
 
@@ -268,10 +270,10 @@ void histogram_equalization(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_o
   auto start_gpu =  chrono::high_resolution_clock::now();
   get_histogram_kernel<<<grid, block >>>(d_output, d_histogram, input.cols, input.rows, static_cast<int>(output.step));
   get_normalizedHistogram_kernel<<<grid, block>>>(d_histogram, df_histogram, imSize);
+  equalizer_kernel<<<grid, block>>>(d_output, de_output, df_histogram, output.cols, output.rows, static_cast<int>(output.step));
   auto end_gpu =  chrono::high_resolution_clock::now();
   chrono::duration<float, std::milli> gpu_duration_ms = end_gpu - start_gpu;
   gpuTime += gpu_duration_ms.count();
-  equalizer_kernel<<<grid, block>>>(d_output, de_output, df_histogram, output.cols, output.rows, static_cast<int>(output.step));
   SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
   // SAFE_CALL kernel error
   SAFE_CALL(cudaGetLastError(), "Error with last error");
