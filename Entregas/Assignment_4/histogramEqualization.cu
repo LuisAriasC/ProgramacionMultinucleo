@@ -161,18 +161,18 @@ __global__ void get_normalizedHistogram_kernel(int * histogram, int * n_histogra
   int hIndex = threadIdx.y * blockDim.x + threadIdx.x;
 
   //Share the histogram with shared memory
-  //__shared__ int aux[C_SIZE];
+  __shared__ int aux[C_SIZE];
 
   // Normalize in GPU
   if (hIndex < 256 && blockIdx.x == 0 && blockIdx.y == 0){
-      //aux[hIndex] = 0;
-      //aux[hIndex] = histogram[hIndex];
-      //__syncthreads();
+      aux[hIndex] = 0;
+      aux[hIndex] = histogram[hIndex];
+      __syncthreads();
 
       float step = size / (C_SIZE -1);
       float sum = 0;
       for(int i = 0; i <= hIndex; i++)
-        sum += histogram[i];
+        sum += aux[i];
       n_histogram[hIndex] = (int)floor(sum / step);
   }
 }
