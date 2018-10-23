@@ -281,6 +281,8 @@ void histogram_equalization(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_o
   SAFE_CALL(cudaMemcpy(f_histogram, df_histogram, hisBytes, cudaMemcpyDeviceToHost), "CUDA Memcpy Device To Device Failed");
   SAFE_CALL(cudaMemcpy(eq_output.ptr(), de_output, grayBytes, cudaMemcpyDeviceToHost), "CUDA Memcpy Device To Device Failed");
 
+  //Save the image
+  cv::imwrite("Images/eq_gpu_" + imageName , eq_output);
   /*
   // Print result histograms in gpu
   printf("Histogram on GPU\n");
@@ -294,7 +296,6 @@ void histogram_equalization(const cv::Mat& input, cv::Mat& output, cv::Mat& eq_o
   printf("Speedup: %f\n", cpuTime / gpuTime );
 
 	// Free the device memory
-
 	SAFE_CALL(cudaFree(d_input), "CUDA Free Failed");
 	SAFE_CALL(cudaFree(d_output), "CUDA Free Failed");
   SAFE_CALL(cudaFree(de_output), "CUDA Free Failed");
